@@ -1,0 +1,359 @@
+/* ============================================================
+   kjyoo.cloud - Brand Foundation Tokens
+   v0.1 (2026-09-01)
+
+   원천: Claude Design "SHAKS Design System"
+         projectId 019dc796-722b-78ad-a61b-0ecfd27c9f36
+   정본: kjyoo_cloud_Brand_Foundation_v0.1.md (본 폴더)
+
+   KJ 결정 2026-09-01 (안 A):
+     SHAKS 파운데이션 토큰만 이식한다.
+     게이밍 B2C 자산(마스코트, 파스텔 민트, 게임 키비주얼,
+     SHAKS 로고/워드마크, 게이밍 영상 톤)은 이식하지 않는다.
+
+   원본과의 차이 - 의도된 도출:
+     1) App UI 계열 색상 채택 (인쇄용 Brand 계열 #ee1e3a/#333 미사용)
+        웹은 화면 매체이므로 화면용 값을 쓴다.
+     2) 웹 타입 스케일 신규 도출 (원본에 웹 장문용 스케일 없음)
+        본문 19px - 모바일 앱 규격 23px는 데스크톱 장문에 과대.
+        타깃 독자가 50대 이상이므로 일반 웹 16px보다 크게 유지.
+     3) 본문 line-height 1.6 (원본 1.5에서 상향, 장문 가독성)
+============================================================ */
+
+
+/* ============================================================
+   WEBFONTS
+   나눔고딕 절대 우선. 무게는 Bold/Regular 2단만.
+============================================================ */
+@import url('https://fonts.googleapis.com/css2?family=Nanum+Gothic:wght@400;700&family=Noto+Sans+KR:wght@400;700&display=swap');
+
+
+/* ============================================================
+   COLOR - LIGHT (기본)
+============================================================ */
+:root {
+  /* 강조 - 단일. 2차 강조색 추가 금지 */
+  --kj-accent:        #E5002B;
+  --kj-accent-hover:  #C70025;
+  --kj-accent-press:  #A8001F;
+  --kj-accent-text:   #FAFAFA;
+
+  /* 배경 / 표면 */
+  --kj-bg:            #FAFAFA;
+  --kj-surface:       #FFFFFF;
+  --kj-surface-alt:   #FFFFFF;
+  --kj-bg-inverse:    #121212;
+
+  /* 텍스트 */
+  --kj-text:          #383838;
+  --kj-text-2:        #737373;
+  --kj-text-3:        #787878;
+  --kj-text-muted:    #DAD9D9;
+  --kj-text-on-accent:#FAFAFA;
+  --kj-text-on-dark:  #FAFAFA;
+
+  /* 경계 */
+  --kj-border:        rgba(0, 0, 0, 0.08);
+  --kj-divider:       rgba(0, 0, 0, 0.06);
+
+  /* 그림자 - black 16% 단일 규칙 */
+  --kj-shadow-button: 0 2px 8px rgba(0, 0, 0, 0.16);
+  --kj-shadow-card:   0 4px 16px rgba(0, 0, 0, 0.16);
+  --kj-shadow-modal:  0 12px 32px rgba(0, 0, 0, 0.16);
+
+  /* 상태 - 기능 전용. 장식으로 쓰지 않는다 */
+  --kj-success:       #2BA84A;
+  --kj-warning:       #F5A623;
+  --kj-error:         #E5002B;
+  --kj-info:          #4A90E2;
+
+  --kj-disabled-opacity: 0.5;
+}
+
+
+/* ============================================================
+   COLOR - DARK (필수. 선택이 아니다)
+============================================================ */
+:root:not([data-theme="light"]) {
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+
+    --kj-accent:        #EE1D3A;
+    --kj-accent-hover:  #FF3650;
+    --kj-accent-press:  #C70025;
+    --kj-accent-text:   #FAFAFA;
+
+    --kj-bg:            #121212;
+    --kj-surface:       rgba(255, 255, 255, 0.09);
+    --kj-surface-alt:   #1F1F1F;
+    --kj-bg-inverse:    #FAFAFA;
+
+    --kj-text:          #FAFAFA;
+    --kj-text-2:        #DAD9D9;
+    --kj-text-3:        #A0A0A0;
+    --kj-text-muted:    #6B6B6B;
+
+    --kj-border:        rgba(255, 255, 255, 0.12);
+    --kj-divider:       rgba(255, 255, 255, 0.08);
+
+    --kj-shadow-card:   0 4px 16px rgba(0, 0, 0, 0.4);
+    --kj-shadow-modal:  0 12px 32px rgba(0, 0, 0, 0.6);
+
+    --kj-error:         #EE1D3A;
+  }
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  --kj-accent:        #EE1D3A;
+  --kj-accent-hover:  #FF3650;
+  --kj-accent-press:  #C70025;
+  --kj-accent-text:   #FAFAFA;
+
+  --kj-bg:            #121212;
+  --kj-surface:       rgba(255, 255, 255, 0.09);
+  --kj-surface-alt:   #1F1F1F;
+  --kj-bg-inverse:    #FAFAFA;
+
+  --kj-text:          #FAFAFA;
+  --kj-text-2:        #DAD9D9;
+  --kj-text-3:        #A0A0A0;
+  --kj-text-muted:    #6B6B6B;
+
+  --kj-border:        rgba(255, 255, 255, 0.12);
+  --kj-divider:       rgba(255, 255, 255, 0.08);
+
+  --kj-shadow-card:   0 4px 16px rgba(0, 0, 0, 0.4);
+  --kj-shadow-modal:  0 12px 32px rgba(0, 0, 0, 0.6);
+
+  --kj-error:         #EE1D3A;
+}
+
+
+/* ============================================================
+   SHAPE - 17px 시그니처 라운드. 임의 변경 금지
+============================================================ */
+:root {
+  --kj-radius:      17px;
+  --kj-radius-pill: 999px;
+  --kj-radius-sm:   8px;
+  --kj-radius-xs:   4px;
+}
+
+
+/* ============================================================
+   SPACING - 4dp 베이스. 중간값 금지
+============================================================ */
+:root {
+  --kj-space-xs:  4px;
+  --kj-space-sm:  8px;
+  --kj-space-md:  16px;
+  --kj-space-lg:  24px;
+  --kj-space-xl:  32px;
+  --kj-space-2xl: 48px;
+  --kj-space-3xl: 64px;
+}
+
+
+/* ============================================================
+   ICON
+============================================================ */
+:root {
+  --kj-icon:     48px;
+  --kj-icon-btn: 24px;
+  --kj-icon-sm:  20px;
+  --kj-icon-xs:  16px;
+}
+
+
+/* ============================================================
+   TYPOGRAPHY - 웹 5단계. 임의 사이즈 금지
+============================================================ */
+:root {
+  --kj-font: "Nanum Gothic", "Noto Sans KR", -apple-system,
+             BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+
+  --kj-fs-display: 56px;   /* Hero 전용 */
+  --kj-fs-title:   37px;   /* 페이지 제목 (28pt 변환) */
+  --kj-fs-heading: 23px;   /* 섹션 헤딩 (17pt 변환) */
+  --kj-fs-body:    19px;   /* 본문 (장문 가독성 도출값) */
+  --kj-fs-caption: 16px;   /* 캡션, 메타 (12pt 변환) */
+
+  --kj-fw-regular: 400;
+  --kj-fw-bold:    700;
+
+  --kj-lh-title: 1.3;
+  --kj-lh-body:  1.6;
+  --kj-lh-tight: 1.2;
+
+  /* 본문 최대 폭 - 68자 내외. 화면 전체로 늘리지 않는다 */
+  --kj-measure: 68ch;
+}
+
+/* 모바일 축소 */
+@media (max-width: 640px) {
+  :root {
+    --kj-fs-display: 37px;
+    --kj-fs-title:   28px;
+    --kj-fs-heading: 21px;
+    --kj-fs-body:    18px;
+  }
+}
+
+
+/* ============================================================
+   TYPE STYLES
+============================================================ */
+.kj-display {
+  font-family: var(--kj-font);
+  font-weight: var(--kj-fw-bold);
+  font-size:   var(--kj-fs-display);
+  line-height: var(--kj-lh-tight);
+  letter-spacing: -0.02em;
+  color:       var(--kj-text);
+}
+
+.kj-title {
+  font-family: var(--kj-font);
+  font-weight: var(--kj-fw-bold);
+  font-size:   var(--kj-fs-title);
+  line-height: var(--kj-lh-title);
+  letter-spacing: -0.01em;
+  color:       var(--kj-text);
+}
+
+.kj-heading {
+  font-family: var(--kj-font);
+  font-weight: var(--kj-fw-bold);
+  font-size:   var(--kj-fs-heading);
+  line-height: var(--kj-lh-title);
+  color:       var(--kj-text);
+}
+
+.kj-body {
+  font-family: var(--kj-font);
+  font-weight: var(--kj-fw-regular);
+  font-size:   var(--kj-fs-body);
+  line-height: var(--kj-lh-body);
+  color:       var(--kj-text);
+  max-width:   var(--kj-measure);
+}
+
+.kj-caption {
+  font-family: var(--kj-font);
+  font-weight: var(--kj-fw-regular);
+  font-size:   var(--kj-fs-caption);
+  line-height: 1.4;
+  color:       var(--kj-text-2);
+}
+
+/* 강조는 Bold + 레드로만. 밑줄, 이탤릭, 형광 금지 */
+.kj-accent-text {
+  font-weight: var(--kj-fw-bold);
+  color:       var(--kj-accent);
+}
+
+
+/* ============================================================
+   PRIMITIVES
+============================================================ */
+.kj-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--kj-space-sm);
+  font-family: var(--kj-font);
+  font-weight: var(--kj-fw-bold);
+  font-size: var(--kj-fs-body);
+  line-height: 1;
+  padding: var(--kj-space-md) var(--kj-space-lg);
+  border-radius: var(--kj-radius);
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: background-color 120ms ease, color 120ms ease;
+}
+
+.kj-btn--primary {
+  background: var(--kj-accent);
+  color: var(--kj-accent-text);
+  box-shadow: var(--kj-shadow-button);
+}
+.kj-btn--primary:hover  { background: var(--kj-accent-hover); }
+.kj-btn--primary:active { background: var(--kj-accent-press); }
+
+.kj-btn--ghost {
+  background: transparent;
+  color: var(--kj-text);
+  border-color: var(--kj-border);
+}
+.kj-btn--ghost:hover { border-color: var(--kj-accent); color: var(--kj-accent); }
+
+.kj-btn:disabled { opacity: var(--kj-disabled-opacity); cursor: not-allowed; }
+
+.kj-card {
+  background: var(--kj-surface);
+  border: 1px solid var(--kj-border);
+  border-radius: var(--kj-radius);
+  padding: var(--kj-space-lg);
+  box-shadow: var(--kj-shadow-card);
+}
+
+.kj-tag {
+  display: inline-block;
+  font-family: var(--kj-font);
+  font-size: var(--kj-fs-caption);
+  font-weight: var(--kj-fw-bold);
+  padding: var(--kj-space-xs) var(--kj-space-md);
+  border-radius: var(--kj-radius-pill);
+  background: var(--kj-accent);
+  color: var(--kj-accent-text);
+}
+
+.kj-divider {
+  height: 1px;
+  background: var(--kj-divider);
+  border: 0;
+  margin: var(--kj-space-2xl) 0;
+}
+
+/* 이미지 - 17px 라운드 통일 */
+.kj-img {
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--kj-radius);
+  display: block;
+}
+
+
+/* ============================================================
+   BASELINE
+============================================================ */
+html {
+  font-family: var(--kj-font);
+  font-size: var(--kj-fs-body);
+  line-height: var(--kj-lh-body);
+  color: var(--kj-text);
+  background: var(--kj-bg);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+body { margin: 0; background: var(--kj-bg); }
+
+a { color: var(--kj-accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+:focus-visible {
+  outline: 2px solid var(--kj-accent);
+  outline-offset: 2px;
+  border-radius: var(--kj-radius-xs);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+}
