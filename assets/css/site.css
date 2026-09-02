@@ -42,12 +42,17 @@ html[lang="ko"] body { word-break: keep-all; overflow-wrap: break-word; }
   min-height: 68px;
 }
 .brand {
+  display: inline-flex; align-items: center; gap: var(--kj-space-sm);
   font-weight: var(--kj-fw-bold); font-size: var(--kj-fs-heading);
   letter-spacing: -0.02em; color: var(--kj-text); text-decoration: none;
   white-space: nowrap;
 }
-.brand span { color: var(--kj-accent); }
 .brand:hover { text-decoration: none; }
+.brand:hover .brand-text { color: var(--kj-accent); }
+/* 워드마크 - 여러 갈래가 하나로 모여 레드 출력선이 된다.
+   stroke 를 토큰으로 두어 라이트/다크에서 함께 바뀐다. */
+.brand .mark { display: block; flex: none; }
+.brand-text { transition: color 120ms ease; }
 
 .nav { display: flex; gap: var(--kj-space-lg); margin-left: auto; flex-wrap: wrap; }
 .nav a {

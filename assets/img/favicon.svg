@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <!-- kjyoo.cloud favicon - 워드마크 (C안)
+       32px 이하에서 선이 뭉개지지 않도록 정본 마크 대비 획을 굵히고
+       여백을 줄였다. 어두운 바탕은 밝은 탭과 어두운 탭 양쪽에서
+       형태를 유지하기 위한 것이다. 라운드는 17px 시그니처의 비례 적용. -->
+  <rect width="64" height="64" rx="14" fill="#121212"/>
+  <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M14 20 H26 Q32 20 32 26 V32" stroke="#DAD9D9" stroke-width="7"/>
+    <path d="M14 32 H32" stroke="#DAD9D9" stroke-width="7"/>
+    <path d="M14 44 H26 Q32 44 32 38 V32" stroke="#DAD9D9" stroke-width="7"/>
+    <path d="M32 32 H51" stroke="#E5002B" stroke-width="9"/>
+  </g>
+</svg>

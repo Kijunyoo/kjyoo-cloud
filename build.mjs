@@ -52,6 +52,7 @@ function layout({ t, page, body }) {
 <meta property="og:url" content="https://${SITE.domain}${href(t.dir, page)}">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="icon" href="/assets/img/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="/assets/css/tokens.css">
 <link rel="stylesheet" href="/assets/css/site.css">
 </head>
@@ -60,7 +61,17 @@ function layout({ t, page, body }) {
 
 <header class="site-head">
   <div class="shell">
-    <a class="brand" href="${href(t.dir, 'index')}">kjyoo<span>.cloud</span></a>
+    <a class="brand" href="${href(t.dir, 'index')}" aria-label="kjyoo.cloud">
+      <svg class="mark" viewBox="0 0 64 48" width="28" height="21" aria-hidden="true" focusable="false">
+        <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 8 H22 Q30 8 30 16 V24" stroke="var(--kj-text-3)" stroke-width="5"/>
+          <path d="M4 24 H30" stroke="var(--kj-text-3)" stroke-width="5"/>
+          <path d="M4 40 H22 Q30 40 30 32 V24" stroke="var(--kj-text-3)" stroke-width="5"/>
+          <path d="M30 24 H60" stroke="var(--kj-accent)" stroke-width="7"/>
+        </g>
+      </svg>
+      <span class="brand-text">kjyoo.cloud</span>
+    </a>
     <nav class="nav" aria-label="${esc(t.nav.index)}">
           ${navItems}
     </nav>
