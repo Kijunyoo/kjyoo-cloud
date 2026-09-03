@@ -14,7 +14,8 @@ import { readFileSync, writeFileSync, mkdirSync, rmSync, cpSync, existsSync } fr
 import { join, dirname, extname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createServer } from 'node:http';
-import { CONTENT, PAGES, SITE } from './content/site.mjs';
+import { createHash } from 'node:crypto';
+import { CONTENT, PAGES, SITE, CASES } from './content/site.mjs';
 
 const ROOT = dirname(fileURLToPath(import.meta.url));
 const DIST = join(ROOT, 'dist');
@@ -23,6 +24,29 @@ const esc = (s) => String(s)
   .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
 const href = (langDir, page) => `/${langDir}/${page === 'index' ? '' : page + '.html'}`;
+const hrefCase = (langDir, slug) => `/${langDir}/cases/${slug}.html`;
+
+// 감사 지적 D-4 (자산 캐시 7일 + 해시 없는 파일명, 2026-09-02) 대응.
+// 서버가 /assets/* 를 7일 캐시로 내보내는데 파일명이 고정이면 재방문자가 옛 자산을 최대 7일 본다.
+// 파일 내용의 sha256 앞 8자리를 파일명에 넣어, 내용이 바뀌면 URL도 함께 바뀌게 한다.
+// 7일 캐시 설정 자체는 그대로 둔다 - 이름이 바뀌므로 안전하다.
+// 대상: HTML 이 <link>/<link rel=icon> 으로 "참조"하는 자산만(site.css, tokens.css, favicon.svg).
+// diagram-*.svg 는 build.mjs 가 파일 내용을 읽어 HTML 안에 직접 인라인하므로(fetch 되는 URL이 아님)
+// 캐시 문제가 성립하지 않아 해시 대상에서 뺐다.
+function hashedAsset(relPath) {
+  const abs = join(ROOT, 'assets', relPath);
+  const buf = readFileSync(abs);
+  const hash = createHash('sha256').update(buf).digest('hex').slice(0, 8);
+  const dir = dirname(relPath).split('\\').join('/');
+  const ext = extname(relPath);
+  const base = relPath.split('/').pop().slice(0, -ext.length);
+  const outRel = `${dir}/${base}.${hash}${ext}`;
+  return { buf, outRel: `assets/${outRel}`, publicPath: `/assets/${outRel}` };
+}
+
+const ASSET_SITE_CSS = hashedAsset('css/site.css');
+const ASSET_TOKENS_CSS = hashedAsset('css/tokens.css');
+const ASSET_FAVICON = hashedAsset('img/favicon.svg');
 
 // 다이어그램 - 인라인 SVG. 정본은 다이어그램_주입지침_v0.1.md.
 // data-t 속성은 다국어 치환 지점 표시. KR 페이지는 원본 그대로 넣고,
@@ -76,7 +100,7 @@ const EN_TEXT = {
   'tvn.then.sub': 'Past org chart. Sales and marketing: 4',
   'tvn.then.r1.name': 'R&D',
   'tvn.then.r1.n': '6',
-  'tvn.then.r2.name': 'Sales & Marketing',
+  'tvn.then.r2.name': 'Sales/Marketing',
   'tvn.then.r2.n': '4',
   'tvn.then.r3.name': 'Overseas',
   'tvn.then.r3.n': '2',
@@ -135,12 +159,10 @@ const EN_OVERFLOW = {
   // 패널 하단 520 아래, viewBox 하단 560 안쪽으로 y를 539로 올려 2줄 확보.
   // 실측 top 524.89(패널하단+4.89) bottom 559.02(viewBox 560 안) gap 1.88
   'tvn.source': { lines: ['Source: internal HR and role records across multiple dates,', 'documents (3 dates). Current figures from 11 agent definition files, counted directly.'], y: 539, dy: 18 },
-  // tvn.then.r2.name ("Sales & Marketing") - 미해결. 1)줄바꿈: 점 글리프 하단(219)과 인원수 텍스트
-  // 상단(약 251.89) 사이 여유가 32.89px 뿐인데 16px 글자 두 줄 최소 높이가 33.13px 이상이라
-  // 겹침 없이 못 들어간다(dy=16에서도 자체 겹침 gap=-1.13). 2)textLength 5% 압축: 필요 압축률이
-  // 7.1%라 5% 상한을 넘는다(5% 적용해도 폭 126.8 > 상자 124, 잔여 초과 약 2.8px). 3)글자크기 축소:
-  // then-now.svg 는 16/23px만 쓰고 t-lane은 이미 16px(최소)이라 더 낮출 값이 없다.
-  // 그대로 두고 총괄 기획실에 보고한다.
+  // tvn.then.r2.name - 해결 (2026-09-03, 감사 지적분 처리). "Sales & Marketing"(폭 133.56,
+  // 상자 124 대비 9.56 초과, 7.2%)을 "Sales/Marketing"으로 축약해 줄바꿈이나 압축 없이 해결했다.
+  // Chromium 152 헤드리스 렌더 실측(Nanum Gothic 700 16px, 폰트 로드 확인 후 getBBox) - 폭 118.97,
+  // 상자 124 대비 여유 5.03(양쪽 2.5), overflow 없음. 별도 EN_OVERFLOW 처리 불필요.
 };
 
 function injectEnSvg(raw, a11yMap, textMap, overflowMap) {
@@ -177,13 +199,15 @@ const svgForLang = (raw, lang) => (lang === 'en' ? injectEnSvg(raw, EN_A11Y, EN_
 
 // ---------- shell ----------
 
-function layout({ t, page, body }) {
+function layout({ t, page, body, pageData: pageDataOverride, pathOverride, altPathOverride, robotsNoindex }) {
   const navItems = PAGES.map((p) => {
     const cur = p === page ? ' aria-current="page"' : '';
     return `<a href="${href(t.dir, p)}"${cur}>${esc(t.nav[p])}</a>`;
   }).join('\n          ');
 
-  const pageData = t[page];
+  const pageData = pageDataOverride || t[page];
+  const selfPath = pathOverride || href(t.dir, page);
+  const altPath = altPathOverride || href(t.other.dir, page);
   const title = page === 'index'
     ? `${pageData.title} - ${t.foot.tagline}`
     : `${pageData.title} - ${SITE.domain}`;
@@ -195,17 +219,17 @@ function layout({ t, page, body }) {
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${esc(title)}</title>
 <meta name="description" content="${esc(pageData.desc)}">
-<link rel="alternate" hreflang="${t.lang}" href="https://${SITE.domain}${href(t.dir, page)}">
-<link rel="alternate" hreflang="${t.other.code}" href="https://${SITE.domain}${href(t.other.dir, page)}">
+${robotsNoindex ? '<meta name="robots" content="noindex">\n' : ''}<link rel="alternate" hreflang="${t.lang}" href="https://${SITE.domain}${selfPath}">
+<link rel="alternate" hreflang="${t.other.code}" href="https://${SITE.domain}${altPath}">
 <meta property="og:type" content="website">
 <meta property="og:title" content="${esc(title)}">
 <meta property="og:description" content="${esc(pageData.desc)}">
-<meta property="og:url" content="https://${SITE.domain}${href(t.dir, page)}">
+<meta property="og:url" content="https://${SITE.domain}${selfPath}">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="icon" href="/assets/img/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="/assets/css/tokens.css">
-<link rel="stylesheet" href="/assets/css/site.css">
+<link rel="icon" href="${ASSET_FAVICON.publicPath}" type="image/svg+xml">
+<link rel="stylesheet" href="${ASSET_TOKENS_CSS.publicPath}">
+<link rel="stylesheet" href="${ASSET_SITE_CSS.publicPath}">
 </head>
 <body>
 <a class="skip" href="#main">${esc(t.skip)}</a>
@@ -227,9 +251,9 @@ function layout({ t, page, body }) {
           ${navItems}
     </nav>
     <div class="lang">
-      <a href="${href(t.dir, page)}" aria-current="true">${t.selfLabel}</a>
+      <a href="${selfPath}" aria-current="true">${t.selfLabel}</a>
       <span>/</span>
-      <a href="${href(t.other.dir, page)}">${t.other.label}</a>
+      <a href="${altPath}">${t.other.label}</a>
     </div>
   </div>
 </header>
@@ -286,9 +310,24 @@ ${cards}
 `;
 }
 
-function pageCases(t) {
+function pageCases(t, langKey) {
   const d = t.cases;
   const tags = d.tags.map((x) => `<span class="tag--quiet tag">${esc(x)}</span>`).join('\n        ');
+  const list = (CASES[langKey] || []).filter((c) => !c.draft);
+  // 결함 5 (케이스 개별 URL 부재, 2026-09-02 감사 지적) 대응. 발행된 케이스가 있으면 목록 카드로,
+  // 없으면 기존 "준비 중" 빈 상태를 그대로 낸다. draft(구조 검증용 표본)는 이 목록에 올리지 않는다 -
+  // 실제 발행물처럼 보이면 안 되기 때문이다.
+  const body = list.length
+    ? `<div class="card-grid">
+${list.map((c) => `      <article class="card">
+        <h3><a href="${hrefCase(t.dir, c.slug)}">${esc(c.title)}</a></h3>
+        <p>${esc(c.summary)}</p>
+      </article>`).join('\n')}
+    </div>`
+    : `<div class="empty">
+      <b>${esc(d.emptyTitle)}</b>
+      <p>${esc(d.emptyBody)}</p>
+    </div>`;
   return `<section class="band">
   <div class="shell">
     <div class="page-head">
@@ -298,9 +337,29 @@ function pageCases(t) {
     <div class="card-meta" style="margin-bottom: var(--kj-space-xl)">
         ${tags}
     </div>
-    <div class="empty">
-      <b>${esc(d.emptyTitle)}</b>
-      <p>${esc(d.emptyBody)}</p>
+    ${body}
+  </div>
+</section>
+`;
+}
+
+// 결함 5 - 케이스 1건당 1페이지. 본문은 Phase 3 소관이므로 여기서는 CASES 배열이 있는 그대로
+// 렌더링만 한다. 문구를 새로 짓지 않는다.
+function pageCaseDetail(t, c) {
+  const bodyP = c.body.map((p) => `      <p>${esc(p)}</p>`).join('\n');
+  const backLabel = t.lang === 'ko' ? '목록으로' : 'Back to list';
+  return `<section class="band">
+  <div class="shell">
+    <div class="page-head">
+      <span class="tag--quiet tag">${esc(c.tag)}</span>
+      <h1>${esc(c.title)}</h1>
+      <p>${esc(c.summary)}</p>
+    </div>
+    <div class="prose" style="margin-top: var(--kj-space-lg)">
+${bodyP}
+    </div>
+    <div class="hero-actions" style="margin-top: var(--kj-space-xl)">
+      <a class="btn btn--ghost" href="${href(t.dir, 'cases')}">${esc(backLabel)}</a>
     </div>
   </div>
 </section>
@@ -513,6 +572,34 @@ const ROOT_REDIRECT = `<!doctype html>
 </html>
 `;
 
+// ---------- robots.txt / sitemap.xml (W-3, 2026-09-02 감사 지적) ----------
+
+const ROBOTS_TXT = `User-agent: *
+Allow: /
+
+Sitemap: https://${SITE.domain}/sitemap.xml
+`;
+
+// 13개 경로 - PAGES(6) x 언어(2) = 12 + 루트 언어 리다이렉트 1. 케이스 개별 페이지는
+// draft(구조 검증용 표본)뿐이라 아직 색인 대상에 넣지 않는다. 실제 케이스가 발행되면 여기 추가한다.
+function buildSitemap() {
+  const langKeys = Object.keys(CONTENT);
+  const urls = [];
+  for (const page of PAGES) {
+    for (const langKey of langKeys) {
+      const t = CONTENT[langKey];
+      const loc = `https://${SITE.domain}${href(t.dir, page)}`;
+      const alt = langKeys.map((lk) => {
+        const tt = CONTENT[lk];
+        return `    <xhtml:link rel="alternate" hreflang="${tt.lang}" href="https://${SITE.domain}${href(tt.dir, page)}"/>`;
+      }).join('\n');
+      urls.push(`  <url>\n    <loc>${loc}</loc>\n${alt}\n  </url>`);
+    }
+  }
+  urls.push(`  <url>\n    <loc>https://${SITE.domain}/</loc>\n  </url>`);
+  return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n${urls.join('\n')}\n</urlset>\n`;
+}
+
 // ---------- build ----------
 
 function build() {
@@ -521,25 +608,57 @@ function build() {
 
   cpSync(join(ROOT, 'assets'), join(DIST, 'assets'), { recursive: true });
 
+  // D-4 - 해시 없는 이름으로 복사된 site.css / tokens.css / favicon.svg 를 해시 이름으로 교체한다.
+  // HTML 은 layout() 이 ASSET_*.publicPath 로 참조하므로 이 세 파일의 옛 이름은 dist 에 남기지 않는다.
+  rmSync(join(DIST, 'assets/css/site.css'), { force: true });
+  rmSync(join(DIST, 'assets/css/tokens.css'), { force: true });
+  rmSync(join(DIST, 'assets/img/favicon.svg'), { force: true });
+  writeFileSync(join(DIST, ASSET_SITE_CSS.outRel), ASSET_SITE_CSS.buf);
+  writeFileSync(join(DIST, ASSET_TOKENS_CSS.outRel), ASSET_TOKENS_CSS.buf);
+  writeFileSync(join(DIST, ASSET_FAVICON.outRel), ASSET_FAVICON.buf);
+
   const written = [];
   for (const langKey of Object.keys(CONTENT)) {
     const t = CONTENT[langKey];
     mkdirSync(join(DIST, t.dir), { recursive: true });
     for (const page of PAGES) {
-      const body = RENDER[page](t);
+      const body = RENDER[page](t, langKey);
       const html = layout({ t, page, body });
       const file = page === 'index' ? 'index.html' : `${page}.html`;
       const out = join(DIST, t.dir, file);
       writeFileSync(out, html, 'utf8');
       written.push(`${t.dir}/${file}`);
     }
+
+    // 결함 5 - 케이스 개별 URL. 목록(cases.html)과 별개로 케이스마다 1페이지를 낸다.
+    const cases = CASES[langKey] || [];
+    if (cases.length) mkdirSync(join(DIST, t.dir, 'cases'), { recursive: true });
+    for (const c of cases) {
+      const body = pageCaseDetail(t, c);
+      const html = layout({
+        t, page: 'cases', body,
+        pageData: { title: c.title, desc: c.summary },
+        pathOverride: hrefCase(t.dir, c.slug),
+        altPathOverride: hrefCase(t.other.dir, c.slug),
+        robotsNoindex: !!c.draft,
+      });
+      const out = join(DIST, t.dir, 'cases', `${c.slug}.html`);
+      writeFileSync(out, html, 'utf8');
+      written.push(`${t.dir}/cases/${c.slug}.html`);
+    }
   }
 
   writeFileSync(join(DIST, 'index.html'), ROOT_REDIRECT, 'utf8');
   written.push('index.html');
 
+  writeFileSync(join(DIST, 'robots.txt'), ROBOTS_TXT, 'utf8');
+  written.push('robots.txt');
+  writeFileSync(join(DIST, 'sitemap.xml'), buildSitemap(), 'utf8');
+  written.push('sitemap.xml');
+
   console.log(`built ${written.length} pages -> dist/`);
   for (const w of written) console.log('  ' + w);
+  console.log(`hashed assets: ${ASSET_SITE_CSS.publicPath}  ${ASSET_TOKENS_CSS.publicPath}  ${ASSET_FAVICON.publicPath}`);
 }
 
 // ---------- preview server ----------

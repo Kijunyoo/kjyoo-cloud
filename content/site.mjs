@@ -33,6 +33,33 @@ export const FACTS = {
 
 export const PAGES = ['index', 'cases', 'system', 'then-now', 'about', 'notes'];
 
+// 결함 5 (케이스 개별 URL 부재, 2026-09-02 감사 지적) 대응. 케이스 1건당 1페이지
+// (/{lang}/cases/<slug>.html)를 build.mjs 가 여기서 만든다. 본문은 Phase 3 소관이라
+// 여기 있는 표본 1건은 draft: true 로 목록에서 빼고 noindex 를 붙인다 - 구조가 도는지
+// 확인하는 용도이지 실제 발행물이 아니다. Phase 3 는 draft 를 지우고 실제 항목을 채운다.
+export const CASES = {
+  ko: [
+    {
+      slug: 'ws5b-structure-check',
+      title: '[구조 검증용 표본] 케이스 개별 페이지',
+      tag: '구조 검증',
+      summary: '케이스 1건이 개별 URL 하나로 뜨는지 확인하기 위한 표본이다. 실제 발행물이 아니다.',
+      body: ['본문 없음. build.mjs 가 content/site.mjs 의 CASES 배열에서 케이스별 페이지를 만들어내는지 확인하는 용도다. 실제 케이스 본문은 Phase 3에서 채운다.'],
+      draft: true,
+    },
+  ],
+  en: [
+    {
+      slug: 'ws5b-structure-check',
+      title: '[Structure check sample] Individual case page',
+      tag: 'Structure check',
+      summary: 'A sample used to confirm one case renders at one URL. Not a real publication.',
+      body: ['No content. This confirms build.mjs generates a per-case page from the CASES array in content/site.mjs. Real case content is written in Phase 3.'],
+      draft: true,
+    },
+  ],
+};
+
 export const CONTENT = {
   ko: {
     lang: 'ko',
@@ -94,7 +121,7 @@ export const CONTENT = {
       diaH: '일이 도는 길',
       diaP: '지시 한 건이 들어가서 산출물 한 건이 나올 때까지의 길입니다. 회사 조직도를 읽는 방향과 같습니다.',
       diaAlt: '지시 한 건이 총괄 기획실을 거쳐 여섯 개 부문으로 나뉘고, 감사를 통과해 산출물 한 건이 되는 흐름도. 아래에 하네스, 스킬, 자동화 세 가지 상시 설비.',
-      diaCaption: '실측 2026-09-02 기준. 에이전트 정의 11종과 스킬 38종(2026-09-03 기준)을 직접 세어 그렸고, 없는 구성요소는 넣지 않았습니다.',
+      diaCaption: '이 그림을 공개하는 것은 확인을 열어 두기 위해서입니다. 구성이 틀렸다면 그 사실도 그대로 드러납니다.',
 
       readH: '그림 읽는 법',
       readRows: [
@@ -286,7 +313,7 @@ export const CONTENT = {
       diaH: 'How one instruction becomes one deliverable',
       diaP: 'This is the path from one instruction to one deliverable. It runs left to right, the same direction as an organization chart.',
       diaAlt: 'Flow diagram. One instruction goes to a Planning HQ, is split across six departments, passes an audit, and comes out as one deliverable. Below it, three standing facilities: the harness, the skills, and the automation.',
-      diaCaption: 'Measured 2026-09-02. Eleven agent definitions and 38 skills (as of 2026-09-03), counted directly. Nothing that does not exist was drawn.',
+      diaCaption: 'I publish this so it can be checked. If something here is wrong, that will show too.',
 
       readH: 'How to read it',
       readRows: [

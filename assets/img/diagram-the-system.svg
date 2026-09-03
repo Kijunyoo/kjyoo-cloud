@@ -141,5 +141,5 @@
   <text class="t-sub"  x="728" y="464" data-t="sys.card3.l2">외부 시스템에 직접 읽고 쓴다</text>
 </g>
 
-<text class="t-cap" x="0" y="520" data-t="sys.source">실측 2026-09-03 기준. 에이전트 정의 11종과 스킬 38종(2026-09-03 기준)을 직접 세어 그렸다. 없는 구성요소는 넣지 않았다.</text>
+<text class="t-cap" x="0" y="520" data-t="sys.source">실측 2026-09-03 기준. 에이전트 정의 11종과 스킬 38종을 직접 세어 그렸다. 없는 구성요소는 넣지 않았다.</text>
 </svg>
