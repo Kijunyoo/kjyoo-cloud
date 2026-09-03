@@ -1,6 +1,6 @@
 # kjyoo.cloud
 
-Senior AI Orchestration Advisor 퍼스널 브랜딩 사이트.
+KJ Yoo 퍼스널 브랜딩 사이트. 40년 실무를 AI 오케스트레이션으로 옮기며 해본 것과 알게 된 것을 공개한다.
 
 이 저장소 자체가 산출물이자 증거물이다. 사이트는 클로드코드로 만들었고 소스를 공개한다.
 
@@ -46,7 +46,7 @@ dist/                   빌드 산출물. 커밋하지 않는다
 | `/{lang}/system.html` | The System. 실제 운용 스택 공개 |
 | `/{lang}/then-now.html` | Then vs Now. 조직 대비 다이어그램 |
 | `/{lang}/about.html` | About. 경력과 검증 가능 실측 |
-| `/{lang}/advisory.html` | Advisory. 자문 제안과 문의 |
+| `/{lang}/notes.html` | 일지 / Notes. 해본 것과 알게 된 것 |
 
 `{lang}` 은 `ko` 또는 `en`.
 

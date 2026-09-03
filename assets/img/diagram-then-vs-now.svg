@@ -1,0 +1,188 @@
+<svg xmlns="http://www.w3.org/2000/svg" class="kjd kjd-tvn" viewBox="-4 -4 1040 564" width="1040" height="564" role="img" aria-labelledby="kjdTvnTitle kjdTvnDesc">
+<title id="kjdTvnTitle">Then vs Now - 같은 분야, 달라진 인력</title>
+<desc id="kjdTvnDesc">왼쪽은 과거 운영조직이다. 여섯 자리에 15명 안팎이 배치돼 있었다. 점 하나가 사람 한 명이며 연구개발, 영업 마케팅, 해외 거점, 경영기획, 대표, 디자인 자리로 나뉜다. 오른쪽은 같은 일을 여섯 부문 에이전트가 맡는 지금의 구성이며 사람은 1명이다. 가운데 수렴 도형이 여럿에서 하나로 모이는 전환을 나타낸다.</desc>
+
+<!-- ============================================================
+     kjyoo.cloud 다이어그램 - Then vs Now
+     v0.2 (2026-09-03) / Creative 부문
+     v0.1 대비 변경: 내부 소재 기록 실측으로 수치 칸 11개를 확정했다.
+
+     정본: kjyoo_cloud_Brand_Foundation_v0.1.md
+     - 6.1절 "Before 는 무채색 계열, After 는 레드 강조" 를 따른다.
+       왼쪽 판에는 레드를 한 곳도 쓰지 않는다.
+     - 가운데 도형은 워드마크 정본 기하
+       (viewBox 0 0 64 48, 수렴선 stroke 5, 출력선 stroke 7) 를
+       그대로 옮기고 0.875 배로만 축소했다. 형태를 고치지 않았다.
+     - 서체 크기는 16 / 23 만 쓴다. 간격은 4dp 스케일만 쓴다.
+     - 라운드 17(판), 8(상자).
+     - 색은 토큰만 참조한다. 하드코딩 값은 var() 폴백뿐이고
+       폴백은 라이트 정본값과 같다. 신규 색을 만들지 않았다.
+
+     수치 출처 (내부 소재 기록)
+     - 왼쪽 6칸과 인원: 내부 인사 자료 기준. 대표 1, 경영기획 1,
+       영업 마케팅 4, 디자인 1, 연구개발 6, 해외 거점 2. 합 15명.
+       외부 고문 2명은 내부 인원이 아니므로 뺐다.
+     - 조직 규모 10 ~ 17명: 내부 인사 기록 여러 시점 기준.
+     - 마케팅과 영업 5 ~ 6명: 내부 인사 자료 4명 + 디자인 1, 내부 과제 기록 6명.
+     - 업무 갈래 7 ~ 9: 내부 업무 기록 여러 시점 기준.
+     - 오른쪽 1명 + 에이전트 11: 에이전트 정의 파일 11개 직접 실측
+       (참모 5 = 총괄 기획실, 감사, 실행, 상황실, 법률 / 부문 6).
+
+     채우지 않은 칸 (근거 없음)
+     - 한 건 산출까지 걸린 시간: 그때 값은 개별 사례만 있고
+       지금 값은 측정 자료가 없다. 양쪽 비교가 성립하지 않아 뺐다.
+     - 결재와 협업 단계 수: 대장에 계수 근거가 없다.
+     - 2019-11 인원 최대 시점(17명)의 부서별 배분: 조직도가 없어 확인 못 함.
+
+     사본 - kjyoo-cloud 저장소 assets/img/
+     - 정본과 동일 내용. 이 사본은 변경하지 않았다.
+     - 인라인 SVG. img 태그 금지(토큰 미적용).
+============================================================ -->
+
+<style>
+.kjd-tvn text { font-family: var(--kj-font, "Nanum Gothic", "Noto Sans KR", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif); }
+.kjd-tvn .t-era-then { font-size: 16px; font-weight: 700; letter-spacing: 1.6px; fill: var(--kj-text-2, #737373); }
+.kjd-tvn .t-era-now  { font-size: 16px; font-weight: 700; letter-spacing: 1.6px; fill: var(--kj-text, #383838); }
+.kjd-tvn .t-h        { font-size: 23px; font-weight: 700; fill: var(--kj-text, #383838); }
+.kjd-tvn .t-sub      { font-size: 16px; font-weight: 400; fill: var(--kj-text-2, #737373); }
+.kjd-tvn .t-lane     { font-size: 16px; font-weight: 700; fill: var(--kj-text, #383838); }
+.kjd-tvn .t-count    { font-size: 16px; font-weight: 400; fill: var(--kj-text-2, #737373); }
+.kjd-tvn .t-metric   { font-size: 16px; font-weight: 400; fill: var(--kj-text-2, #737373); }
+.kjd-tvn .t-num      { font-size: 23px; font-weight: 700; fill: var(--kj-text, #383838); }
+.kjd-tvn .t-val      { font-size: 23px; font-weight: 700; fill: var(--kj-accent, #E5002B); }
+.kjd-tvn .t-cap      { font-size: 16px; font-weight: 400; fill: var(--kj-text-2, #737373); }
+.kjd-tvn .panel      { fill: var(--kj-surface, #FFFFFF); stroke: var(--kj-border, rgba(0,0,0,0.08)); stroke-width: 1; }
+.kjd-tvn .box        { fill: none; stroke: var(--kj-border, rgba(0,0,0,0.08)); stroke-width: 1; }
+.kjd-tvn .rule       { stroke: var(--kj-divider, rgba(0,0,0,0.06)); stroke-width: 1; }
+.kjd-tvn .glyph      { fill: var(--kj-text-3, #787878); }
+.kjd-tvn .glyph-out  { fill: none; stroke: var(--kj-accent, #E5002B); stroke-width: 5; stroke-linecap: round; }
+.kjd-tvn .mk-line    { fill: none; stroke: var(--kj-text-3, #787878); stroke-width: 5; stroke-linecap: round; stroke-linejoin: round; }
+.kjd-tvn .mk-out     { fill: none; stroke: var(--kj-accent, #E5002B); stroke-width: 7; stroke-linecap: round; stroke-linejoin: round; }
+</style>
+
+<!-- ================= 왼쪽. THEN ================= -->
+<rect class="panel" x="0" y="0" width="484" height="520" rx="17"/>
+
+<text class="t-era-then" x="32" y="48" data-t="tvn.then.era">THEN</text>
+<text class="t-h"   x="32" y="88"  data-t="tvn.then.h1">분야마다 사람이</text>
+<text class="t-h"   x="32" y="118" data-t="tvn.then.h2">따로 있었다</text>
+<text class="t-sub" x="32" y="146" data-t="tvn.then.sub">과거 운영조직. 영업 마케팅만 4명</text>
+<line class="rule" x1="32" y1="168" x2="452" y2="168"/>
+
+<!-- 그때의 6개 자리. 점 하나가 사람 한 명이다. 합 15명 -->
+<g>
+  <rect class="box" x="32" y="192" width="124" height="84" rx="8"/>
+  <g class="glyph">
+    <circle cx="54" cy="214" r="5"/><circle cx="70" cy="214" r="5"/><circle cx="86" cy="214" r="5"/>
+    <circle cx="102" cy="214" r="5"/><circle cx="118" cy="214" r="5"/><circle cx="134" cy="214" r="5"/>
+  </g>
+  <text class="t-lane"  x="94" y="244" text-anchor="middle" data-t="tvn.then.r1.name">연구개발</text>
+  <text class="t-count" x="94" y="266" text-anchor="middle" data-t="tvn.then.r1.n">6명</text>
+
+  <rect class="box" x="180" y="192" width="124" height="84" rx="8"/>
+  <g class="glyph">
+    <circle cx="218" cy="214" r="5"/><circle cx="234" cy="214" r="5"/>
+    <circle cx="250" cy="214" r="5"/><circle cx="266" cy="214" r="5"/>
+  </g>
+  <text class="t-lane"  x="242" y="244" text-anchor="middle" data-t="tvn.then.r2.name">영업 마케팅</text>
+  <text class="t-count" x="242" y="266" text-anchor="middle" data-t="tvn.then.r2.n">4명</text>
+
+  <rect class="box" x="328" y="192" width="124" height="84" rx="8"/>
+  <g class="glyph">
+    <circle cx="382" cy="214" r="5"/><circle cx="398" cy="214" r="5"/>
+  </g>
+  <text class="t-lane"  x="390" y="244" text-anchor="middle" data-t="tvn.then.r3.name">해외 거점</text>
+  <text class="t-count" x="390" y="266" text-anchor="middle" data-t="tvn.then.r3.n">2명</text>
+
+  <rect class="box" x="32" y="292" width="124" height="84" rx="8"/>
+  <circle class="glyph" cx="94" cy="314" r="5"/>
+  <text class="t-lane"  x="94" y="344" text-anchor="middle" data-t="tvn.then.r4.name">대표</text>
+  <text class="t-count" x="94" y="366" text-anchor="middle" data-t="tvn.then.r4.n">1명</text>
+
+  <rect class="box" x="180" y="292" width="124" height="84" rx="8"/>
+  <circle class="glyph" cx="242" cy="314" r="5"/>
+  <text class="t-lane"  x="242" y="344" text-anchor="middle" data-t="tvn.then.r5.name">경영기획</text>
+  <text class="t-count" x="242" y="366" text-anchor="middle" data-t="tvn.then.r5.n">1명</text>
+
+  <rect class="box" x="328" y="292" width="124" height="84" rx="8"/>
+  <circle class="glyph" cx="390" cy="314" r="5"/>
+  <text class="t-lane"  x="390" y="344" text-anchor="middle" data-t="tvn.then.r6.name">디자인</text>
+  <text class="t-count" x="390" y="366" text-anchor="middle" data-t="tvn.then.r6.n">1명</text>
+</g>
+
+<line class="rule" x1="32" y1="392" x2="452" y2="392"/>
+
+<text class="t-metric" x="32" y="424" data-t="tvn.m1.label">조직 규모</text>
+<text class="t-num" x="452" y="424" text-anchor="end" data-t="tvn.m1.then">10 ~ 17명</text>
+
+<text class="t-metric" x="32" y="456" data-t="tvn.m2.label">마케팅과 영업</text>
+<text class="t-num" x="452" y="456" text-anchor="end" data-t="tvn.m2.then">5 ~ 6명</text>
+
+<text class="t-metric" x="32" y="488" data-t="tvn.m3.label">업무 갈래</text>
+<text class="t-num" x="452" y="488" text-anchor="end" data-t="tvn.m3.then">7 ~ 9갈래</text>
+
+<!-- ================= 가운데. 워드마크 ================= -->
+<!-- 정본 기하 viewBox 0 0 64 48 을 0.875 배로만 축소했다 -->
+<g transform="translate(488 239) scale(0.875)">
+  <path class="mk-line" d="M4 8 H22 Q30 8 30 16 V24"/>
+  <path class="mk-line" d="M4 24 H30"/>
+  <path class="mk-line" d="M4 40 H22 Q30 40 30 32 V24"/>
+  <path class="mk-out"  d="M30 24 H60"/>
+</g>
+
+<!-- ================= 오른쪽. NOW ================= -->
+<rect class="panel" x="548" y="0" width="484" height="520" rx="17"/>
+
+<text class="t-era-now" x="580" y="48" data-t="tvn.now.era">NOW</text>
+<text class="t-h"   x="580" y="88"  data-t="tvn.now.h1">같은 분야를</text>
+<text class="t-h"   x="580" y="118" data-t="tvn.now.h2">1명이 맡는다</text>
+<text class="t-sub" x="580" y="146" data-t="tvn.now.sub">총괄 기획실이 나누고 감사가 검증한다</text>
+<line class="rule" x1="580" y1="168" x2="1000" y2="168"/>
+
+<!-- 지금의 부문 6종. 실재하는 에이전트 정의다 -->
+<g>
+  <rect class="box" x="580" y="192" width="124" height="84" rx="8"/>
+  <path class="glyph-out" d="M630 214 H654"/>
+  <text class="t-lane"  x="642" y="244" text-anchor="middle" data-t="tvn.dept.tech">기술</text>
+  <text class="t-count" x="642" y="266" text-anchor="middle" data-t="tvn.dept.tech.n">에이전트 1</text>
+
+  <rect class="box" x="728" y="192" width="124" height="84" rx="8"/>
+  <path class="glyph-out" d="M778 214 H802"/>
+  <text class="t-lane"  x="790" y="244" text-anchor="middle" data-t="tvn.dept.knowledge">지식</text>
+  <text class="t-count" x="790" y="266" text-anchor="middle" data-t="tvn.dept.knowledge.n">에이전트 1</text>
+
+  <rect class="box" x="876" y="192" width="124" height="84" rx="8"/>
+  <path class="glyph-out" d="M926 214 H950"/>
+  <text class="t-lane"  x="938" y="244" text-anchor="middle" data-t="tvn.dept.creative">창작</text>
+  <text class="t-count" x="938" y="266" text-anchor="middle" data-t="tvn.dept.creative.n">에이전트 1</text>
+
+  <rect class="box" x="580" y="292" width="124" height="84" rx="8"/>
+  <path class="glyph-out" d="M630 314 H654"/>
+  <text class="t-lane"  x="642" y="344" text-anchor="middle" data-t="tvn.dept.marketing">마케팅</text>
+  <text class="t-count" x="642" y="366" text-anchor="middle" data-t="tvn.dept.marketing.n">에이전트 1</text>
+
+  <rect class="box" x="728" y="292" width="124" height="84" rx="8"/>
+  <path class="glyph-out" d="M778 314 H802"/>
+  <text class="t-lane"  x="790" y="344" text-anchor="middle" data-t="tvn.dept.business">사업</text>
+  <text class="t-count" x="790" y="366" text-anchor="middle" data-t="tvn.dept.business.n">에이전트 1</text>
+
+  <rect class="box" x="876" y="292" width="124" height="84" rx="8"/>
+  <path class="glyph-out" d="M926 314 H950"/>
+  <text class="t-lane"  x="938" y="344" text-anchor="middle" data-t="tvn.dept.intelligence">조사</text>
+  <text class="t-count" x="938" y="366" text-anchor="middle" data-t="tvn.dept.intelligence.n">에이전트 1</text>
+</g>
+
+<line class="rule" x1="580" y1="392" x2="1000" y2="392"/>
+
+<text class="t-metric" x="580" y="424" data-t="tvn.m1.label.now">조직 규모</text>
+<text class="t-val" x="1000" y="424" text-anchor="end" data-t="tvn.m1.now">1명 + 에이전트 11</text>
+
+<text class="t-metric" x="580" y="456" data-t="tvn.m2.label.now">마케팅과 영업</text>
+<text class="t-num" x="1000" y="456" text-anchor="end" data-t="tvn.m2.now">에이전트 1</text>
+
+<text class="t-metric" x="580" y="488" data-t="tvn.m3.label.now">업무 갈래</text>
+<text class="t-num" x="1000" y="488" text-anchor="end" data-t="tvn.m3.now">부문 6갈래</text>
+
+<!-- ================= 출처 ================= -->
+<text class="t-cap" x="0" y="552" data-t="tvn.source">출처: 내부 인사, 업무 기록 여러 시점. 지금 값은 에이전트 정의 파일 실측.</text>
+</svg>

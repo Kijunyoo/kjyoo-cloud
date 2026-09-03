@@ -1,0 +1,145 @@
+<svg xmlns="http://www.w3.org/2000/svg" class="kjd kjd-sys" viewBox="-4 -4 1040 536" width="1040" height="536" role="img" aria-labelledby="kjdSysTitle kjdSysDesc">
+<title id="kjdSysTitle">The System - 지시 1건이 산출물 1건이 되는 길</title>
+<desc id="kjdSysDesc">지시 1건을 총괄 기획실이 받아 여섯 개 부문으로 나누고, 결과가 감사팀을 거쳐 산출물 1건으로 모인다. 그 아래에 하네스, 스킬, n8n 자동화가 상시 설비로 깔려 있다.</desc>
+
+<!-- ============================================================
+     kjyoo.cloud 다이어그램 - The System
+     v0.2 (2026-09-03) / Creative 부문
+     v0.1 대비 변경 2건. 그림 내용과 문구는 건드리지 않았다.
+       1) viewBox 에 4px 여백을 넣었다. v0.1 은 viewBox 0 0 1032 540
+          이라서 x=0 상자의 1px 테두리가 0.5px, x=1032 에 붙은
+          산출물 상자의 2px 강조 테두리가 1px 잘려 나갔다.
+          내부 좌표는 하나도 바꾸지 않고 원점만 -4 로 옮겼다.
+       2) t-eyebrow 와 t-cap 의 색을 kj-text-3 에서 kj-text-2 로
+          바꿨다. 라이트 모드에서 16px 글자가 대비 4.23 대 1 로
+          WCAG AA 기준 4.5 대 1 에 미달했다. 신규 색을 만들지 않고
+          이미 있는 토큰으로 옮겨 4.54 대 1 을 확보했다.
+
+     정정 1건 (2026-09-03 확정)
+       - "스킬 34종" 은 실측과 다르다. 세는 규칙은 최상위
+         정해진 규칙 기준으로 실측 38종이다.
+         card2.title 을 "스킬 38종" 으로, sys.source 캡션을
+         "스킬 38종(2026-09-03 기준)" 으로 고쳤다. 그 외 좌표,
+         색, 글자 크기, 다른 문구는 전혀 손대지 않았다.
+       - 이 사본은 kjyoo-cloud 저장소 assets/img/ 에 둔다.
+         v0.2 정본은 그대로 두었다(위 정정 미반영).
+
+     정본: kjyoo_cloud_Brand_Foundation_v0.1.md
+     - 색은 토큰만 참조한다. 하드코딩 값은 var() 의 폴백뿐이며
+       폴백은 라이트 모드 정본값과 동일하다.
+     - 서체 크기는 웹 5단계 중 16 / 19 / 23 만 쓴다.
+     - 간격은 4dp 스케일(8 / 16 / 24 / 32 / 48 / 64)만 쓴다.
+     - 라운드 17(카드), 999(pill).
+     - 강조 레드는 감사에서 산출물로 나가는 출력선 1개와
+       산출물 상자 테두리만 쓴다. 워드마크
+       (무채색 여러 갈래 에서 레드 출력선 1개)의 직접 인용이다.
+============================================================ -->
+
+<style>
+.kjd-sys text { font-family: var(--kj-font, "Nanum Gothic", "Noto Sans KR", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif); }
+.kjd-sys .t-eyebrow { font-size: 16px; font-weight: 700; letter-spacing: 1.6px; fill: var(--kj-text-2, #737373); }
+.kjd-sys .t-node    { font-size: 19px; font-weight: 700; fill: var(--kj-text, #383838); }
+.kjd-sys .t-sub     { font-size: 16px; font-weight: 400; fill: var(--kj-text-2, #737373); }
+.kjd-sys .t-lane    { font-size: 16px; font-weight: 700; fill: var(--kj-text, #383838); }
+.kjd-sys .t-card    { font-size: 19px; font-weight: 700; fill: var(--kj-text, #383838); }
+.kjd-sys .t-cap     { font-size: 16px; font-weight: 400; fill: var(--kj-text-2, #737373); }
+.kjd-sys .t-out     { font-size: 19px; font-weight: 700; fill: var(--kj-accent, #E5002B); }
+.kjd-sys .box       { fill: var(--kj-surface, #FFFFFF); stroke: var(--kj-border, rgba(0,0,0,0.08)); stroke-width: 1; }
+.kjd-sys .box-out   { fill: var(--kj-surface, #FFFFFF); stroke: var(--kj-accent, #E5002B); stroke-width: 2; }
+.kjd-sys .wire      { fill: none; stroke: var(--kj-text-3, #787878); stroke-width: 3; stroke-linecap: round; }
+.kjd-sys .wire-out  { fill: none; stroke: var(--kj-accent, #E5002B); stroke-width: 5; stroke-linecap: round; }
+.kjd-sys .rule      { stroke: var(--kj-divider, rgba(0,0,0,0.06)); stroke-width: 1; }
+</style>
+
+<!-- ========== 1단. 일이 도는 길 ========== -->
+<text class="t-eyebrow" x="0" y="20" data-t="sys.band1">일이 도는 길</text>
+
+<!-- 배선. 무채색 여러 갈래가 감사에서 모이고, 레드 출력선 1개가 나간다 -->
+<g>
+  <path class="wire" d="M152 156 H216"/>
+  <path class="wire" d="M376 156 C408 156 408 66 440 66"/>
+  <path class="wire" d="M376 156 C408 156 408 102 440 102"/>
+  <path class="wire" d="M376 156 C408 156 408 138 440 138"/>
+  <path class="wire" d="M376 156 C408 156 408 174 440 174"/>
+  <path class="wire" d="M376 156 C408 156 408 210 440 210"/>
+  <path class="wire" d="M376 156 C408 156 408 246 440 246"/>
+  <path class="wire" d="M592 66 C624 66 624 156 656 156"/>
+  <path class="wire" d="M592 102 C624 102 624 156 656 156"/>
+  <path class="wire" d="M592 138 C624 138 624 156 656 156"/>
+  <path class="wire" d="M592 174 C624 174 624 156 656 156"/>
+  <path class="wire" d="M592 210 C624 210 624 156 656 156"/>
+  <path class="wire" d="M592 246 C624 246 624 156 656 156"/>
+  <path class="wire-out" d="M808 156 H872"/>
+</g>
+
+<!-- 지시 -->
+<g>
+  <rect class="box" x="0" y="108" width="152" height="96" rx="17"/>
+  <text class="t-node" x="76" y="150" text-anchor="middle" data-t="sys.in.title">지시 1건</text>
+  <text class="t-sub"  x="76" y="176" text-anchor="middle" data-t="sys.in.sub">사람이 내린다</text>
+</g>
+
+<!-- 총괄 기획실 -->
+<g>
+  <rect class="box" x="216" y="108" width="160" height="96" rx="17"/>
+  <text class="t-node" x="296" y="150" text-anchor="middle" data-t="sys.chief.title">총괄 기획실</text>
+  <text class="t-sub"  x="296" y="176" text-anchor="middle" data-t="sys.chief.sub">쪼개서 나눠준다</text>
+</g>
+
+<!-- 부문 6 -->
+<g>
+  <rect class="box" x="440" y="52"  width="152" height="28" rx="14"/>
+  <text class="t-lane" x="516" y="72"  text-anchor="middle" data-t="sys.dept.tech">기술</text>
+  <rect class="box" x="440" y="88"  width="152" height="28" rx="14"/>
+  <text class="t-lane" x="516" y="108" text-anchor="middle" data-t="sys.dept.knowledge">지식</text>
+  <rect class="box" x="440" y="124" width="152" height="28" rx="14"/>
+  <text class="t-lane" x="516" y="144" text-anchor="middle" data-t="sys.dept.creative">창작</text>
+  <rect class="box" x="440" y="160" width="152" height="28" rx="14"/>
+  <text class="t-lane" x="516" y="180" text-anchor="middle" data-t="sys.dept.marketing">마케팅</text>
+  <rect class="box" x="440" y="196" width="152" height="28" rx="14"/>
+  <text class="t-lane" x="516" y="216" text-anchor="middle" data-t="sys.dept.business">사업</text>
+  <rect class="box" x="440" y="232" width="152" height="28" rx="14"/>
+  <text class="t-lane" x="516" y="252" text-anchor="middle" data-t="sys.dept.intelligence">조사</text>
+</g>
+<text class="t-cap" x="516" y="288" text-anchor="middle" data-t="sys.dept.more">+ 실행, 상황실, 법률 전담 3종</text>
+
+<!-- 감사 -->
+<g>
+  <rect class="box" x="656" y="108" width="152" height="96" rx="17"/>
+  <text class="t-node" x="732" y="150" text-anchor="middle" data-t="sys.audit.title">감사</text>
+  <text class="t-sub"  x="732" y="176" text-anchor="middle" data-t="sys.audit.sub">합격, 불합격</text>
+</g>
+
+<!-- 산출물 -->
+<g>
+  <rect class="box-out" x="872" y="108" width="160" height="96" rx="17"/>
+  <text class="t-out" x="952" y="150" text-anchor="middle" data-t="sys.out.title">산출물 1건</text>
+  <text class="t-sub" x="952" y="176" text-anchor="middle" data-t="sys.out.sub">사람이 최종 확인</text>
+</g>
+
+<line class="rule" x1="0" y1="320" x2="1032" y2="320"/>
+
+<!-- ========== 2단. 항상 켜져 있는 설비 ========== -->
+<text class="t-eyebrow" x="0" y="352" data-t="sys.band2">항상 켜져 있는 설비</text>
+
+<g>
+  <rect class="box" x="0" y="372" width="328" height="120" rx="17"/>
+  <text class="t-card" x="24" y="410" data-t="sys.card1.title">하네스</text>
+  <text class="t-sub"  x="24" y="440" data-t="sys.card1.l1">지켜야 할 규칙을 한 곳에</text>
+  <text class="t-sub"  x="24" y="464" data-t="sys.card1.l2">작업 6개 시점마다 자동 점검</text>
+</g>
+<g>
+  <rect class="box" x="352" y="372" width="328" height="120" rx="17"/>
+  <text class="t-card" x="376" y="410" data-t="sys.card2.title">스킬 38종</text>
+  <text class="t-sub"  x="376" y="440" data-t="sys.card2.l1">반복 작업을 굳혀 둔 절차서</text>
+  <text class="t-sub"  x="376" y="464" data-t="sys.card2.l2">매번 다시 설명하지 않는다</text>
+</g>
+<g>
+  <rect class="box" x="704" y="372" width="328" height="120" rx="17"/>
+  <text class="t-card" x="728" y="410" data-t="sys.card3.title">n8n 자동화</text>
+  <text class="t-sub"  x="728" y="440" data-t="sys.card3.l1">정해진 시각에 사람 없이 돈다</text>
+  <text class="t-sub"  x="728" y="464" data-t="sys.card3.l2">외부 시스템에 직접 읽고 쓴다</text>
+</g>
+
+<text class="t-cap" x="0" y="520" data-t="sys.source">실측 2026-09-03 기준. 에이전트 정의 11종과 스킬 38종(2026-09-03 기준)을 직접 세어 그렸다. 없는 구성요소는 넣지 않았다.</text>
+</svg>

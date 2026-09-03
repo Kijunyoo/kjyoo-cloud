@@ -24,6 +24,13 @@ const esc = (s) => String(s)
 
 const href = (langDir, page) => `/${langDir}/${page === 'index' ? '' : page + '.html'}`;
 
+// 다이어그램 - 인라인 SVG. 정본은 다이어그램_주입지침_v0.1.md.
+// data-t 속성은 다국어 치환 지점 표시이며 이번 판은 치환하지 않고
+// 두 언어 페이지에 동일한(한국어) SVG를 그대로 넣는다. 새 영문 카피를
+// 만들지 않기 위한 결정이며 EN 페이지 다이어그램 번역은 별도 과업이다.
+const SVG_THE_SYSTEM = readFileSync(join(ROOT, 'assets/img/diagram-the-system.svg'), 'utf8');
+const SVG_THEN_NOW = readFileSync(join(ROOT, 'assets/img/diagram-then-vs-now.svg'), 'utf8');
+
 // ---------- shell ----------
 
 function layout({ t, page, body }) {
@@ -118,7 +125,6 @@ function pageIndex(t) {
     <p>${esc(d.heroBody)}</p>
     <div class="hero-actions">
       <a class="btn btn--primary" href="${href(t.dir, 'cases')}">${esc(d.ctaPrimary)}</a>
-      <a class="btn btn--ghost" href="${href(t.dir, 'advisory')}">${esc(d.ctaGhost)}</a>
     </div>
     <div class="stats">
 ${stats}
@@ -163,6 +169,8 @@ function pageSystem(t) {
     `        <div class="node${i === 0 ? ' node--human' : ''}"><b>${esc(n.b)}</b><small>${esc(n.s)}</small></div>`).join('\n');
   const rows = d.stackRows.map(([k, v]) =>
     `        <tr><td><b>${esc(k)}</b></td><td>${esc(v)}</td></tr>`).join('\n');
+  const readRows = d.readRows.map(([k, v]) =>
+    `        <tr><td><b>${esc(k)}</b></td><td>${esc(v)}</td></tr>`).join('\n');
 
   return `<section class="band">
   <div class="shell">
@@ -171,7 +179,24 @@ function pageSystem(t) {
       <p>${esc(d.lead)}</p>
     </div>
 
-    <h2>${esc(d.pipelineH)}</h2>
+    <h2>${esc(d.diaH)}</h2>
+    <p style="color: var(--kj-text-2); margin: var(--kj-space-md) 0 var(--kj-space-lg); max-width: var(--kj-measure)">${esc(d.diaP)}</p>
+    <div class="kjd-wrap" role="group" tabindex="0" aria-label="다이어그램. 가로로 스크롤할 수 있다">
+${SVG_THE_SYSTEM}
+    </div>
+    <p class="sr-only">${esc(d.diaAlt)}</p>
+    <p style="color: var(--kj-text-3); font-size: var(--kj-fs-caption); margin-top: var(--kj-space-md)">${esc(d.diaCaption)}</p>
+
+    <h2 style="margin-top: var(--kj-space-3xl)">${esc(d.readH)}</h2>
+    <div class="tablewrap" style="margin-top: var(--kj-space-lg)">
+      <table>
+        <tbody>
+${readRows}
+        </tbody>
+      </table>
+    </div>
+
+    <h2 style="margin-top: var(--kj-space-3xl)">${esc(d.pipelineH)}</h2>
     <p style="color: var(--kj-text-2); margin: var(--kj-space-md) 0 var(--kj-space-lg); max-width: var(--kj-measure)">${esc(d.pipelineP)}</p>
     <div class="pipeline" style="max-width: 560px">
 ${nodes}
@@ -193,10 +218,10 @@ ${rows}
 
 function pageThenNow(t) {
   const d = t['then-now'];
-  const people = d.people.map((p) =>
-    `          <div class="person">${esc(p)}</div>`).join('\n');
-  const nodes = t.system.nodes.map((n, i) =>
-    `          <div class="node${i === 0 ? ' node--human' : ''}"><b>${esc(n.b)}</b><small>${esc(n.s)}</small></div>`).join('\n');
+  const evidenceRows = d.evidenceRows.map(([k, v]) =>
+    `        <tr><td><b>${esc(k)}</b></td><td>${esc(v)}</td></tr>`).join('\n');
+  const anchorP = d.anchorP.map((p) => `    <p>${esc(p)}</p>`).join('\n');
+  const closeP = d.closeP.map((p) => `    <p>${esc(p)}</p>`).join('\n');
 
   return `<section class="band">
   <div class="shell">
@@ -205,37 +230,27 @@ function pageThenNow(t) {
       <p>${esc(d.lead)}</p>
     </div>
 
-    <div class="dia">
-      <div class="dia-side dia-side--before">
-        <div>
-          <div class="dia-era">${esc(d.beforeEra)}</div>
-          <div class="dia-count">${esc(d.beforeCount)}</div>
-          <div class="dia-sub">${esc(d.beforeSub)}</div>
-        </div>
-        <div class="people">
-${people}
-        </div>
-      </div>
-
-      <div class="dia-arrow" aria-hidden="true">&rarr;</div>
-
-      <div class="dia-side dia-side--after">
-        <div>
-          <div class="dia-era">${esc(d.afterEra)}</div>
-          <div class="dia-count">${esc(d.afterCount)}</div>
-          <div class="dia-sub">${esc(d.afterSub)}</div>
-        </div>
-        <div class="pipeline">
-${nodes}
-        </div>
-      </div>
+    <div class="kjd-wrap" role="group" tabindex="0" aria-label="다이어그램. 가로로 스크롤할 수 있다">
+${SVG_THEN_NOW}
     </div>
 
-    <p style="color: var(--kj-text-2); font-size: var(--kj-fs-caption); margin-top: var(--kj-space-lg); padding-top: var(--kj-space-md); border-top: 1px solid var(--kj-divider); max-width: var(--kj-measure)">${esc(d.caption)}</p>
+    <h2 style="margin-top: var(--kj-space-3xl)">${esc(d.evidenceH)}</h2>
+    <div class="tablewrap" style="margin-top: var(--kj-space-lg)">
+      <table>
+        <tbody>
+${evidenceRows}
+        </tbody>
+      </table>
+    </div>
 
-    <div class="empty" style="margin-top: var(--kj-space-3xl)">
-      <b>${esc(d.pendingH)}</b>
-      <p>${esc(d.pendingP)}</p>
+    <h2 style="margin-top: var(--kj-space-3xl)">${esc(d.anchorH)}</h2>
+    <div class="prose" style="margin-top: var(--kj-space-lg)">
+${anchorP}
+    </div>
+
+    <h2 style="margin-top: var(--kj-space-3xl)">${esc(d.closeH)}</h2>
+    <div class="prose" style="margin-top: var(--kj-space-lg)">
+${closeP}
     </div>
   </div>
 </section>
@@ -283,16 +298,10 @@ ${facts}
 `;
 }
 
-function pageAdvisory(t) {
-  const d = t.advisory;
-  const offers = d.offers.map((o) =>
-    `      <div class="offer">
-        <h3>${esc(o.h)}</h3>
-        <p style="color: var(--kj-text-2); font-size: var(--kj-fs-caption); margin: 0">${esc(o.p)}</p>
-        <ul>
-${o.li.map((x) => `          <li>${esc(x)}</li>`).join('\n')}
-        </ul>
-      </div>`).join('\n');
+function pageNotes(t) {
+  const d = t.notes;
+  const didP = d.didP.map((p) => `      <p>${esc(p)}</p>`).join('\n');
+  const learnedP = d.learnedP.map((p) => `      <p>${esc(p)}</p>`).join('\n');
   const areas = d.areas.map(([k, v]) =>
     `        <tr><td><b>${esc(k)}</b></td><td>${esc(v)}</td></tr>`).join('\n');
 
@@ -303,8 +312,14 @@ ${o.li.map((x) => `          <li>${esc(x)}</li>`).join('\n')}
       <p>${esc(d.lead)}</p>
     </div>
 
-    <div class="offer-grid">
-${offers}
+    <h2>${esc(d.didH)}</h2>
+    <div class="prose" style="margin-top: var(--kj-space-lg)">
+${didP}
+    </div>
+
+    <h2 style="margin-top: var(--kj-space-3xl)">${esc(d.learnedH)}</h2>
+    <div class="prose" style="margin-top: var(--kj-space-lg)">
+${learnedP}
     </div>
 
     <h2 style="margin-top: var(--kj-space-3xl)">${esc(d.areasH)}</h2>
@@ -316,10 +331,10 @@ ${areas}
       </table>
     </div>
 
-    <div class="contact" style="margin-top: var(--kj-space-3xl)">
-      <h2>${esc(d.contactH)}</h2>
-      <p style="color: var(--kj-text-2); margin: 0; max-width: var(--kj-measure)">${esc(d.contactP)}</p>
-      <a class="btn btn--primary" href="mailto:${SITE.email}">${esc(d.contactBtn)}</a>
+    <h2 style="margin-top: var(--kj-space-3xl)">${esc(d.linksH)}</h2>
+    <div class="hero-actions" style="margin-top: var(--kj-space-lg)">
+      <a class="btn btn--ghost" href="${SITE.linkedin}">LinkedIn</a>
+      <a class="btn btn--ghost" href="${SITE.github}">GitHub</a>
     </div>
   </div>
 </section>
@@ -332,7 +347,7 @@ const RENDER = {
   system: pageSystem,
   'then-now': pageThenNow,
   about: pageAbout,
-  advisory: pageAdvisory,
+  notes: pageNotes,
 };
 
 // ---------- root language redirect ----------
