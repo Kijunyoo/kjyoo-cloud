@@ -400,7 +400,7 @@ function pageSystem(t) {
 ${svgForLang(SVG_THE_SYSTEM, t.lang)}
     </div>
     <p class="sr-only">${esc(d.diaAlt)}</p>
-    <p style="color: var(--kj-text-3); font-size: var(--kj-fs-caption); margin-top: var(--kj-space-md)">${esc(d.diaCaption)}</p>
+    <p style="color: var(--kj-text-2); font-size: var(--kj-fs-caption); margin-top: var(--kj-space-md)">${esc(d.diaCaption)}</p>
 
     <h2 style="margin-top: var(--kj-space-3xl)">${esc(d.readH)}</h2>
     <div class="tablewrap" style="margin-top: var(--kj-space-lg)">
@@ -425,7 +425,7 @@ ${rows}
         </tbody>
       </table>
     </div>
-    <p style="color: var(--kj-text-3); font-size: var(--kj-fs-caption); margin-top: var(--kj-space-md)">${esc(d.note)}</p>
+    <p style="color: var(--kj-text-2); font-size: var(--kj-fs-caption); margin-top: var(--kj-space-md)">${esc(d.note)}</p>
   </div>
 </section>
 `;
