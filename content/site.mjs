@@ -27,6 +27,9 @@ export const FACTS = {
   patents: '28',
   govRnd: '20',
   govRndAmount: '3.06',
+  // KR 표기 전용. "십억원"은 한국어에서 쓰지 않는 단위라 EN(govRndAmount+'B'=3.06B)과
+  // 별도로 억원 기준 값을 둔다. 3.06(십억) x 10 = 30.6(억). 3차 감사 W-9 지적 정정(2026-09-03)
+  govRndAmountEok: '30.6',
   euRnd: '2',
   overseasYears: '13+',
 };
@@ -35,8 +38,9 @@ export const PAGES = ['index', 'cases', 'system', 'then-now', 'about', 'notes'];
 
 // 결함 5 (케이스 개별 URL 부재, 2026-09-02 감사 지적) 대응. 케이스 1건당 1페이지
 // (/{lang}/cases/<slug>.html)를 build.mjs 가 여기서 만든다. 본문은 Phase 3 소관이라
-// 여기 있는 표본 1건은 draft: true 로 목록에서 빼고 noindex 를 붙인다 - 구조가 도는지
-// 확인하는 용도이지 실제 발행물이 아니다. Phase 3 는 draft 를 지우고 실제 항목을 채운다.
+// 여기 있는 표본 1건은 draft: true 로 둔다. build.mjs 는 draft 항목을 목록, 개별 페이지,
+// sitemap 세 곳 전부에서 뺀다(3차 감사 W-5 지적, 2026-09-03) - 라이브에는 아무 흔적도
+// 남기지 않고, 구조는 코드에 그대로 보존한다. Phase 3 는 draft 를 지우고 실제 항목을 채운다.
 export const CASES = {
   ko: [
     {
@@ -116,7 +120,7 @@ export const CONTENT = {
     },
 
     system: {
-      title: '실제 돌리는 시스템',
+      title: '시스템',
       desc: '지금 운용 중인 클로드코드 하네스, 에이전트 조직, 자동화 파이프라인 구성. 실측 2026-09-03 기준.',
       h1: '이 사이트도 이 시스템이 만들었습니다',
       lead: '말이 아니라 기계를 놓았습니다. 아래 그림은 지금 이 순간 돌아가는 구성이고, 구성이 바뀌면 이 페이지도 바뀝니다.',
@@ -167,7 +171,7 @@ export const CONTENT = {
         ['직원 10명에서 17명', '여러 시점의 내부 인사 기록에 남아 있습니다. 우리가 만든 자료가 아닙니다'],
         ['마케팅과 영업 5~6명', '2021년 조직도로 5명, 2023년 과제 대장으로 6명이 이름을 걸고 있었습니다'],
         ['업무 갈래 7개에서 9개', '상품기획, 마케팅, 영업배송, 고객서비스, 생산, 품질, 개발. 갈래마다 담당이 따로 있었습니다'],
-        ['과제 73건을 6명이 넉 달에', '한 사람이 평균 12.2건입니다. 그 대장의 소요시간 칸은 106행 중 101행이 비어 있고, 나머지 5행에도 소요시간 값은 없습니다.'],
+        ['과제 73건을 6명이 넉 달에', '한 사람이 평균 12.2건입니다. 담당이 배정된 73행 전부에 소요시간이 비어 있었습니다.'],
         ['같은 결재 문서를 12개월 연속', '금액도 인원도 거의 같은 서류를 매달 새로 만들었습니다.'],
         ['상세페이지 11번째 버전', '같은 페이지가 버전 11(V0.11)까지 갔습니다.'],
         ['파일 103,348건', '사내 아카이브 정리 종합요약(2026-07-14)과 2026-09-03 재실측에서 나온 숫자입니다.'],
@@ -208,7 +212,7 @@ export const CONTENT = {
         ['글로벌 ICT 경력', FACTS.ictYears + '년 (LG 18년 포함)'],
         ['CEO / C-Level', FACTS.ceoYears + '년, 창업 2회'],
         ['특허', FACTS.patents + '건 (등록 13, 출원 15)'],
-        ['정부 R&D', '약 ' + FACTS.govRnd + '건, 총 ' + FACTS.govRndAmount + '십억원 (Project Lead)'],
+        ['정부 R&D', '약 ' + FACTS.govRnd + '건, 총 ' + FACTS.govRndAmountEok + '억원 (Project Lead)'],
         ['EU R&D', FACTS.euRnd + '건 (Eureka, Horizon)'],
         ['글로벌 파트너십', 'Qualcomm, Google, Deutsche Telekom, TIM'],
         ['해외 주재', FACTS.overseasYears + '년 (이탈리아 9년, 중국 4년)'],
@@ -311,7 +315,7 @@ export const CONTENT = {
     },
 
     system: {
-      title: 'The System',
+      title: 'System',
       desc: 'The Claude Code harness, agent structure and automation pipelines currently in operation. Measured 2026-09-03.',
       h1: 'This site was built by the system on this page.',
       lead: 'Not claims, but the machine. What follows is running right now. When it changes, this page changes.',
@@ -362,7 +366,7 @@ export const CONTENT = {
         ['10 to 17 employees', 'Recorded across multiple points in internal HR records, not a file we created ourselves'],
         ['5 to 6 in marketing and sales', 'Five by the 2021 organization chart. Six by name on the 2023 task list'],
         ['7 to 9 functions', 'Product, marketing, sales and logistics, customer service, production, quality, development. Each had its own owner'],
-        ['73 tasks, 6 people, 4 months', 'About 12.2 tasks each. The "hours needed" column is empty on 101 of 106 rows; the other five have no time value either.'],
+        ['73 tasks, 6 people, 4 months', 'About 12.2 tasks each. Every one of the 73 rows with an owner assigned had an empty "hours needed" column.'],
         ['The same approval paper, 12 months running', 'Same amount, same headcount, rewritten from scratch every month.'],
         ['Version 11 of one product page', 'The same page reached version 11 (V0.11).'],
         ['103,348 files', 'The figure comes from the 2026-07-14 archive summary and the 2026-09-03 recount.'],

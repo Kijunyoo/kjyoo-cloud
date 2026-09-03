@@ -97,7 +97,11 @@ const EN_TEXT = {
   'tvn.then.era': 'THEN',
   'tvn.then.h1': 'Different People',
   'tvn.then.h2': 'for Each Area',
-  'tvn.then.sub': 'Past org chart. Sales and marketing: 4',
+  // W-4 (3차 감사 지적, 2026-09-03). KR 원문은 "영업 마케팅만 4명"으로 "만"(only)이 범위를
+  // 한정한다. 종전 EN "Sales and marketing: 4"에는 그 한정어가 없어 같은 페이지 표의
+  // "Five by the 2021 organization chart"(영업마케팅 4 + 디자인 1 = 5)와 숫자가 충돌해
+  // 읽혔다. "only"를 넣어 4가 영업마케팅 단독 수치임을 밝힌다.
+  'tvn.then.sub': 'Past org chart. Sales/Marketing only: 4',
   'tvn.then.r1.name': 'R&D',
   'tvn.then.r1.n': '6',
   'tvn.then.r2.name': 'Sales/Marketing',
@@ -599,9 +603,11 @@ Sitemap: https://${SITE.domain}/sitemap.xml
 
 // 13개 고정 경로 - PAGES(6) x 언어(2) = 12 + 루트 언어 리다이렉트 1.
 // 케이스 개별 페이지도 CASES 배열에 있는 그대로 추가한다(총괄 기획실 지시 2026-09-03 - 발행
-// 스킬이 넣을 주소가 sitemap 에서도 실재해야 한다). draft(구조 검증용 표본)도 넣는다 - 페이지
-// 자체의 <meta name="robots" content="noindex"> 가 검색 색인을 막으므로 sitemap 등재와
-// 충돌하지 않는다. 다른 언어에 같은 slug 가 있으면 그쪽을 hreflang 대체로 건다.
+// 스킬이 넣을 주소가 sitemap 에서도 실재해야 한다). draft(구조 검증용 표본)는 뺀다
+// (3차 감사 W-5 지적, 2026-09-03) - 공개 접근 가능 + sitemap 등재 + noindex 가 동시에
+// 걸려 있던 것이 결함이었다. 표본은 라이브에서 완전히 내리고, 실제 발행물이 sitemap 에
+// 오를 때부터 이 루프가 작동한다는 것으로 구조 증명을 대신한다. 다른 언어에 같은 slug 가
+// 있으면 그쪽을 hreflang 대체로 건다.
 function buildSitemap() {
   const langKeys = Object.keys(CONTENT);
   const urls = [];
@@ -620,7 +626,7 @@ function buildSitemap() {
 
   for (const langKey of langKeys) {
     const t = CONTENT[langKey];
-    for (const c of (CASES[langKey] || [])) {
+    for (const c of (CASES[langKey] || []).filter((c) => !c.draft)) {
       const loc = `https://${SITE.domain}${hrefCase(t.dir, c.slug)}`;
       const alt = langKeys
         .filter((lk) => (CASES[lk] || []).some((oc) => oc.slug === c.slug))
@@ -676,7 +682,11 @@ function build() {
     }
 
     // 결함 5 - 케이스 개별 URL. 목록(cases.html)과 별개로 케이스마다 1페이지를 낸다.
-    const cases = CASES[langKey] || [];
+    // draft(구조 검증용 표본)는 dist 에 파일 자체를 만들지 않는다 (3차 감사 W-5 지적,
+    // 2026-09-03) - 라이브에서 완전히 내리는 것이 방침이다. CASES 배열의 draft 항목은
+    // 코드에 그대로 남아 있으므로 Phase 3 가 draft 를 지우고 실제 케이스를 넣으면
+    // 이 루프가 그대로 페이지를 낸다.
+    const cases = (CASES[langKey] || []).filter((c) => !c.draft);
     if (cases.length) mkdirSync(join(DIST, t.dir, 'cases'), { recursive: true });
     for (const c of cases) {
       const body = pageCaseDetail(t, c);
