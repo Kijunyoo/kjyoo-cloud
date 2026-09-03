@@ -25,11 +25,155 @@ const esc = (s) => String(s)
 const href = (langDir, page) => `/${langDir}/${page === 'index' ? '' : page + '.html'}`;
 
 // 다이어그램 - 인라인 SVG. 정본은 다이어그램_주입지침_v0.1.md.
-// data-t 속성은 다국어 치환 지점 표시이며 이번 판은 치환하지 않고
-// 두 언어 페이지에 동일한(한국어) SVG를 그대로 넣는다. 새 영문 카피를
-// 만들지 않기 위한 결정이며 EN 페이지 다이어그램 번역은 별도 과업이다.
+// data-t 속성은 다국어 치환 지점 표시. KR 페이지는 원본 그대로 넣고,
+// EN 페이지는 빌드 시점에 아래 EN_TEXT/EN_A11Y 승인본(도해_영문세트_v0.1.md)으로
+// data-t 텍스트 노드와 title/desc 4곳을 치환한다. data-t 속성 자체는 지우지 않는다.
 const SVG_THE_SYSTEM = readFileSync(join(ROOT, 'assets/img/diagram-the-system.svg'), 'utf8');
 const SVG_THEN_NOW = readFileSync(join(ROOT, 'assets/img/diagram-then-vs-now.svg'), 'utf8');
+
+// title/desc (data-t 없음, id로 매칭)
+const EN_A11Y = {
+  kjdSysTitle: 'The System - how one instruction becomes one deliverable',
+  kjdSysDesc: 'One instruction goes to the Planning HQ, who splits it across six departments. Results pass an audit and come out as one deliverable. Below that, the harness, the skills and n8n automation run as standing infrastructure.',
+  kjdTvnTitle: 'Then vs Now - same work, different headcount',
+  kjdTvnDesc: 'The left panel is the organization from the February 2021 chart: six roles, fifteen people. Each dot is one person - six in R&D, four in sales and marketing, two overseas, and one each in CEO, business planning and design. The right panel is six department agents doing the same work today, with one person. The converging shape in the middle marks the shift from many to one.',
+};
+
+// data-t 키 -> EN 승인본. 문자열이면 한 줄 치환.
+// 넘침 처리(줄바꿈/textLength/글자크기 1단계 축소)는 실측 후 값으로 채운다(3절 순서).
+const EN_TEXT = {
+  'sys.band1': 'Work Flow',
+  'sys.in.title': 'One instruction',
+  'sys.in.sub': 'A person gives it',
+  'sys.chief.title': 'Chief of Staff',
+  'sys.chief.sub': 'Splits and assigns',
+  'sys.dept.tech': 'Tech',
+  'sys.dept.knowledge': 'Knowledge',
+  'sys.dept.creative': 'Creative',
+  'sys.dept.marketing': 'Marketing',
+  'sys.dept.business': 'Business',
+  'sys.dept.intelligence': 'Research',
+  'sys.dept.more': '+ Execution, Situation Room, Legal - 3 more',
+  'sys.audit.title': 'Audit',
+  'sys.audit.sub': 'Pass or fail',
+  'sys.out.title': 'One deliverable',
+  'sys.out.sub': 'A person checks it last',
+  'sys.band2': 'Always on',
+  'sys.card1.title': 'Harness',
+  'sys.card1.l1': 'Rules in one place',
+  'sys.card1.l2': 'Auto-checked at 6 points',
+  'sys.card2.title': '38 Skills',
+  'sys.card2.l1': 'Procedures for repeated work',
+  'sys.card2.l2': 'Never explained twice',
+  'sys.card3.title': 'n8n Automation',
+  'sys.card3.l1': 'Runs on schedule, no person',
+  'sys.card3.l2': 'Reads and writes directly',
+  'sys.source': 'Measured as of 2026-09-03. 11 agent definitions and 38 skills, counted directly. Nothing that does not exist was drawn.',
+
+  'tvn.then.era': 'THEN',
+  'tvn.then.h1': 'Different People',
+  'tvn.then.h2': 'for Each Area',
+  'tvn.then.sub': 'Past org chart. Sales and marketing: 4',
+  'tvn.then.r1.name': 'R&D',
+  'tvn.then.r1.n': '6',
+  'tvn.then.r2.name': 'Sales & Marketing',
+  'tvn.then.r2.n': '4',
+  'tvn.then.r3.name': 'Overseas',
+  'tvn.then.r3.n': '2',
+  'tvn.then.r4.name': 'CEO',
+  'tvn.then.r4.n': '1',
+  'tvn.then.r5.name': 'Planning',
+  'tvn.then.r5.n': '1',
+  'tvn.then.r6.name': 'Design',
+  'tvn.then.r6.n': '1',
+  'tvn.m1.label': 'Org size',
+  'tvn.m1.then': '10 to 17',
+  'tvn.m2.label': 'Marketing & sales',
+  'tvn.m2.then': '5 to 6',
+  'tvn.m3.label': 'Areas',
+  'tvn.m3.then': '7 to 9',
+  'tvn.now.era': 'NOW',
+  'tvn.now.h1': 'Same Areas,',
+  'tvn.now.h2': 'One Person',
+  'tvn.now.sub': 'Chief of staff splits it, audit verifies',
+  'tvn.dept.tech': 'Tech',
+  'tvn.dept.tech.n': 'Agent 1',
+  'tvn.dept.knowledge': 'Knowledge',
+  'tvn.dept.knowledge.n': 'Agent 1',
+  'tvn.dept.creative': 'Creative',
+  'tvn.dept.creative.n': 'Agent 1',
+  'tvn.dept.marketing': 'Marketing',
+  'tvn.dept.marketing.n': 'Agent 1',
+  'tvn.dept.business': 'Business',
+  'tvn.dept.business.n': 'Agent 1',
+  'tvn.dept.intelligence': 'Research',
+  'tvn.dept.intelligence.n': 'Agent 1',
+  'tvn.m1.label.now': 'Org size',
+  'tvn.m1.now': '1+11 agents',
+  'tvn.m2.label.now': 'Marketing & sales',
+  'tvn.m2.now': 'Agent 1',
+  'tvn.m3.label.now': 'Areas',
+  'tvn.m3.now': '6 depts',
+  'tvn.source': 'Source: internal HR and role records across multiple dates. Current figures from agent definition files, counted directly.',
+};
+
+const xmlesc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+// EN 넘침 처리. Chromium 151 실제 렌더 실측(measure_diagrams.py, search_treatment*.py)으로
+// 확정한 값만 채운다. 순서 - 1)줄바꿈(lines+y+dy) 2)textLength 압축(5% 이내) 3)글자크기 1단계 축소(fontSize).
+// 이 SVG 안에 이미 쓰인 값만 쓴다: system 16/19, then-now 16/23.
+// y 를 지정하면 <text> 의 원래 y 를 그 값으로 바꾼다(줄바꿈 시 2줄이 들어갈 자리를 만들기 위함).
+// 상자 좌표(rect)는 손대지 않았다 - 옮긴 것은 텍스트 자신의 y 뿐이다.
+const EN_OVERFLOW = {
+  // 상자 안(y108~204). 원래 y=176 그대로, dy=18 두 줄. 실측 bottom 196.02 <= box bottom 204, gap 1.88(안 겹침)
+  'sys.out.sub': { lines: ['A person', 'checks it last'], dy: 18 },
+  // 상자 없음(캡션). 카드 하단 492 아래, viewBox 하단 532 안쪽으로 y를 511로 올려 2줄 확보.
+  // 실측 top 496.89(카드하단+4.89) bottom 531.02(viewBox 532 안) gap 1.88
+  'sys.dept.more': { lines: ['+ Execution, Situation Room,', 'Legal - 3 more'], dy: 20 },
+  'sys.source': { lines: ['Measured as of 2026-09-03. 11 agent definitions and 38 skills,', 'counted directly. Nothing that does not exist was drawn.'], y: 511, dy: 18 },
+  'tvn.now.sub': { lines: ['Chief of staff splits it,', 'audit verifies'], dy: 20 },
+  // 패널 하단 520 아래, viewBox 하단 560 안쪽으로 y를 539로 올려 2줄 확보.
+  // 실측 top 524.89(패널하단+4.89) bottom 559.02(viewBox 560 안) gap 1.88
+  'tvn.source': { lines: ['Source: internal HR and role records across multiple dates,', 'documents (3 dates). Current figures from 11 agent definition files, counted directly.'], y: 539, dy: 18 },
+  // tvn.then.r2.name ("Sales & Marketing") - 미해결. 1)줄바꿈: 점 글리프 하단(219)과 인원수 텍스트
+  // 상단(약 251.89) 사이 여유가 32.89px 뿐인데 16px 글자 두 줄 최소 높이가 33.13px 이상이라
+  // 겹침 없이 못 들어간다(dy=16에서도 자체 겹침 gap=-1.13). 2)textLength 5% 압축: 필요 압축률이
+  // 7.1%라 5% 상한을 넘는다(5% 적용해도 폭 126.8 > 상자 124, 잔여 초과 약 2.8px). 3)글자크기 축소:
+  // then-now.svg 는 16/23px만 쓰고 t-lane은 이미 16px(최소)이라 더 낮출 값이 없다.
+  // 그대로 두고 총괄 기획실에 보고한다.
+};
+
+function injectEnSvg(raw, a11yMap, textMap, overflowMap) {
+  let out = raw;
+  out = out.replace(/(<title id="([^"]+)">)([^<]*)(<\/title>)/g, (m, pre, id, _c, post) =>
+    a11yMap[id] !== undefined ? pre + xmlesc(a11yMap[id]) + post : m);
+  out = out.replace(/(<desc id="([^"]+)">)([^<]*)(<\/desc>)/g, (m, pre, id, _c, post) =>
+    a11yMap[id] !== undefined ? pre + xmlesc(a11yMap[id]) + post : m);
+  out = out.replace(/<text([^>]*)\sdata-t="([^"]+)">([^<]*)<\/text>/g, (m, attrs, key) => {
+    if (textMap[key] === undefined) return m;
+    const ov = overflowMap[key];
+    if (ov && ov.lines) {
+      const xMatch = attrs.match(/\sx="([-\d.]+)"/);
+      const x = xMatch ? xMatch[1] : '0';
+      // 줄바꿈 시 2줄이 들어갈 자리를 만들기 위해 y를 지정값으로 교체(상자 좌표는 그대로, 텍스트 자신의 y만)
+      let outAttrs = attrs;
+      if (ov.y !== undefined) outAttrs = outAttrs.replace(/\sy="[-\d.]+"/, ` y="${ov.y}"`);
+      const tspans = ov.lines.map((line, i) =>
+        i === 0 ? xmlesc(line) : `<tspan x="${x}" dy="${ov.dy}">${xmlesc(line)}</tspan>`).join('');
+      return `<text${outAttrs} data-t="${key}">${tspans}</text>`;
+    }
+    if (ov && ov.textLength) {
+      return `<text${attrs} data-t="${key}" textLength="${ov.textLength}" lengthAdjust="spacingAndGlyphs">${xmlesc(textMap[key])}</text>`;
+    }
+    if (ov && ov.fontSize) {
+      return `<text${attrs} data-t="${key}" style="font-size:${ov.fontSize}px">${xmlesc(textMap[key])}</text>`;
+    }
+    return `<text${attrs} data-t="${key}">${xmlesc(textMap[key])}</text>`;
+  });
+  return out;
+}
+
+const svgForLang = (raw, lang) => (lang === 'en' ? injectEnSvg(raw, EN_A11Y, EN_TEXT, EN_OVERFLOW) : raw);
 
 // ---------- shell ----------
 
@@ -182,7 +326,7 @@ function pageSystem(t) {
     <h2>${esc(d.diaH)}</h2>
     <p style="color: var(--kj-text-2); margin: var(--kj-space-md) 0 var(--kj-space-lg); max-width: var(--kj-measure)">${esc(d.diaP)}</p>
     <div class="kjd-wrap" role="group" tabindex="0" aria-label="다이어그램. 가로로 스크롤할 수 있다">
-${SVG_THE_SYSTEM}
+${svgForLang(SVG_THE_SYSTEM, t.lang)}
     </div>
     <p class="sr-only">${esc(d.diaAlt)}</p>
     <p style="color: var(--kj-text-3); font-size: var(--kj-fs-caption); margin-top: var(--kj-space-md)">${esc(d.diaCaption)}</p>
@@ -231,7 +375,7 @@ function pageThenNow(t) {
     </div>
 
     <div class="kjd-wrap" role="group" tabindex="0" aria-label="다이어그램. 가로로 스크롤할 수 있다">
-${SVG_THEN_NOW}
+${svgForLang(SVG_THEN_NOW, t.lang)}
     </div>
 
     <h2 style="margin-top: var(--kj-space-3xl)">${esc(d.evidenceH)}</h2>
