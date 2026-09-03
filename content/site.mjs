@@ -114,7 +114,7 @@ export const CONTENT = {
 
     system: {
       title: '실제 돌리는 시스템',
-      desc: '지금 운용 중인 클로드코드 하네스, 에이전트 조직, 자동화 파이프라인 구성. 실측 2026-09-02 기준.',
+      desc: '지금 운용 중인 클로드코드 하네스, 에이전트 조직, 자동화 파이프라인 구성. 실측 2026-09-03 기준.',
       h1: '이 사이트도 이 시스템이 만들었습니다',
       lead: '말이 아니라 기계를 놓았습니다. 아래 그림은 지금 이 순간 돌아가는 구성이고, 구성이 바뀌면 이 페이지도 바뀝니다.',
 
@@ -306,7 +306,7 @@ export const CONTENT = {
 
     system: {
       title: 'The System',
-      desc: 'The Claude Code harness, agent structure and automation pipelines currently in operation. Measured 2026-09-02.',
+      desc: 'The Claude Code harness, agent structure and automation pipelines currently in operation. Measured 2026-09-03.',
       h1: 'This site was built by the system on this page.',
       lead: 'Not claims, but the machine. What follows is running right now. When it changes, this page changes.',
 

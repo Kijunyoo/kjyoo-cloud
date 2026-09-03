@@ -580,8 +580,11 @@ Allow: /
 Sitemap: https://${SITE.domain}/sitemap.xml
 `;
 
-// 13개 경로 - PAGES(6) x 언어(2) = 12 + 루트 언어 리다이렉트 1. 케이스 개별 페이지는
-// draft(구조 검증용 표본)뿐이라 아직 색인 대상에 넣지 않는다. 실제 케이스가 발행되면 여기 추가한다.
+// 13개 고정 경로 - PAGES(6) x 언어(2) = 12 + 루트 언어 리다이렉트 1.
+// 케이스 개별 페이지도 CASES 배열에 있는 그대로 추가한다(총괄 기획실 지시 2026-09-03 - 발행
+// 스킬이 넣을 주소가 sitemap 에서도 실재해야 한다). draft(구조 검증용 표본)도 넣는다 - 페이지
+// 자체의 <meta name="robots" content="noindex"> 가 검색 색인을 막으므로 sitemap 등재와
+// 충돌하지 않는다. 다른 언어에 같은 slug 가 있으면 그쪽을 hreflang 대체로 건다.
 function buildSitemap() {
   const langKeys = Object.keys(CONTENT);
   const urls = [];
@@ -597,6 +600,21 @@ function buildSitemap() {
     }
   }
   urls.push(`  <url>\n    <loc>https://${SITE.domain}/</loc>\n  </url>`);
+
+  for (const langKey of langKeys) {
+    const t = CONTENT[langKey];
+    for (const c of (CASES[langKey] || [])) {
+      const loc = `https://${SITE.domain}${hrefCase(t.dir, c.slug)}`;
+      const alt = langKeys
+        .filter((lk) => (CASES[lk] || []).some((oc) => oc.slug === c.slug))
+        .map((lk) => {
+          const tt = CONTENT[lk];
+          return `    <xhtml:link rel="alternate" hreflang="${tt.lang}" href="https://${SITE.domain}${hrefCase(tt.dir, c.slug)}"/>`;
+        }).join('\n');
+      urls.push(`  <url>\n    <loc>${loc}</loc>\n${alt}\n  </url>`);
+    }
+  }
+
   return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n${urls.join('\n')}\n</urlset>\n`;
 }
 
