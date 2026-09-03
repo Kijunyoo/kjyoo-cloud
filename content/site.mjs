@@ -169,7 +169,7 @@ export const CONTENT = {
       evidenceH: '그때 남은 자료가 곧 증거입니다',
       evidenceRows: [
         ['직원 10명에서 17명', '여러 시점의 내부 인사 기록에 남아 있습니다. 우리가 만든 자료가 아닙니다'],
-        ['마케팅과 영업 5~6명', '2021년 조직도로 5명, 2023년 과제 대장으로 6명이 이름을 걸고 있었습니다'],
+        ['마케팅과 영업 5~6명', '2021년 조직도로 5명입니다. 영업 마케팅 4명에 디자인 1명을 더한 값입니다. 2023년 과제 대장으로 6명이 이름을 걸고 있었습니다'],
         ['업무 갈래 7개에서 9개', '상품기획, 마케팅, 영업배송, 고객서비스, 생산, 품질, 개발. 갈래마다 담당이 따로 있었습니다'],
         ['과제 73건을 6명이 넉 달에', '한 사람이 평균 12.2건입니다. 담당이 배정된 73행 전부에 소요시간이 비어 있었습니다.'],
         ['같은 결재 문서를 12개월 연속', '금액도 인원도 거의 같은 서류를 매달 새로 만들었습니다.'],
@@ -364,7 +364,7 @@ export const CONTENT = {
       evidenceH: 'The records from that time are the evidence',
       evidenceRows: [
         ['10 to 17 employees', 'Recorded across multiple points in internal HR records, not a file we created ourselves'],
-        ['5 to 6 in marketing and sales', 'Five by the 2021 organization chart. Six by name on the 2023 task list'],
+        ['5 to 6 in marketing and sales', 'Five by the 2021 organization chart: four in sales and marketing plus one in design. Six by name on the 2023 task list'],
         ['7 to 9 functions', 'Product, marketing, sales and logistics, customer service, production, quality, development. Each had its own owner'],
         ['73 tasks, 6 people, 4 months', 'About 12.2 tasks each. Every one of the 73 rows with an owner assigned had an empty "hours needed" column.'],
         ['The same approval paper, 12 months running', 'Same amount, same headcount, rewritten from scratch every month.'],
