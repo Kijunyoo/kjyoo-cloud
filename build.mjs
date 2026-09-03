@@ -195,7 +195,15 @@ function injectEnSvg(raw, a11yMap, textMap, overflowMap) {
   return out;
 }
 
-const svgForLang = (raw, lang) => (lang === 'en' ? injectEnSvg(raw, EN_A11Y, EN_TEXT, EN_OVERFLOW) : raw);
+// D-7 (2026-09-03 2차 감사 지적, 치명). 원본 SVG 파일(assets/img/diagram-*.svg)의 XML 주석에는
+// 정본 파일명, 내부 경로, 조직 절차
+// 세부가 작업자용 지침으로 적혀 있다. 이 주석이 그대로 HTML 로 나가면 대외 페이지 소스에
+// 내부 자료가 노출된다. 원본 SVG 파일 자체는 고치지 않고(작업자용 지침이므로 유지),
+// HTML 에 인라인될 때만 주석을 제거한다.
+const stripXmlComments = (svg) => svg.replace(/<!--[\s\S]*?-->/g, '');
+
+const svgForLang = (raw, lang) =>
+  stripXmlComments(lang === 'en' ? injectEnSvg(raw, EN_A11Y, EN_TEXT, EN_OVERFLOW) : raw);
 
 // ---------- shell ----------
 
@@ -384,7 +392,7 @@ function pageSystem(t) {
 
     <h2>${esc(d.diaH)}</h2>
     <p style="color: var(--kj-text-2); margin: var(--kj-space-md) 0 var(--kj-space-lg); max-width: var(--kj-measure)">${esc(d.diaP)}</p>
-    <div class="kjd-wrap" role="group" tabindex="0" aria-label="다이어그램. 가로로 스크롤할 수 있다">
+    <div class="kjd-wrap" role="group" tabindex="0" aria-label="${esc(t.a11y.diagramScroll)}">
 ${svgForLang(SVG_THE_SYSTEM, t.lang)}
     </div>
     <p class="sr-only">${esc(d.diaAlt)}</p>
@@ -433,7 +441,7 @@ function pageThenNow(t) {
       <p>${esc(d.lead)}</p>
     </div>
 
-    <div class="kjd-wrap" role="group" tabindex="0" aria-label="다이어그램. 가로로 스크롤할 수 있다">
+    <div class="kjd-wrap" role="group" tabindex="0" aria-label="${esc(t.a11y.diagramScroll)}">
 ${svgForLang(SVG_THEN_NOW, t.lang)}
     </div>
 
@@ -469,6 +477,10 @@ function pageAbout(t) {
       </div>`).join('\n');
   const facts = d.factsRows.map(([k, v]) =>
     `        <tr><td><b>${esc(k)}</b></td><td>${esc(v)}</td></tr>`).join('\n');
+  // D-9 (2026-09-03 2차 감사 지적, 중대). content/site.mjs 의 about.nowH / about.nowP 는
+  // 정본에 있으나 이 함수가 렌더하지 않아 라이브에 "지금 하는 일" 절이 0건이었다.
+  // 카피는 이미 7-4 화법 기준으로 개정된 것이 정본에 들어 있으므로 문구를 새로 쓰지 않고 그대로 낸다.
+  const nowP = d.nowP.map((p) => `      <p>${esc(p)}</p>`).join('\n');
 
   return `<section class="band">
   <div class="shell">
@@ -489,6 +501,11 @@ ${tl}
 ${facts}
         </tbody>
       </table>
+    </div>
+
+    <h2 style="margin-top: var(--kj-space-3xl)">${esc(d.nowH)}</h2>
+    <div class="prose" style="margin-top: var(--kj-space-lg)">
+${nowP}
     </div>
 
     <h2 style="margin-top: var(--kj-space-3xl)">${esc(d.linksH)}</h2>
@@ -634,6 +651,16 @@ function build() {
   writeFileSync(join(DIST, ASSET_SITE_CSS.outRel), ASSET_SITE_CSS.buf);
   writeFileSync(join(DIST, ASSET_TOKENS_CSS.outRel), ASSET_TOKENS_CSS.buf);
   writeFileSync(join(DIST, ASSET_FAVICON.outRel), ASSET_FAVICON.buf);
+
+  // D-7 (2026-09-03 2차 감사 지적, 치명). diagram-the-system.svg / diagram-then-vs-now.svg 는
+  // build.mjs 가 파일 내용을 읽어 페이지 HTML 안에 직접 인라인한다(위 SVG_THE_SYSTEM/SVG_THEN_NOW,
+  // svgForLang 이 주석까지 제거해 내보낸다). 그런데 cpSync 가 assets/ 전체를 dist 로 그대로 복사하면서
+  // 원본 파일 사본이 /assets/img/diagram-*.svg 로도 그대로 라이브에 올라갔고, 이 사본은 주석이 살아
+  // 있어 실측 200 으로 직접 조회가 됐다(내부 경로, 조직명, 절차가 원문 그대로 노출). 이 두 파일은
+  // 어떤 HTML 도 URL 로 참조하지 않으므로(인라인 전용) dist 사본을 지운다. 원본 assets/ 파일은
+  // 그대로 둔다 - 작업자용 주석이 필요한 것은 원본이지 배포본이 아니다.
+  rmSync(join(DIST, 'assets/img/diagram-the-system.svg'), { force: true });
+  rmSync(join(DIST, 'assets/img/diagram-then-vs-now.svg'), { force: true });
 
   const written = [];
   for (const langKey of Object.keys(CONTENT)) {

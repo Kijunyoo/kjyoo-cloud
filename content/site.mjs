@@ -66,6 +66,9 @@ export const CONTENT = {
     dir: 'ko',
     other: { code: 'en', label: 'EN', dir: 'en' },
     selfLabel: 'KO',
+    a11y: {
+      diagramScroll: '다이어그램. 가로로 스크롤할 수 있다',
+    },
     nav: {
       index: '홈',
       cases: '케이스',
@@ -84,7 +87,7 @@ export const CONTENT = {
 
     index: {
       title: 'kjyoo.cloud',
-      desc: '마케팅 영업 5~6명이 하던 일을, 지금은 한 사람과 AI 오케스트레이션으로 돌립니다. 40년 ICT 경력 임원의 AI 전환 실증 기록.',
+      desc: '마케팅 영업 5~6명이 하던 일을, 지금은 한 사람과 AI 오케스트레이션으로 돌립니다. 40년 실무 경력 경영자의 AI 전환 실증 기록.',
       heroLead: '마케팅과 영업만 5~6명이 하던 일을',
       heroAccent: '지금은 한 사람과 AI가 돌립니다',
       heroBody: '40년간 개발, 제조, 영업, 마케팅을 직접 기획하고 실행했습니다. 지금은 그 조직이 하던 일을 클로드코드 오케스트레이션으로 대신합니다. 이 사이트는 그 과정을 있는 그대로 공개하는 기록입니다.',
@@ -106,7 +109,7 @@ export const CONTENT = {
       title: '케이스 스터디',
       desc: '실제 업무에서 나온 문제와, 그것을 AI 오케스트레이션으로 재설계한 과정. 2일에 한 번 발행합니다.',
       h1: '케이스 스터디',
-      lead: '성공 자랑이 아니라 실패를 시스템으로 제압한 과정을 씁니다. 문제를 진단하고, 파이프라인으로 재설계하고, 제언 한 줄로 닫습니다.',
+      lead: '성공 자랑이 아니라 실패를 시스템으로 제압한 과정을 씁니다. 무엇이 막혔는지 적고, 파이프라인으로 다시 짜고, 결과를 그대로 남깁니다.',
       tags: ['마케팅', '영업', '운영', 'MVP'],
       emptyTitle: '첫 케이스를 준비 중입니다',
       emptyBody: '소재는 매일 업무에서 채굴하고, 발행은 2일에 한 번 합니다. 첫 발행 전까지 이 자리는 비어 있습니다.',
@@ -164,7 +167,7 @@ export const CONTENT = {
         ['직원 10명에서 17명', '여러 시점의 내부 인사 기록에 남아 있습니다. 우리가 만든 자료가 아닙니다'],
         ['마케팅과 영업 5~6명', '2021년 조직도로 5명, 2023년 과제 대장으로 6명이 이름을 걸고 있었습니다'],
         ['업무 갈래 7개에서 9개', '상품기획, 마케팅, 영업배송, 고객서비스, 생산, 품질, 개발. 갈래마다 담당이 따로 있었습니다'],
-        ['과제 106건을 6명이 넉 달에', '한 사람이 평균 열여덟 건입니다. 그 대장의 소요시간 칸은 106줄 전부 비어 있습니다.'],
+        ['과제 73건을 6명이 넉 달에', '한 사람이 평균 12.2건입니다. 그 대장의 소요시간 칸은 106행 중 101행이 비어 있고, 나머지 5행에도 소요시간 값은 없습니다.'],
         ['같은 결재 문서를 12개월 연속', '금액도 인원도 거의 같은 서류를 매달 새로 만들었습니다.'],
         ['상세페이지 11번째 버전', '같은 페이지가 버전 11(V0.11)까지 갔습니다.'],
         ['파일 103,348건', '사내 아카이브 정리 종합요약(2026-07-14)과 2026-09-03 재실측에서 나온 숫자입니다.'],
@@ -173,7 +176,7 @@ export const CONTENT = {
       anchorH: '대책 칸이 비어 있던 한 줄',
       anchorP: [
         '2021년에 우리 회사 사람들이 업무가 늦어지는 원인을 여덟 가지로 적었습니다. 그리고 일곱 가지에는 대책을 달았습니다. 담당을 정하고, 늦으면 알림이 가게 하고, 마감 이틀 전에 미리 보고하게 하는 식이었습니다.',
-        '여덟 번째 원인에는 대책이 없습니다. 그 원인은 "업무 Loading 과다로 인한 지연", 쉽게 말해 일이 너무 많아서 늦는다는 것이었습니다.',
+        '여덟 번째 원인에는 대책이 없습니다. 그 원인은 "업무 Loading이 많아서 처리가 지연", 쉽게 말해 일이 너무 많아서 늦는다는 것이었습니다.',
         '대책을 못 적은 이유는 간단합니다. 답이 "사람을 더 뽑는다" 하나뿐이었기 때문입니다. 알림은 늦는다는 것을 알려줄 뿐 일을 대신해 주지 않습니다. 담당을 정해도 그 사람의 하루는 24시간입니다.',
         '그때는 사람을 늘리지 않고 처리량을 늘리는 방법이 없었습니다. 지금 저는 나머지 일곱 가지가 아니라 바로 그 하나에 답하고 있습니다.',
       ],
@@ -258,6 +261,9 @@ export const CONTENT = {
     dir: 'en',
     other: { code: 'ko', label: 'KO', dir: 'ko' },
     selfLabel: 'EN',
+    a11y: {
+      diagramScroll: 'Diagram. Can be scrolled horizontally.',
+    },
     nav: {
       index: 'Home',
       cases: 'Cases',
@@ -276,7 +282,7 @@ export const CONTENT = {
 
     index: {
       title: 'kjyoo.cloud',
-      desc: 'Work that took a team of five to six in marketing and sales now runs with one person and AI orchestration. A record of one executive turning 40 years of ICT experience into an AI operation.',
+      desc: 'Work that took a team of five to six in marketing and sales now runs with one person and AI orchestration. A record of one executive turning 40 years of hands on experience into an AI operation.',
       heroLead: 'Work that took five to six people',
       heroAccent: 'now runs with one person and AI',
       heroBody: 'For 40 years I planned and ran development, manufacturing, sales and marketing myself. Today an orchestration of AI agents does what that organization used to do. This site is the record, published as it happens.',
@@ -298,7 +304,7 @@ export const CONTENT = {
       title: 'Case Studies',
       desc: 'Real problems from real work, and how each was redesigned as an AI orchestration pipeline. Published every second day.',
       h1: 'Case Studies',
-      lead: 'Not victory laps. Each case diagnoses a real failure, rebuilds it as a pipeline, and closes with the one line only a senior operator can offer.',
+      lead: 'Not victory laps. Each case writes what got stuck, rebuilds it as a pipeline, and leaves the result as it is.',
       tags: ['Marketing', 'Sales', 'Operations', 'MVP'],
       emptyTitle: 'The first case is in preparation',
       emptyBody: 'Material is mined from daily work; publishing runs every second day. This space stays empty until the first case ships.',
@@ -356,7 +362,7 @@ export const CONTENT = {
         ['10 to 17 employees', 'Recorded across multiple points in internal HR records, not a file we created ourselves'],
         ['5 to 6 in marketing and sales', 'Five by the 2021 organization chart. Six by name on the 2023 task list'],
         ['7 to 9 functions', 'Product, marketing, sales and logistics, customer service, production, quality, development. Each had its own owner'],
-        ['106 tasks, 6 people, 4 months', 'About eighteen tasks each. The "hours needed" column is empty on all 106 rows.'],
+        ['73 tasks, 6 people, 4 months', 'About 12.2 tasks each. The "hours needed" column is empty on 101 of 106 rows; the other five have no time value either.'],
         ['The same approval paper, 12 months running', 'Same amount, same headcount, rewritten from scratch every month.'],
         ['Version 11 of one product page', 'The same page reached version 11 (V0.11).'],
         ['103,348 files', 'The figure comes from the 2026-07-14 archive summary and the 2026-09-03 recount.'],
