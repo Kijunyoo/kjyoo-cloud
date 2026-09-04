@@ -150,11 +150,11 @@ const EN_TEXT = {
   'tvn.dept.intelligence': 'Research',
   'tvn.dept.intelligence.n': 'Agent 1',
   'tvn.m1.label.now': 'Org size',
-  'tvn.m1.now': 'Me + about 10 agents',
+  'tvn.m1.now': '1 person + agents',
   'tvn.m2.label.now': 'Marketing & sales',
   'tvn.m2.now': 'Agent 1',
   'tvn.m3.label.now': 'Areas',
-  'tvn.m3.now': '6 depts',
+  'tvn.m3.now': '6 areas',
 };
 
 const xmlesc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');

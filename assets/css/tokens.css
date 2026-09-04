@@ -178,7 +178,8 @@
   --kj-font: "Nanum Gothic", "Noto Sans KR", -apple-system,
              BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 
-  --kj-fs-display: 56px;   /* Hero 전용 */
+  --kj-fs-display: 44px;   /* Hero 전용. KJ 지시 A-1 (2026-09-04) 56 -> 44 축소.
+                              페이지 제목 37px 보다 크게 두어 위계는 유지한다 */
   --kj-fs-title:   37px;   /* 페이지 제목 (28pt 변환) */
   --kj-fs-heading: 23px;   /* 섹션 헤딩 (17pt 변환) */
   --kj-fs-body:    19px;   /* 본문 (장문 가독성 도출값) */
@@ -198,7 +199,7 @@
 /* 모바일 축소 */
 @media (max-width: 640px) {
   :root {
-    --kj-fs-display: 37px;
+    --kj-fs-display: 33px;
     --kj-fs-title:   28px;
     --kj-fs-heading: 21px;
     --kj-fs-body:    18px;

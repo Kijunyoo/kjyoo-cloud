@@ -113,25 +113,37 @@ h3 { font-size: var(--kj-fs-heading); line-height: var(--kj-lh-title); }
 }
 
 /* ---------- hero ---------- */
+/* KJ 지시 A-1 (2026-09-04) - 히어로가 5~6줄로 늘어져 산만했다. 카피를 줄이고
+   글자 크기를 토큰에서 한 단 내렸으며(56 -> 44), 폭을 20ch 에서 24ch 로 넓혀
+   어절이 덜 끊기게 했다. 데스크톱 2~3줄이 목표다. */
 .hero { padding: var(--kj-space-3xl) 0 var(--kj-space-2xl); }
 .hero h1 {
   font-size: var(--kj-fs-display); line-height: var(--kj-lh-tight);
-  letter-spacing: -0.025em; max-width: 20ch;
+  letter-spacing: -0.025em; max-width: 36ch;
 }
+/* ch 는 숫자 0 의 폭이라 한글은 한 글자가 약 2ch 를 먹는다.
+   같은 24ch 라도 한국어는 12자, 영어는 24자가 되어 영문만 줄이 늘어졌다.
+   실측 기준으로 언어별 폭을 따로 준다. */
+html[lang="en"] .hero h1 { max-width: 44ch; }
 .hero h1 em { font-style: normal; color: var(--kj-accent); }
 .hero p { margin: var(--kj-space-lg) 0 0; color: var(--kj-text-2); max-width: var(--kj-measure); }
 .hero-actions { display: flex; gap: var(--kj-space-md); margin-top: var(--kj-space-xl); flex-wrap: wrap; }
 
 /* ---------- stat strip ---------- */
+/* KJ 지시 A-2 (2026-09-04) - 한 칸만 두 줄로 접혀 카드 높이와 기준선이 어긋났다.
+   수치 문구를 짧게 맞추고, 접힘이 다시 생기지 않도록 nowrap 을 건다.
+   중제목과 소제목을 모두 중앙정렬로 통일한다. */
 .stats {
   display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   gap: var(--kj-space-lg); margin-top: var(--kj-space-3xl);
   padding-top: var(--kj-space-xl); border-top: 1px solid var(--kj-divider);
 }
-.stat { display: flex; flex-direction: column; gap: var(--kj-space-xs); }
+.stat { display: flex; flex-direction: column; gap: var(--kj-space-xs);
+        align-items: center; text-align: center; }
 .stat b {
   font-size: var(--kj-fs-title); font-weight: var(--kj-fw-bold);
   line-height: 1; color: var(--kj-accent); font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
 .stat span { font-size: var(--kj-fs-caption); color: var(--kj-text-2); }
 

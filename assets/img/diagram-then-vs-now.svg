@@ -158,12 +158,12 @@
 <line class="rule" x1="580" y1="392" x2="1000" y2="392"/>
 
 <text class="t-metric" x="580" y="424" data-t="tvn.m1.label.now">조직 규모</text>
-<text class="t-val" x="1000" y="424" text-anchor="end" data-t="tvn.m1.now">나 + 에이전트 10여</text>
+<text class="t-val" x="1000" y="424" text-anchor="end" data-t="tvn.m1.now">1명 + 에이전트</text>
 
 <text class="t-metric" x="580" y="456" data-t="tvn.m2.label.now">마케팅과 영업</text>
-<text class="t-num" x="1000" y="456" text-anchor="end" data-t="tvn.m2.now">에이전트 1</text>
+<text class="t-val" x="1000" y="456" text-anchor="end" data-t="tvn.m2.now">에이전트 1</text>
 
 <text class="t-metric" x="580" y="488" data-t="tvn.m3.label.now">업무 갈래</text>
-<text class="t-num" x="1000" y="488" text-anchor="end" data-t="tvn.m3.now">부문 6갈래</text>
+<text class="t-val" x="1000" y="488" text-anchor="end" data-t="tvn.m3.now">6갈래</text>
 
 </svg>
