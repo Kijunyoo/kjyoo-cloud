@@ -58,18 +58,18 @@ const SVG_THEN_NOW = readFileSync(join(ROOT, 'assets/img/diagram-then-vs-now.svg
 // title/desc (data-t 없음, id로 매칭)
 const EN_A11Y = {
   kjdSysTitle: 'The System - how one instruction becomes one deliverable',
-  kjdSysDesc: 'One instruction goes to the Planning HQ, who splits it across six departments. Results pass an audit and come out as one deliverable. Below that, the harness, the skills and n8n automation run as standing infrastructure.',
+  kjdSysDesc: 'One instruction goes to the Planning HQ, who splits it across six departments. Results pass the audit team and come out as one deliverable.',
   kjdTvnTitle: 'Then vs Now - same work, different headcount',
-  kjdTvnDesc: 'The left panel is the organization from the February 2021 chart: six roles, fifteen people. Each dot is one person - six in R&D, four in sales and marketing, two overseas, and one each in CEO, business planning and design. The right panel is six department agents doing the same work today, with one person. The converging shape in the middle marks the shift from many to one.',
+  kjdTvnDesc: 'The left panel is the past organization: six roles, nineteen people. Each dot is one person - six in R&D, four in sales and marketing, four overseas, three in business planning, and one each in CEO and design. The right panel is six department agents doing the same work today, with one person. The converging shape in the middle marks the shift from many to one.',
 };
 
 // data-t 키 -> EN 승인본. 문자열이면 한 줄 치환.
 // 넘침 처리(줄바꿈/textLength/글자크기 1단계 축소)는 실측 후 값으로 채운다(3절 순서).
 const EN_TEXT = {
-  'sys.band1': 'Work Flow',
+  'sys.band1': 'Instruction to Deliverable',
   'sys.in.title': 'One instruction',
   'sys.in.sub': 'A person gives it',
-  'sys.chief.title': 'Chief of Staff',
+  'sys.chief.title': 'Planning HQ',
   'sys.chief.sub': 'Splits and assigns',
   'sys.dept.tech': 'Tech',
   'sys.dept.knowledge': 'Knowledge',
@@ -78,21 +78,10 @@ const EN_TEXT = {
   'sys.dept.business': 'Business',
   'sys.dept.intelligence': 'Research',
   'sys.dept.more': '+ Execution, Situation Room, Legal - 3 more',
-  'sys.audit.title': 'Audit',
+  'sys.audit.title': 'Audit Team',
   'sys.audit.sub': 'Pass or fail',
   'sys.out.title': 'One deliverable',
   'sys.out.sub': 'A person checks it last',
-  'sys.band2': 'Always on',
-  'sys.card1.title': 'Harness',
-  'sys.card1.l1': 'Rules in one place',
-  'sys.card1.l2': 'Auto-checked at 6 points',
-  'sys.card2.title': '38 Skills',
-  'sys.card2.l1': 'Procedures for repeated work',
-  'sys.card2.l2': 'Never explained twice',
-  'sys.card3.title': 'n8n Automation',
-  'sys.card3.l1': 'Runs on schedule, no person',
-  'sys.card3.l2': 'Reads and writes directly',
-  'sys.source': 'Measured as of 2026-09-03. 11 agent definitions and 38 skills, counted directly. Nothing that does not exist was drawn.',
 
   'tvn.then.era': 'THEN',
   'tvn.then.h1': 'Different People',
@@ -107,15 +96,15 @@ const EN_TEXT = {
   'tvn.then.r2.name': 'Sales/Marketing',
   'tvn.then.r2.n': '4',
   'tvn.then.r3.name': 'Overseas',
-  'tvn.then.r3.n': '2',
+  'tvn.then.r3.n': '4',
   'tvn.then.r4.name': 'CEO',
   'tvn.then.r4.n': '1',
   'tvn.then.r5.name': 'Planning',
-  'tvn.then.r5.n': '1',
+  'tvn.then.r5.n': '3',
   'tvn.then.r6.name': 'Design',
   'tvn.then.r6.n': '1',
   'tvn.m1.label': 'Org size',
-  'tvn.m1.then': '10 to 17',
+  'tvn.m1.then': 'About 20',
   'tvn.m2.label': 'Marketing & sales',
   'tvn.m2.then': '5 to 6',
   'tvn.m3.label': 'Areas',
@@ -123,7 +112,7 @@ const EN_TEXT = {
   'tvn.now.era': 'NOW',
   'tvn.now.h1': 'Same Areas,',
   'tvn.now.h2': 'One Person',
-  'tvn.now.sub': 'Chief of staff splits it, audit verifies',
+  'tvn.now.sub': 'Planning HQ splits it, audit team verifies',
   'tvn.dept.tech': 'Tech',
   'tvn.dept.tech.n': 'Agent 1',
   'tvn.dept.knowledge': 'Knowledge',
@@ -137,12 +126,11 @@ const EN_TEXT = {
   'tvn.dept.intelligence': 'Research',
   'tvn.dept.intelligence.n': 'Agent 1',
   'tvn.m1.label.now': 'Org size',
-  'tvn.m1.now': '1+11 agents',
+  'tvn.m1.now': 'Me + about 10 agents',
   'tvn.m2.label.now': 'Marketing & sales',
   'tvn.m2.now': 'Agent 1',
   'tvn.m3.label.now': 'Areas',
   'tvn.m3.now': '6 depts',
-  'tvn.source': 'Source: internal HR and role records across multiple dates. Current figures from agent definition files, counted directly.',
 };
 
 const xmlesc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -158,11 +146,7 @@ const EN_OVERFLOW = {
   // 상자 없음(캡션). 카드 하단 492 아래, viewBox 하단 532 안쪽으로 y를 511로 올려 2줄 확보.
   // 실측 top 496.89(카드하단+4.89) bottom 531.02(viewBox 532 안) gap 1.88
   'sys.dept.more': { lines: ['+ Execution, Situation Room,', 'Legal - 3 more'], dy: 20 },
-  'sys.source': { lines: ['Measured as of 2026-09-03. 11 agent definitions and 38 skills,', 'counted directly. Nothing that does not exist was drawn.'], y: 511, dy: 18 },
-  'tvn.now.sub': { lines: ['Chief of staff splits it,', 'audit verifies'], dy: 20 },
-  // 패널 하단 520 아래, viewBox 하단 560 안쪽으로 y를 539로 올려 2줄 확보.
-  // 실측 top 524.89(패널하단+4.89) bottom 559.02(viewBox 560 안) gap 1.88
-  'tvn.source': { lines: ['Source: internal HR and role records across multiple dates,', 'documents (3 dates). Current figures from 11 agent definition files, counted directly.'], y: 539, dy: 18 },
+  'tvn.now.sub': { lines: ['Planning HQ splits it,', 'audit team verifies'], dy: 20 },
   // tvn.then.r2.name - 해결 (2026-09-03, 감사 지적분 처리). "Sales & Marketing"(폭 133.56,
   // 상자 124 대비 9.56 초과, 7.2%)을 "Sales/Marketing"으로 축약해 줄바꿈이나 압축 없이 해결했다.
   // Chromium 152 헤드리스 렌더 실측(Nanum Gothic 700 16px, 폰트 로드 확인 후 getBBox) - 폭 118.97,
@@ -380,12 +364,10 @@ ${bodyP}
 
 function pageSystem(t) {
   const d = t.system;
-  const nodes = d.nodes.map((n, i) =>
-    `        <div class="node${i === 0 ? ' node--human' : ''}"><b>${esc(n.b)}</b><small>${esc(n.s)}</small></div>`).join('\n');
-  const rows = d.stackRows.map(([k, v]) =>
-    `        <tr><td><b>${esc(k)}</b></td><td>${esc(v)}</td></tr>`).join('\n');
-  const readRows = d.readRows.map(([k, v]) =>
-    `        <tr><td><b>${esc(k)}</b></td><td>${esc(v)}</td></tr>`).join('\n');
+  // 개편 7항(2026-09-04) - readRows/pipelineH.../stackRows/note 렌더는 삭제했다. 대신
+  // 6항의 liveStats 를 index.stats 와 동일한 카드 패턴으로 낸다(보고서형 표로 되돌리지 않는다).
+  const liveStats = d.liveStats.map((s) =>
+    `      <div class="stat"><b>${esc(s.n)}</b><span>${esc(s.l)}</span></div>`).join('\n');
 
   return `<section class="band">
   <div class="shell">
@@ -400,32 +382,12 @@ function pageSystem(t) {
 ${svgForLang(SVG_THE_SYSTEM, t.lang)}
     </div>
     <p class="sr-only">${esc(d.diaAlt)}</p>
-    <p style="color: var(--kj-text-2); font-size: var(--kj-fs-caption); margin-top: var(--kj-space-md)">${esc(d.diaCaption)}</p>
 
-    <h2 style="margin-top: var(--kj-space-3xl)">${esc(d.readH)}</h2>
-    <div class="tablewrap" style="margin-top: var(--kj-space-lg)">
-      <table>
-        <tbody>
-${readRows}
-        </tbody>
-      </table>
+    <h2 style="margin-top: var(--kj-space-3xl)">${esc(d.liveH)}</h2>
+    <p style="color: var(--kj-text-2); margin: var(--kj-space-md) 0 var(--kj-space-lg); max-width: var(--kj-measure)">${esc(d.liveP)}</p>
+    <div class="stats">
+${liveStats}
     </div>
-
-    <h2 style="margin-top: var(--kj-space-3xl)">${esc(d.pipelineH)}</h2>
-    <p style="color: var(--kj-text-2); margin: var(--kj-space-md) 0 var(--kj-space-lg); max-width: var(--kj-measure)">${esc(d.pipelineP)}</p>
-    <div class="pipeline" style="max-width: 560px">
-${nodes}
-    </div>
-
-    <h2 style="margin-top: var(--kj-space-3xl)">${esc(d.stackH)}</h2>
-    <div class="tablewrap" style="margin-top: var(--kj-space-lg)">
-      <table>
-        <tbody>
-${rows}
-        </tbody>
-      </table>
-    </div>
-    <p style="color: var(--kj-text-2); font-size: var(--kj-fs-caption); margin-top: var(--kj-space-md)">${esc(d.note)}</p>
   </div>
 </section>
 `;
@@ -433,8 +395,7 @@ ${rows}
 
 function pageThenNow(t) {
   const d = t['then-now'];
-  const evidenceRows = d.evidenceRows.map(([k, v]) =>
-    `        <tr><td><b>${esc(k)}</b></td><td>${esc(v)}</td></tr>`).join('\n');
+  const evidenceP = d.evidenceP.map((p) => `      <p>${esc(p)}</p>`).join('\n');
   const anchorP = d.anchorP.map((p) => `    <p>${esc(p)}</p>`).join('\n');
   const closeP = d.closeP.map((p) => `    <p>${esc(p)}</p>`).join('\n');
 
@@ -450,12 +411,8 @@ ${svgForLang(SVG_THEN_NOW, t.lang)}
     </div>
 
     <h2 style="margin-top: var(--kj-space-3xl)">${esc(d.evidenceH)}</h2>
-    <div class="tablewrap" style="margin-top: var(--kj-space-lg)">
-      <table>
-        <tbody>
-${evidenceRows}
-        </tbody>
-      </table>
+    <div class="prose" style="margin-top: var(--kj-space-lg)">
+${evidenceP}
     </div>
 
     <h2 style="margin-top: var(--kj-space-3xl)">${esc(d.anchorH)}</h2>
@@ -474,16 +431,10 @@ ${closeP}
 
 function pageAbout(t) {
   const d = t.about;
-  const tl = d.timeline.map((r) =>
-    `      <div class="tl-row">
-        <div class="tl-when">${esc(r.when)}</div>
-        <div class="tl-what"><b>${esc(r.b)}</b><small>${esc(r.s)}</small></div>
-      </div>`).join('\n');
-  const facts = d.factsRows.map(([k, v]) =>
-    `        <tr><td><b>${esc(k)}</b></td><td>${esc(v)}</td></tr>`).join('\n');
-  // D-9 (2026-09-03 2차 감사 지적, 중대). content/site.mjs 의 about.nowH / about.nowP 는
-  // 정본에 있으나 이 함수가 렌더하지 않아 라이브에 "지금 하는 일" 절이 0건이었다.
-  // 카피는 이미 7-4 화법 기준으로 개정된 것이 정본에 들어 있으므로 문구를 새로 쓰지 않고 그대로 낸다.
+  // 개편 10항/11항(2026-09-04) - timeline(7행)/factsRows(7행) 표를 지우고 서사 산문으로 바꿨다.
+  // originP = 40년 기술 연륜 도입부, careerP = 경력 압축(3줄), nowP = 지금 하는 일(기존 유지).
+  const originP = d.originP.map((p) => `      <p>${esc(p)}</p>`).join('\n');
+  const careerP = d.careerP.map((p) => `      <p>${esc(p)}</p>`).join('\n');
   const nowP = d.nowP.map((p) => `      <p>${esc(p)}</p>`).join('\n');
 
   return `<section class="band">
@@ -493,18 +444,14 @@ function pageAbout(t) {
       <p>${esc(d.lead)}</p>
     </div>
 
-    <h2>${esc(d.timelineH)}</h2>
-    <div class="timeline" style="margin-top: var(--kj-space-lg)">
-${tl}
+    <h2>${esc(d.originH)}</h2>
+    <div class="prose" style="margin-top: var(--kj-space-lg)">
+${originP}
     </div>
 
-    <h2 style="margin-top: var(--kj-space-3xl)">${esc(d.factsH)}</h2>
-    <div class="tablewrap" style="margin-top: var(--kj-space-lg)">
-      <table>
-        <tbody>
-${facts}
-        </tbody>
-      </table>
+    <h2 style="margin-top: var(--kj-space-3xl)">${esc(d.careerH)}</h2>
+    <div class="prose" style="margin-top: var(--kj-space-lg)">
+${careerP}
     </div>
 
     <h2 style="margin-top: var(--kj-space-3xl)">${esc(d.nowH)}</h2>
@@ -522,48 +469,9 @@ ${nowP}
 `;
 }
 
-function pageNotes(t) {
-  const d = t.notes;
-  const didP = d.didP.map((p) => `      <p>${esc(p)}</p>`).join('\n');
-  const learnedP = d.learnedP.map((p) => `      <p>${esc(p)}</p>`).join('\n');
-  const areas = d.areas.map(([k, v]) =>
-    `        <tr><td><b>${esc(k)}</b></td><td>${esc(v)}</td></tr>`).join('\n');
-
-  return `<section class="band">
-  <div class="shell">
-    <div class="page-head">
-      <h1>${esc(d.h1)}</h1>
-      <p>${esc(d.lead)}</p>
-    </div>
-
-    <h2>${esc(d.didH)}</h2>
-    <div class="prose" style="margin-top: var(--kj-space-lg)">
-${didP}
-    </div>
-
-    <h2 style="margin-top: var(--kj-space-3xl)">${esc(d.learnedH)}</h2>
-    <div class="prose" style="margin-top: var(--kj-space-lg)">
-${learnedP}
-    </div>
-
-    <h2 style="margin-top: var(--kj-space-3xl)">${esc(d.areasH)}</h2>
-    <div class="tablewrap" style="margin-top: var(--kj-space-lg)">
-      <table>
-        <tbody>
-${areas}
-        </tbody>
-      </table>
-    </div>
-
-    <h2 style="margin-top: var(--kj-space-3xl)">${esc(d.linksH)}</h2>
-    <div class="hero-actions" style="margin-top: var(--kj-space-lg)">
-      <a class="btn btn--ghost" href="${SITE.linkedin}">LinkedIn</a>
-      <a class="btn btn--ghost" href="${SITE.github}">GitHub</a>
-    </div>
-  </div>
-</section>
-`;
-}
+// pageNotes 는 2026-09-04 개편(총괄 기획실 결정)으로 삭제했다. notes(일지) 페이지는
+// cases 로 통합됐고 PAGES 배열에서도 빠졌다. 구 URL /{lang}/notes.html 은
+// build() 안의 리다이렉트 스텁이 처리한다(sitemap 미등재).
 
 const RENDER = {
   index: pageIndex,
@@ -571,7 +479,6 @@ const RENDER = {
   system: pageSystem,
   'then-now': pageThenNow,
   about: pageAbout,
-  notes: pageNotes,
 };
 
 // ---------- root language redirect ----------
@@ -595,7 +502,15 @@ const ROOT_REDIRECT = `<!doctype html>
 
 // ---------- robots.txt / sitemap.xml (W-3, 2026-09-02 감사 지적) ----------
 
-const ROBOTS_TXT = `User-agent: *
+// 이견 5 (2026-09-04 감사 지적) - 시험 주소는 검색 크롤러를 막는다. 본 사이트 빌드
+// (플래그 없음)는 Allow: / 그대로 두고, `node build.mjs --preview` 로 부를 때만
+// Disallow: / 를 낸다. deploy.mjs --preview 가 이 플래그를 넘긴다.
+const IS_PREVIEW_BUILD = process.argv.includes('--preview');
+const ROBOTS_TXT = IS_PREVIEW_BUILD
+  ? `User-agent: *
+Disallow: /
+`
+  : `User-agent: *
 Allow: /
 
 Sitemap: https://${SITE.domain}/sitemap.xml
@@ -705,6 +620,31 @@ function build() {
 
   writeFileSync(join(DIST, 'index.html'), ROOT_REDIRECT, 'utf8');
   written.push('index.html');
+
+  // 구 /{lang}/notes.html 리다이렉트 스텁 (총괄 기획실 결정 2026-09-04). notes(일지) 페이지가
+  // cases 로 통합되면서 PAGES 에서 빠졌다. 라이브 운영 중 사이트라 외부 링크가 있을 수 있어
+  // 404 로 두지 않고 cases 로 넘긴다. ROOT_REDIRECT 와 같은 방식(meta refresh + canonical)을
+  // 언어별로 재사용한다. sitemap.xml 에는 올리지 않는다(지시서 3절 4번).
+  for (const langKey of Object.keys(CONTENT)) {
+    const t = CONTENT[langKey];
+    const target = href(t.dir, 'cases');
+    const stub = `<!doctype html>
+<html lang="${t.lang}">
+<head>
+<meta charset="utf-8">
+<title>${esc(t.cases.title)} - ${SITE.domain}</title>
+<meta name="robots" content="noindex">
+<link rel="canonical" href="https://${SITE.domain}${target}">
+<meta http-equiv="refresh" content="0; url=${target}">
+</head>
+<body>
+<p><a href="${target}">${esc(t.cases.title)}</a></p>
+</body>
+</html>
+`;
+    writeFileSync(join(DIST, t.dir, 'notes.html'), stub, 'utf8');
+    written.push(`${t.dir}/notes.html (redirect stub, not in sitemap)`);
+  }
 
   writeFileSync(join(DIST, 'robots.txt'), ROBOTS_TXT, 'utf8');
   written.push('robots.txt');

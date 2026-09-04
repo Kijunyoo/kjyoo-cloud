@@ -1,10 +1,15 @@
 // ============================================================
 // kjyoo.cloud - 배포기
-// v0.1 (2026-09-02)
+// v0.2 (2026-09-04 --preview 추가)
 //
 // 외부 의존성 없음. Node 표준 모듈과 시스템 ssh/scp 만 쓴다.
-//   node deploy.mjs         -> 빌드 + 업로드 + 전환 + 검증
-//   node deploy.mjs --check -> 업로드 없이 라이브 검증만
+//   node deploy.mjs           -> 빌드 + 업로드 + 전환 + 검증 (본 사이트)
+//   node deploy.mjs --check   -> 업로드 없이 본 사이트 라이브 검증만
+//   node deploy.mjs --preview       -> 빌드 + 업로드 + 전환 + 검증 (시험 주소, 별도 릴리스 경로)
+//   node deploy.mjs --preview --check -> 업로드 없이 시험 주소 검증만
+//
+// --preview 는 PREVIEW_ROOT/PREVIEW_NAME/PREVIEW_VERIFY_BASE(+선택 PREVIEW_RELOAD_CMD)를 쓴다.
+// 본 사이트 동작(DEPLOY_* 키, 플래그 없는 실행)은 이 파일에서 바꾸지 않았다.
 //
 // 접속 정보는 저장소에 두지 않는다. 같은 폴더의 deploy.env 에서 읽는다
 // (deploy.env 는 .gitignore 대상. deploy.env.example 참조).
@@ -23,6 +28,7 @@ import { spawnSync } from 'node:child_process';
 const ROOT = dirname(fileURLToPath(import.meta.url));
 const DIST = join(ROOT, 'dist');
 const CHECK_ONLY = process.argv.includes('--check');
+const PREVIEW = process.argv.includes('--preview');
 
 // ---------- 설정 ----------
 
@@ -32,18 +38,29 @@ function loadEnv() {
     console.error('deploy.env 가 없다. deploy.env.example 을 복사해 값을 채운다.');
     process.exit(1);
   }
-  const env = {};
+  const raw = {};
   for (const line of readFileSync(file, 'utf8').split(/\r?\n/)) {
     const s = line.trim();
     if (!s || s.startsWith('#')) continue;
     const i = s.indexOf('=');
-    if (i > 0) env[s.slice(0, i).trim()] = s.slice(i + 1).trim();
+    if (i > 0) raw[s.slice(0, i).trim()] = s.slice(i + 1).trim();
   }
-  const need = ['DEPLOY_HOST', 'DEPLOY_USER', 'DEPLOY_ROOT', 'DEPLOY_NAME', 'DEPLOY_KEY', 'VERIFY_BASE'];
-  const missing = need.filter((k) => !env[k]);
+  const need = PREVIEW
+    ? ['DEPLOY_HOST', 'DEPLOY_USER', 'DEPLOY_KEY', 'PREVIEW_ROOT', 'PREVIEW_NAME', 'PREVIEW_VERIFY_BASE']
+    : ['DEPLOY_HOST', 'DEPLOY_USER', 'DEPLOY_ROOT', 'DEPLOY_NAME', 'DEPLOY_KEY', 'VERIFY_BASE'];
+  const missing = need.filter((k) => !raw[k]);
   if (missing.length) {
     console.error('deploy.env 에 값이 빠졌다: ' + missing.join(', '));
     process.exit(1);
+  }
+  // --preview 일 땐 ROOT/NAME/VERIFY_BASE/RELOAD_CMD 를 PREVIEW_* 로 바꿔치기하고
+  // 이후 로직은 그대로 env.DEPLOY_ROOT 등 기존 키 이름을 참조한다 (본 배포 코드 경로 무변경).
+  const env = { ...raw };
+  if (PREVIEW) {
+    env.DEPLOY_ROOT = raw.PREVIEW_ROOT;
+    env.DEPLOY_NAME = raw.PREVIEW_NAME;
+    env.VERIFY_BASE = raw.PREVIEW_VERIFY_BASE;
+    env.RELOAD_CMD = raw.PREVIEW_RELOAD_CMD; // 없으면 undefined -> 4단계 생략됨(기존 로직)
   }
   return env;
 }
@@ -106,9 +123,12 @@ async function verify(base, files) {
 
 const env = loadEnv();
 
+console.log(PREVIEW ? `[preview 모드] -> ${env.VERIFY_BASE}` : `[본 배포] -> ${env.VERIFY_BASE}`);
+
 if (!CHECK_ONLY) {
   console.log('1) 빌드');
-  run(process.execPath, [join(ROOT, 'build.mjs')], { cwd: ROOT });
+  const buildArgs = PREVIEW ? [join(ROOT, 'build.mjs'), '--preview'] : [join(ROOT, 'build.mjs')];
+  run(process.execPath, buildArgs, { cwd: ROOT });
 
   const stamp = new Date().toISOString().replace(/[-:T]/g, '').slice(0, 12); // YYYYMMDDhhmm (UTC)
   const releases = `${env.DEPLOY_ROOT}/${env.DEPLOY_NAME}-releases`;

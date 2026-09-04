@@ -1,38 +1,19 @@
-<svg xmlns="http://www.w3.org/2000/svg" class="kjd kjd-sys" viewBox="-4 -4 1040 536" width="1040" height="536" role="img" aria-labelledby="kjdSysTitle kjdSysDesc">
+<svg xmlns="http://www.w3.org/2000/svg" class="kjd kjd-sys" viewBox="-4 -4 1040 320" width="1040" height="320" role="img" aria-labelledby="kjdSysTitle kjdSysDesc">
 <title id="kjdSysTitle">The System - 지시 1건이 산출물 1건이 되는 길</title>
-<desc id="kjdSysDesc">지시 1건을 총괄 기획실이 받아 여섯 개 부문으로 나누고, 결과가 감사팀을 거쳐 산출물 1건으로 모인다. 그 아래에 하네스, 스킬, n8n 자동화가 상시 설비로 깔려 있다.</desc>
+<desc id="kjdSysDesc">지시 1건을 총괄 기획실이 받아 여섯 개 부문으로 나누고, 결과가 감사팀을 거쳐 산출물 1건으로 모인다.</desc>
 
 <!-- ============================================================
      kjyoo.cloud 다이어그램 - The System
-     v0.2 (2026-09-03) / Creative 부문
-     v0.1 대비 변경 2건. 그림 내용과 문구는 건드리지 않았다.
-       1) viewBox 에 4px 여백을 넣었다. v0.1 은 viewBox 0 0 1032 540
-          이라서 x=0 상자의 1px 테두리가 0.5px, x=1032 에 붙은
-          산출물 상자의 2px 강조 테두리가 1px 잘려 나갔다.
-          내부 좌표는 하나도 바꾸지 않고 원점만 -4 로 옮겼다.
-       2) t-eyebrow 와 t-cap 의 색을 kj-text-3 에서 kj-text-2 로
-          바꿨다. 라이트 모드에서 16px 글자가 대비 4.23 대 1 로
-          WCAG AA 기준 4.5 대 1 에 미달했다. 신규 색을 만들지 않고
-          이미 있는 토큰으로 옮겨 4.54 대 1 을 확보했다.
+     v0.4 - 지시 1건이 여섯 부문을 거쳐 산출물 1건이 되는 흐름만 그린다.
+     설비 레인(하네스/스킬/자동화)은 시스템 페이지의 별도 통계 섹션과
+     내용이 중복되어 뺐다.
 
-     정정 1건 (2026-09-03 확정)
-       - "스킬 34종" 은 실측과 다르다. 세는 규칙은 최상위
-         정해진 규칙 기준으로 실측 38종이다.
-         card2.title 을 "스킬 38종" 으로, sys.source 캡션을
-         "스킬 38종(2026-09-03 기준)" 으로 고쳤다. 그 외 좌표,
-         색, 글자 크기, 다른 문구는 전혀 손대지 않았다.
-       - 이 사본은 kjyoo-cloud 저장소 assets/img/ 에 둔다.
-         v0.2 정본은 그대로 두었다(위 정정 미반영).
-
-     정본: kjyoo_cloud_Brand_Foundation_v0.1.md
-     - 색은 토큰만 참조한다. 하드코딩 값은 var() 의 폴백뿐이며
-       폴백은 라이트 모드 정본값과 동일하다.
-     - 서체 크기는 웹 5단계 중 16 / 19 / 23 만 쓴다.
-     - 간격은 4dp 스케일(8 / 16 / 24 / 32 / 48 / 64)만 쓴다.
-     - 라운드 17(카드), 999(pill).
-     - 강조 레드는 감사에서 산출물로 나가는 출력선 1개와
-       산출물 상자 테두리만 쓴다. 워드마크
-       (무채색 여러 갈래 에서 레드 출력선 1개)의 직접 인용이다.
+     디자인 규칙
+     - 색, 서체 크기, 간격은 전부 CSS 토큰만 참조한다. 하드코딩 값은
+       var() 의 폴백뿐이며 폴백은 라이트 모드 정본값과 동일하다.
+     - 서체 크기는 16 / 19 / 23 세 단계만 쓴다. 간격은 4dp 스케일만 쓴다.
+     - 강조 레드는 감사에서 산출물로 나가는 출력선과 산출물 상자
+       테두리에만 쓴다.
 ============================================================ -->
 
 <style>
@@ -52,7 +33,7 @@
 </style>
 
 <!-- ========== 1단. 일이 도는 길 ========== -->
-<text class="t-eyebrow" x="0" y="20" data-t="sys.band1">일이 도는 길</text>
+<text class="t-eyebrow" x="0" y="20" data-t="sys.band1">지시에서 산출까지</text>
 
 <!-- 배선. 무채색 여러 갈래가 감사에서 모이고, 레드 출력선 1개가 나간다 -->
 <g>
@@ -106,7 +87,7 @@
 <!-- 감사 -->
 <g>
   <rect class="box" x="656" y="108" width="152" height="96" rx="17"/>
-  <text class="t-node" x="732" y="150" text-anchor="middle" data-t="sys.audit.title">감사</text>
+  <text class="t-node" x="732" y="150" text-anchor="middle" data-t="sys.audit.title">감사팀</text>
   <text class="t-sub"  x="732" y="176" text-anchor="middle" data-t="sys.audit.sub">합격, 불합격</text>
 </g>
 
@@ -117,29 +98,4 @@
   <text class="t-sub" x="952" y="176" text-anchor="middle" data-t="sys.out.sub">사람이 최종 확인</text>
 </g>
 
-<line class="rule" x1="0" y1="320" x2="1032" y2="320"/>
-
-<!-- ========== 2단. 항상 켜져 있는 설비 ========== -->
-<text class="t-eyebrow" x="0" y="352" data-t="sys.band2">항상 켜져 있는 설비</text>
-
-<g>
-  <rect class="box" x="0" y="372" width="328" height="120" rx="17"/>
-  <text class="t-card" x="24" y="410" data-t="sys.card1.title">하네스</text>
-  <text class="t-sub"  x="24" y="440" data-t="sys.card1.l1">지켜야 할 규칙을 한 곳에</text>
-  <text class="t-sub"  x="24" y="464" data-t="sys.card1.l2">작업 6개 시점마다 자동 점검</text>
-</g>
-<g>
-  <rect class="box" x="352" y="372" width="328" height="120" rx="17"/>
-  <text class="t-card" x="376" y="410" data-t="sys.card2.title">스킬 38종</text>
-  <text class="t-sub"  x="376" y="440" data-t="sys.card2.l1">반복 작업을 굳혀 둔 절차서</text>
-  <text class="t-sub"  x="376" y="464" data-t="sys.card2.l2">매번 다시 설명하지 않는다</text>
-</g>
-<g>
-  <rect class="box" x="704" y="372" width="328" height="120" rx="17"/>
-  <text class="t-card" x="728" y="410" data-t="sys.card3.title">n8n 자동화</text>
-  <text class="t-sub"  x="728" y="440" data-t="sys.card3.l1">정해진 시각에 사람 없이 돈다</text>
-  <text class="t-sub"  x="728" y="464" data-t="sys.card3.l2">외부 시스템에 직접 읽고 쓴다</text>
-</g>
-
-<text class="t-cap" x="0" y="520" data-t="sys.source">실측 2026-09-03 기준. 에이전트 정의 11종과 스킬 38종을 직접 세어 그렸다. 없는 구성요소는 넣지 않았다.</text>
 </svg>

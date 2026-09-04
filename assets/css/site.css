@@ -103,7 +103,8 @@ h3 { font-size: var(--kj-fs-heading); line-height: var(--kj-lh-title); }
 .page-head p { color: var(--kj-text-2); margin: var(--kj-space-md) 0 0; max-width: var(--kj-measure); }
 
 .prose > * + * { margin-top: var(--kj-space-lg); }
-.prose p { margin: 0; max-width: var(--kj-measure); }
+.prose > *:first-child { margin-top: 0; }
+.prose p { margin-bottom: 0; max-width: var(--kj-measure); }
 .prose h2 { margin-top: var(--kj-space-2xl); }
 .prose h3 { margin-top: var(--kj-space-xl); }
 .prose ul, .prose ol {

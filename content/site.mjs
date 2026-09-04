@@ -1,15 +1,19 @@
 // ============================================================
 // kjyoo.cloud - 사이트 콘텐츠 정본
-// v0.2 (2026-09-03) - Phase 2 카피 주입
+// v0.3 (2026-09-04) - 개편 지시서 반영(KJ_수정지시서_20260904.md, 개편_작업지시서_20260904.md)
 //
-// 6개 섹션 x 2개 언어(ko/en)의 모든 카피가 이 파일 하나에 있다.
+// 5개 섹션(index/cases/system/then-now/about) x 2개 언어(ko/en)의 모든 카피가 이 파일 하나에 있다.
 // 페이지 HTML을 직접 고치지 말고 여기를 고친 뒤 build.mjs 를 돌린다.
 //
-// v0.1 -> v0.2 요지 (Phase2_페이지카피_v0.2.md 근거)
-//   - 목표를 프랙셔널 자문 수주에서 경험 전수로 전환 (KJ 결정 2026-09-03)
-//   - Advisory 페이지를 "일지 / Notes" 로 개편, 상품 구성/문의 절차/전환 버튼 전부 삭제
-//   - Home 자문 문의 버튼 삭제, 바닥글 메일과 직함 변경
-//   - 수치 10~15명 -> 10명에서 17명, About CWD 행 삭제, 엑싯 표현 제거
+// v0.2 -> v0.3 요지 (개편_신규카피_v0.1.md / v0.2.md 근거)
+//   - 보고서형 표 4종(system.readRows/stackRows, then-now.evidenceRows 각주, about.factsRows) 및
+//     방어형/자기증명 문구 전량 삭제. 감사팀이 아니라 방문자에게 하는 말만 남긴다.
+//   - notes(일지) 페이지 폐기, cases로 통합(대문 문장 이관). PAGES 6 -> 5.
+//   - about에 40년 기술 연륜 서사(originH/originP), 경력 압축(careerH/careerP) 신설.
+//   - system에 실가동 인프라 요약(liveH/liveP/liveStats) 신설.
+//   - 조직 편제 명칭은 공개용으로 정리해 SVG 쪽(assets/img/*.svg,
+//     build.mjs EN_TEXT)에서 처리. 이 파일에는 조직명 문자열이 없다.
+//   - 수량은 전부 대략치(KJ 결정 2026-09-04). 정의/출처/기준일을 화면에 달지 않는다.
 // ============================================================
 
 export const SITE = {
@@ -19,22 +23,21 @@ export const SITE = {
   email: 'kj@kjyoo.cloud',
 };
 
-// 검증 가능 실측 - 출처 KJ_Yoo_Profile.pdf (2026-03)
-// 숫자를 바꿀 때는 출처 문서를 먼저 고친다.
+// 개인 이력 실측 - 출처 KJ_Yoo_Profile.pdf (2026-03).
+// v0.3부터 화면 카피는 이 상수를 참조하지 않고 대략치 문장을 직접 쓴다(about.careerP,
+// index.stats). 이 상수는 향후 원 출처 대조용으로만 남겨 둔다.
 export const FACTS = {
   ictYears: '30+',
   ceoYears: '17',
   patents: '28',
   govRnd: '20',
   govRndAmount: '3.06',
-  // KR 표기 전용. "십억원"은 한국어에서 쓰지 않는 단위라 EN(govRndAmount+'B'=3.06B)과
-  // 별도로 억원 기준 값을 둔다. 3.06(십억) x 10 = 30.6(억). 3차 감사 W-9 지적 정정(2026-09-03)
   govRndAmountEok: '30.6',
   euRnd: '2',
   overseasYears: '13+',
 };
 
-export const PAGES = ['index', 'cases', 'system', 'then-now', 'about', 'notes'];
+export const PAGES = ['index', 'cases', 'system', 'then-now', 'about'];
 
 // 결함 5 (케이스 개별 URL 부재, 2026-09-02 감사 지적) 대응. 케이스 1건당 1페이지
 // (/{lang}/cases/<slug>.html)를 build.mjs 가 여기서 만든다. 본문은 Phase 3 소관이라
@@ -79,7 +82,6 @@ export const CONTENT = {
       system: '시스템',
       'then-now': '그때와 지금',
       about: '소개',
-      notes: '일지',
     },
     foot: {
       tagline: 'KJ Yoo',
@@ -91,20 +93,20 @@ export const CONTENT = {
 
     index: {
       title: 'kjyoo.cloud',
-      desc: '마케팅 영업 5~6명이 하던 일을, 지금은 한 사람과 AI 오케스트레이션으로 돌립니다. 40년 실무 경력 경영자의 AI 전환 실증 기록.',
-      heroLead: '마케팅과 영업만 5~6명이 하던 일을',
-      heroAccent: '지금은 한 사람과 AI가 돌립니다',
-      heroBody: '40년간 개발, 제조, 영업, 마케팅을 직접 기획하고 실행했습니다. 지금은 그 조직이 하던 일을 클로드코드 오케스트레이션으로 대신합니다. 이 사이트는 그 과정을 있는 그대로 공개하는 기록입니다.',
+      desc: '한국, 중국, 유럽 20여 명이 하던 개발, 제조, 마케팅, 서비스를 지금은 한 사람과 AI 오케스트레이션으로 돌립니다. 40년 실무 경력 경영자의 AI 전환 실증 기록.',
+      heroLead: '한국, 중국, 유럽 20여 명의 조직이 하던',
+      heroAccent: '개발, 제조, 마케팅, 서비스, 이제 한 사람과 AI 오케스트레이션으로 돌립니다',
+      heroBody: '40년간 개발, 제조, 마케팅, 서비스를 직접 기획하고 실행했습니다. 지금은 여러 AI에게 일을 나눠주고 결과를 확인하는 방식으로, 그 조직이 하던 일을 혼자 돌립니다.',
       ctaPrimary: '케이스 보기',
       stats: [
-        { n: FACTS.ictYears + '년', l: '글로벌 ICT 경력' },
-        { n: FACTS.ceoYears + '년', l: 'CEO / C-Level' },
-        { n: FACTS.patents + '건', l: '특허 등록 및 출원' },
-        { n: FACTS.govRnd + '건', l: '정부 R&D 총괄' },
+        { n: '30년 넘게', l: '글로벌 ICT 경력' },
+        { n: '17년', l: 'CEO / C-Level' },
+        { n: '30건 가까이', l: '특허 등록 및 출원' },
+        { n: '20여 건', l: '정부 R&D 총괄' },
       ],
       sections: [
-        { key: 'then-now', h: '그때와 지금', p: '분야별로 10명에서 17명이 상주하던 조직이 어떻게 1인과 파이프라인으로 바뀌었는지, 당시 자료를 근거로 대조합니다.' },
-        { key: 'system', h: '실제 돌리는 시스템', p: '말이 아니라 기계를 보여줍니다. 지금 운용 중인 에이전트 구성과 자동화 파이프라인을 그대로 공개합니다.' },
+        { key: 'then-now', h: '그때와 지금', p: '분야별로 20여 명이 상주하던 조직이 어떻게 1인과 파이프라인으로 바뀌었는지, 당시 자료와 나란히 놓고 봅니다.' },
+        { key: 'system', h: '실제 돌리는 시스템', p: '말이 아니라 기계를 보여줍니다. 지금 운용 중인 에이전트 구성과 자동화 파이프라인 구성입니다.' },
         { key: 'cases', h: '케이스 스터디', p: '성공 자랑이 아니라 실패를 시스템으로 제압한 과정을 씁니다. 2일에 한 번 발행합니다.' },
       ],
     },
@@ -112,7 +114,7 @@ export const CONTENT = {
     cases: {
       title: '케이스 스터디',
       desc: '실제 업무에서 나온 문제와, 그것을 AI 오케스트레이션으로 재설계한 과정. 2일에 한 번 발행합니다.',
-      h1: '케이스 스터디',
+      h1: '이렇게 해봤고, 이렇게 됐습니다',
       lead: '성공 자랑이 아니라 실패를 시스템으로 제압한 과정을 씁니다. 무엇이 막혔는지 적고, 파이프라인으로 다시 짜고, 결과를 그대로 남깁니다.',
       tags: ['마케팅', '영업', '운영', 'MVP'],
       emptyTitle: '첫 케이스를 준비 중입니다',
@@ -121,63 +123,39 @@ export const CONTENT = {
 
     system: {
       title: '시스템',
-      desc: '지금 운용 중인 클로드코드 하네스, 에이전트 조직, 자동화 파이프라인 구성. 실측 2026-09-03 기준.',
+      desc: '지금 운용 중인 클로드코드 하네스, 에이전트 조직, 자동화 파이프라인 구성입니다.',
       h1: '이 사이트도 이 시스템이 만들었습니다',
       lead: '말이 아니라 기계를 놓았습니다. 아래 그림은 지금 이 순간 돌아가는 구성이고, 구성이 바뀌면 이 페이지도 바뀝니다.',
 
       diaH: '일이 도는 길',
       diaP: '지시 한 건이 들어가서 산출물 한 건이 나올 때까지의 길입니다. 회사 조직도를 읽는 방향과 같습니다.',
-      diaAlt: '지시 한 건이 총괄 기획실을 거쳐 여섯 개 부문으로 나뉘고, 감사를 통과해 산출물 한 건이 되는 흐름도. 아래에 하네스, 스킬, 자동화 세 가지 상시 설비.',
-      diaCaption: '이 그림을 공개하는 것은 확인을 열어 두기 위해서입니다. 구성이 틀렸다면 그 사실도 그대로 드러납니다.',
+      diaAlt: '지시 한 건이 총괄 기획실을 거쳐 여섯 개 부문으로 나뉘고, 감사팀을 통과해 산출물 한 건이 되는 흐름도.',
 
-      readH: '그림 읽는 법',
-      readRows: [
-        ['지시 1건', '사람이 내립니다. 무엇을 언제까지 어떤 형태로 낼지 여섯 칸을 채워 넘깁니다'],
-        ['총괄 기획실', '지시를 쪼개 담당에게 나눠줍니다. 실무자들을 관리하는 반장 자리입니다'],
-        ['부문 여섯', '기술, 지식, 창작, 마케팅, 사업, 조사. 사람 조직의 부서와 같은 자리입니다'],
-        ['감사', '나온 결과를 합격 또는 불합격으로만 판정합니다. 만든 쪽이 스스로 합격을 주지 못합니다'],
-        ['산출물 1건', '사람이 최종 확인합니다. 여기서 사람이 빠지지 않습니다'],
+      liveH: '지금 도는 것들',
+      liveP: '그림이 아니라 지금 실제로 켜져 있는 것들입니다.',
+      liveStats: [
+        { n: '3대', l: '서버가 상시 가동 중입니다' },
+        { n: '200개 가까운', l: '업무 자동화가 돌아갑니다' },
+        { n: '10여 개', l: '에이전트가 부문을 나눠 맡습니다' },
+        { n: '40여 종', l: '업무 매뉴얼(스킬)을 직접 만들었습니다' },
       ],
-
-      pipelineH: '콘텐츠 파이프라인',
-      pipelineP: '이 사이트에 글이 올라오는 길입니다. 매일 업무에서 소재를 건지고, 형식을 바꿔가며 내보냅니다. 사람이 하는 일은 판단과 승인입니다.',
-      nodes: [
-        { b: 'KJ', s: '판단과 승인. 경영자 관점의 코멘트를 더하고 뺍니다' },
-        { b: 'case-capture', s: '그날 업무에서 소재를 서너 줄로 건져 대기 목록에 쌓습니다' },
-        { b: 'case-deep', s: '소재 한 건을 풀버전 사례로 늘립니다. 그림 한 장이 반드시 붙습니다' },
-        { b: 'case-rotate', s: '같은 소재를 매번 다른 형식으로 짧게 냅니다' },
-        { b: 'ceo-eli5', s: '경영자가 두 번 읽지 않고 이해하는지 마지막에 겁니다' },
-      ],
-
-      stackH: '항상 켜져 있는 설비',
-      stackRows: [
-        ['하네스', '지켜야 할 규칙을 한 곳에 모은 사규집입니다. 작업 도중 여섯 개 시점에서 자동으로 걸립니다'],
-        ['스킬 38종 (2026-09-03 기준)', '반복 업무를 굳혀 둔 표준 작업 매뉴얼입니다. 같은 설명을 매번 다시 하지 않습니다'],
-        ['업무 자동화', '정해진 시각에 사람 없이 도는 컨베이어 벨트입니다. 외부 시스템에 직접 읽고 씁니다'],
-        ['문서 정본', '구글 드라이브와 옵시디언. 문서고를 한 곳만 정답으로 둡니다'],
-        ['코드와 발행', '깃허브 공개 저장소. 이 사이트는 명령 한 줄로 조립해서 내보냅니다'],
-      ],
-      note: '이 사이트도 이 구성으로 만들었고, 소스는 깃허브에 공개돼 있습니다. 화면에 보이는 것과 저장소에 있는 것이 같습니다.',
     },
 
     'then-now': {
       title: '그때와 지금',
-      desc: 'AI 이전에 10명에서 17명이 하던 일이, 지금 어떻게 한 사람과 파이프라인으로 바뀌었는가. 당시 조직도와 업무 분장표를 근거로 대조합니다.',
+      desc: 'AI 이전에 20여 명이 하던 일이, 지금 어떻게 한 사람과 파이프라인으로 바뀌었는가. 당시 조직도와 업무 분장표를 지금과 나란히 놓습니다.',
       h1: '대책 칸이 비어 있던 한 줄',
       lead: '그때 만든 조직도와 업무 분장표를 그대로 놓고 지금과 비교합니다.',
 
-      evidenceH: '그때 남은 자료가 곧 증거입니다',
-      evidenceRows: [
-        ['직원 10명에서 17명', '여러 시점의 내부 인사 기록에 남아 있습니다. 우리가 만든 자료가 아닙니다'],
-        ['마케팅과 영업 5~6명', '2021년 조직도로 5명입니다. 영업 마케팅 4명에 디자인 1명을 더한 값입니다. 2023년 과제 대장으로 6명이 이름을 걸고 있었습니다'],
-        ['업무 갈래 7개에서 9개', '상품기획, 마케팅, 영업배송, 고객서비스, 생산, 품질, 개발. 갈래마다 담당이 따로 있었습니다'],
-        ['과제 73건을 6명이 넉 달에', '한 사람이 평균 12.2건입니다. 담당이 배정된 73행 전부에 소요시간이 비어 있었습니다.'],
-        ['같은 결재 문서를 12개월 연속', '금액도 인원도 거의 같은 서류를 매달 새로 만들었습니다.'],
-        ['상세페이지 11번째 버전', '같은 페이지가 버전 11(V0.11)까지 갔습니다.'],
-        ['파일 103,348건', '사내 아카이브 정리 종합요약(2026-07-14)과 2026-09-03 재실측에서 나온 숫자입니다.'],
+      evidenceH: '그때 남은 자료',
+      evidenceP: [
+        '직원 20여 명이 여러 해에 걸쳐 있었습니다. 상품기획, 마케팅, 영업배송, 고객서비스, 생산, 품질, 개발까지 갈래마다 담당이 따로 있었습니다.',
+        '과제가 몰렸던 넉 달은 몇 명이 나눠 맡았는데, 일한 시간을 적어 둔 칸은 전부 비어 있었습니다.',
+        '같은 결재 문서를 금액도 인원도 거의 같은 채로 매달 새로 만들었고, 상세페이지도 같은 것을 열 번 넘게 다시 만들었습니다.',
+        '그렇게 쌓인 파일이 10만 건 넘습니다. 지금 다시 봐도 그대로입니다.',
       ],
 
-      anchorH: '대책 칸이 비어 있던 한 줄',
+      anchorH: '대책이 없었던 이유',
       anchorP: [
         '2021년에 우리 회사 사람들이 업무가 늦어지는 원인을 여덟 가지로 적었습니다. 그리고 일곱 가지에는 대책을 달았습니다. 담당을 정하고, 늦으면 알림이 가게 하고, 마감 이틀 전에 미리 보고하게 하는 식이었습니다.',
         '여덟 번째 원인에는 대책이 없습니다. 그 원인은 "업무 Loading이 많아서 처리가 지연", 쉽게 말해 일이 너무 많아서 늦는다는 것이었습니다.',
@@ -194,66 +172,32 @@ export const CONTENT = {
 
     about: {
       title: '소개',
-      desc: 'BYC 영업사원(1986)에서 시작해 LG 18년, 창업 2회, 특허 28건. 그리고 65세에 시작한 AI 전환의 기록.',
+      desc: 'BYC 영업사원(1986)에서 시작해 LG 18년, 창업 2회, 특허 30건 가까이. 그리고 65세에 시작한 AI 전환의 기록.',
       h1: '65세의 도전',
-      lead: '1986년 영업사원으로 시작했습니다. LG에서 18년, 두 번의 창업, 28건의 특허를 지나왔습니다. 지금은 열 명에서 열일곱 명이 하던 일을 혼자서 AI와 함께 돌립니다.',
-      timelineH: '경력',
-      timeline: [
-        { when: '2013 ~', b: 'AKSys / SHAKS', s: 'CEO, 단독 창업. 특허 28건, 5개국 이상 OEM' },
-        { when: '2013 ~ 2017', b: 'Innoplay', s: 'EVP / Shenzhen. 중국 EMS 제조, IoT, 스마트홈' },
-        { when: '2008 ~ 2013', b: 'Avantis', s: 'CEO, COO, 공동 창업. 이탈리아 스페인 노르웨이 한국 4개국 JV' },
-        { when: '2003 ~ 2008', b: 'LG-Nortel', s: 'Head of European Sales / Milan' },
-        { when: '1999 ~ 2003', b: 'LG전자', s: 'GM, European Sales / Milan. 휴대폰 유럽 시장 확대' },
-        { when: '1990 ~ 1999', b: 'LG정보통신', s: '영업, 기획, 전략' },
-        { when: '1986 ~ 1990', b: 'BYC', s: '영업, 기획' },
+      lead: '1986년 영업사원으로 시작했습니다. LG에서 18년, 두 번의 창업, 특허 30건 가까이를 지나왔습니다. 지금은 20여 명이 하던 일을 혼자서 AI와 함께 돌려 보려는 새로운 시도를 새롭게 배우면서, 공부하면서 시도하고 있습니다.',
+
+      originH: '40년, 도구만 바뀌었습니다',
+      originP: [
+        '1989~1990년 회사에 처음 들어온 IBM XT 급 PC로 dBASE III 책을 사서 혼자 익혔습니다. 로터스 1-2-3 스프레드시트로 회사 관리 자료도 만들었습니다.',
+        '그때는 아침마다 텔렉스실에 가서 해외 바이어의 전문을 확인했습니다. 텔렉스는 지금의 문자메시지와 같은 통신 수단인데, 글자 수만큼 요금이 나가서 다들 줄임말을 썼습니다. 지금 메신저 줄임말의 원조인 셈입니다.',
+        '1992~1993년 팩스가 보급되면서 서류를 그 자리에서 주고받게 됐고, 1996~1998년 이메일이 퍼지면서 일하는 방식이 다시 바뀌었습니다.',
+        '텔렉스에서 팩스로, 팩스에서 이메일로, 지금은 AI 에이전트로. 도구는 계속 바뀌었지만 제가 하는 일은 똑같습니다. 무엇을 할지 정하고, 시키고, 결과를 확인하는 것입니다.',
       ],
-      factsH: '검증 가능한 실측',
-      factsRows: [
-        ['글로벌 ICT 경력', FACTS.ictYears + '년 (LG 18년 포함)'],
-        ['CEO / C-Level', FACTS.ceoYears + '년, 창업 2회'],
-        ['특허', FACTS.patents + '건 (등록 13, 출원 15)'],
-        ['정부 R&D', '약 ' + FACTS.govRnd + '건, 총 ' + FACTS.govRndAmountEok + '억원 (Project Lead)'],
-        ['EU R&D', FACTS.euRnd + '건 (Eureka, Horizon)'],
-        ['글로벌 파트너십', 'Qualcomm, Google, Deutsche Telekom, TIM'],
-        ['해외 주재', FACTS.overseasYears + '년 (이탈리아 9년, 중국 4년)'],
+
+      careerH: '경력',
+      careerP: [
+        'LG에서 해외 영업과 기획을 18년 했습니다.',
+        '그다음 해외 합작법인과 글로벌 C-Level 자리를 17년 거쳤습니다. 해외에서 10년 넘게 살며 이탈리아, 스페인, 노르웨이, 중국을 오갔습니다.',
+        '지금은 AKSys와 SHAKS를 혼자 창업해 운영합니다. 특허 30건 가까이 내고, 정부 과제 20여 건과 EU 과제도 몇 건 이끌었습니다. 그 경험을 지금은 AI 에이전트 조직에 씁니다.',
       ],
 
       nowH: '지금 하는 일',
       nowP: [
-        '실무를 직접 합니다. 하루 업무는 대부분 지시를 내리고 결과를 확인하는 일입니다.',
-        '자료 조사, 문서 작성, 코드 작성, 발행은 AI 에이전트가 맡습니다. 맡은 일이 정해진 실무 담당자를 여럿 두는 것과 같습니다. 제가 하는 일은 판단과 승인입니다.',
-        '40년 동안 사람에게 시키던 방식 그대로 기계에 시킵니다. 바뀐 것은 지시를 받는 쪽이지 지시하는 방법이 아닙니다.',
-      ],
-
-      linksH: '연결',
-    },
-
-    notes: {
-      title: '일지',
-      desc: '40년 실무를 AI 오케스트레이션으로 옮기며 해본 것과 알게 된 것을 적습니다.',
-      h1: '이렇게 해봤고, 이렇게 됐습니다',
-      lead: '1986년부터 지금까지 제 일을 직접 기획하고 실행했습니다. 지금은 그 일의 상당 부분을 AI 오케스트레이션으로 옮기고 있습니다. 여기에는 그 과정에서 해본 것과 알게 된 것을 적습니다.',
-
-      didH: '해본 일',
-      didP: [
-        '지시를 여섯 개 부문으로 나누고 감사를 거치게 하는 구조를 만들어 돌렸습니다. 사람 조직에서 하던 방식을 그대로 옮겼습니다.',
-        '정부 R&D, 하드웨어 제품화, 해외 파트너십처럼 사람이 하던 일도 같은 구조 안에 넣어 봤습니다. 전부 되지는 않았습니다.',
-        '안 되는 일은 안 된다고 적어 두었습니다. 판단이 사람에게만 되는 지점은 그대로 사람에게 남겼습니다.',
-      ],
-
-      learnedH: '알게 된 것',
-      learnedP: [
+        '지금은 지시를 내리고 결과를 확인하는 일을 합니다. 조사, 문서 작성, 코드 작성, 발행은 에이전트 여러 개가 나눠 맡습니다.',
+        '지시를 여섯 개 부문으로 나누고 감사팀을 거치게 하는 구조를 만들어 돌렸습니다. 사람 조직에서 하던 방식을 그대로 옮겼습니다.',
+        '정부 R&D, 하드웨어 제품화, 해외 파트너십처럼 사람이 하던 일도 같은 구조 안에 넣어 봤습니다. 전부 되지는 않았습니다. 안 되는 일은 안 된다고 적어 두었고, 판단이 사람에게만 되는 지점은 그대로 사람에게 남겼습니다.',
         '일을 기계에 맡기는 것과 지시하는 방법을 바꾸는 것은 다른 일이었습니다. 40년 동안 사람에게 하던 방식 그대로 기계에 지시하니 더 잘 됐습니다.',
-        '속도보다 먼저 걸린 것은 판정 기준이었습니다. 무엇이 통과인지 미리 적어두지 않으면 결과물이 계속 되돌아왔습니다.',
-        '이 방식이 저한테는 맞았습니다. 다른 조건, 다른 규모에서는 다를 수 있습니다.',
-      ],
-
-      areasH: '해본 영역',
-      areas: [
-        ['AI 오케스트레이션', '지시를 나누고 감사를 붙이는 구조를 실제로 돌렸습니다'],
-        ['사업개발', '해외 파트너십과 위탁생산을 국경 너머로 조율했습니다'],
-        ['정부 R&D', '기획부터 정산까지 전 주기를 직접 겪었습니다'],
-        ['하드웨어 제품화', '요구사항 정의부터 인증까지 실무로 했습니다'],
+        '속도보다 먼저 걸린 것은 판정 기준이었습니다. 무엇이 통과인지 미리 적어두지 않으면 결과물이 계속 되돌아왔습니다. 이 방식이 저한테는 맞았습니다. 다른 조건, 다른 규모에서는 다를 수 있습니다.',
       ],
 
       linksH: '연결',
@@ -274,7 +218,6 @@ export const CONTENT = {
       system: 'System',
       'then-now': 'Then vs Now',
       about: 'About',
-      notes: 'Notes',
     },
     foot: {
       tagline: 'KJ Yoo',
@@ -286,20 +229,20 @@ export const CONTENT = {
 
     index: {
       title: 'kjyoo.cloud',
-      desc: 'Work that took a team of five to six in marketing and sales now runs with one person and AI orchestration. A record of one executive turning 40 years of hands on experience into an AI operation.',
-      heroLead: 'Work that took five to six people',
-      heroAccent: 'now runs with one person and AI',
-      heroBody: 'For 40 years I planned and ran development, manufacturing, sales and marketing myself. Today an orchestration of AI agents does what that organization used to do. This site is the record, published as it happens.',
+      desc: 'Work that once took about 20 people across Korea, China and Europe, covering development, manufacturing, marketing and service, now runs with one person and AI orchestration. A record of a 40 year operator\'s AI transition.',
+      heroLead: 'Work that took a 20-person team',
+      heroAccent: 'across Korea, China and Europe now runs with one person and AI',
+      heroBody: 'For 40 years I planned and ran development, manufacturing, marketing and service myself. Today I hand out the work to a set of AI agents and check what comes back, the way one person now runs what an organization used to run.',
       ctaPrimary: 'Read the cases',
       stats: [
-        { n: FACTS.ictYears, l: 'Years in global ICT' },
-        { n: FACTS.ceoYears, l: 'Years as CEO / C-level' },
-        { n: FACTS.patents, l: 'Patents filed and granted' },
-        { n: FACTS.govRnd, l: 'Government R&D projects led' },
+        { n: 'more than 30 years', l: 'Years in global ICT' },
+        { n: '17 years', l: 'Years as CEO / C-level' },
+        { n: 'nearly 30', l: 'Patents filed and granted' },
+        { n: 'about 20', l: 'Government R&D projects led' },
       ],
       sections: [
-        { key: 'then-now', h: 'Then vs Now', p: 'How an organization of ten to seventeen specialists became one person and a pipeline, set against the records from that time.' },
-        { key: 'system', h: 'The system, in the open', p: 'Not claims, but the machine. The agent structure and automation pipelines currently in operation, published as they are.' },
+        { key: 'then-now', h: 'Then vs Now', p: 'How an organization of about twenty specialists became one person and a pipeline, set against the records from that time.' },
+        { key: 'system', h: 'The system, in the open', p: 'Not claims, but the machine. The agent structure and automation pipelines currently in operation.' },
         { key: 'cases', h: 'Case studies', p: 'Not victory laps. How a failure was beaten by building a system. Published every second day.' },
       ],
     },
@@ -307,7 +250,7 @@ export const CONTENT = {
     cases: {
       title: 'Case Studies',
       desc: 'Real problems from real work, and how each was redesigned as an AI orchestration pipeline. Published every second day.',
-      h1: 'Case Studies',
+      h1: 'This is what I did, and what happened',
       lead: 'Not victory laps. Each case writes what got stuck, rebuilds it as a pipeline, and leaves the result as it is.',
       tags: ['Marketing', 'Sales', 'Operations', 'MVP'],
       emptyTitle: 'The first case is in preparation',
@@ -316,63 +259,39 @@ export const CONTENT = {
 
     system: {
       title: 'System',
-      desc: 'The Claude Code harness, agent structure and automation pipelines currently in operation. Measured 2026-09-03.',
-      h1: 'This site was built by the system on this page.',
+      desc: 'The Claude Code harness, agent structure and automation pipelines currently in operation.',
+      h1: 'This site was built by the system on this page',
       lead: 'Not claims, but the machine. What follows is running right now. When it changes, this page changes.',
 
       diaH: 'How one instruction becomes one deliverable',
       diaP: 'This is the path from one instruction to one deliverable. It runs left to right, the same direction as an organization chart.',
-      diaAlt: 'Flow diagram. One instruction goes to a Planning HQ, is split across six departments, passes an audit, and comes out as one deliverable. Below it, three standing facilities: the harness, the skills, and the automation.',
-      diaCaption: 'I publish this so it can be checked. If something here is wrong, that will show too.',
+      diaAlt: 'Flow diagram. One instruction goes to the Planning HQ, is split across six departments, passes an audit team, and comes out as one deliverable.',
 
-      readH: 'How to read it',
-      readRows: [
-        ['One instruction', 'A person gives it. Six fields: what, by when, in what form, with what inputs'],
-        ['Chief of staff', 'Splits the instruction and hands the parts out. The floor manager of the team'],
-        ['Six departments', 'Tech, knowledge, creative, marketing, business, research. The same seats a company has'],
-        ['Audit', 'Pass or fail only. The one who made it cannot pass it'],
-        ['One deliverable', 'A person checks it last. The person is never removed at this step'],
+      liveH: 'What\'s running right now',
+      liveP: 'Not a diagram. What is actually switched on right now.',
+      liveStats: [
+        { n: '3', l: 'servers running around the clock' },
+        { n: 'nearly 200', l: 'automation pipelines running' },
+        { n: 'about a dozen', l: 'agents, split across departments' },
+        { n: 'about 40', l: 'work manuals (skills), built in house' },
       ],
-
-      pipelineH: 'Content pipeline',
-      pipelineP: 'This is how writing gets onto this site. Material is pulled from daily work and published in rotating formats. What stays human is judgment and approval.',
-      nodes: [
-        { b: 'KJ', s: 'Judgment and approval. The operator viewpoint, added or cut' },
-        { b: 'case-capture', s: 'Pulls three to five lines out of the day and stacks them in a queue' },
-        { b: 'case-deep', s: 'Grows one item into a full case study. One diagram is mandatory' },
-        { b: 'case-rotate', s: 'Publishes the same item in a different short format each time' },
-        { b: 'ceo-eli5', s: 'The last gate. Can a non technical reader understand it in one pass' },
-      ],
-
-      stackH: 'Always on',
-      stackRows: [
-        ['Harness', 'One place for the rules to follow. It fires automatically at six points during a job'],
-        ['38 skills (as of 2026-09-03)', 'Standard operating procedures for repeated work. The same briefing is never given twice'],
-        ['Workflow automation', 'A conveyor belt that runs on schedule without a person. It reads and writes to outside systems directly'],
-        ['Document source of truth', 'Google Drive and Obsidian. One place is the answer, not three'],
-        ['Code and publishing', 'Public GitHub repositories. This site is assembled and shipped with one command'],
-      ],
-      note: 'This site was built with the same setup, and its source is public on GitHub. What you see here is what is in the repository.',
     },
 
     'then-now': {
       title: 'Then vs Now',
-      desc: 'What ten to seventeen people used to do, and how it became one person and a pipeline. Set against the organization charts and role assignments of that time.',
+      desc: 'What about twenty people used to do, and how it became one person and a pipeline. Set against the organization charts and role assignments of that time.',
       h1: 'The line with an empty box',
-      lead: 'Nothing here is invented. The comparison is drawn from the organization charts and role assignments written at the time.',
+      lead: 'The organization charts and role assignments from back then, set next to today.',
 
-      evidenceH: 'The records from that time are the evidence',
-      evidenceRows: [
-        ['10 to 17 employees', 'Recorded across multiple points in internal HR records, not a file we created ourselves'],
-        ['5 to 6 in marketing and sales', 'Five by the 2021 organization chart: four in sales and marketing plus one in design. Six by name on the 2023 task list'],
-        ['7 to 9 functions', 'Product, marketing, sales and logistics, customer service, production, quality, development. Each had its own owner'],
-        ['73 tasks, 6 people, 4 months', 'About 12.2 tasks each. Every one of the 73 rows with an owner assigned had an empty "hours needed" column.'],
-        ['The same approval paper, 12 months running', 'Same amount, same headcount, rewritten from scratch every month.'],
-        ['Version 11 of one product page', 'The same page reached version 11 (V0.11).'],
-        ['103,348 files', 'The figure comes from the 2026-07-14 archive summary and the 2026-09-03 recount.'],
+      evidenceH: 'What is left from back then',
+      evidenceP: [
+        'About 20 people worked here across several years, each area with its own owner - product planning, marketing, sales and delivery, customer service, production, quality, development.',
+        'During four months when tasks piled up, a few people split them, and the column for hours worked was left empty.',
+        'The same approval paper was rewritten from scratch every month, same amount, same headcount. The same product page was remade more than ten times.',
+        'Files piled up past 100,000. Still there today.',
       ],
 
-      anchorH: 'The line with an empty box',
+      anchorH: 'Why the box stayed empty',
       anchorP: [
         'In 2021 our own people wrote down eight reasons why work was running late. They put a countermeasure next to seven of them. Assign an owner. Send an alert after one, three and five days. Report two days before the deadline.',
         'The eighth reason has an empty box next to it. That reason was "delay caused by work overload". In plain words, too much work.',
@@ -389,66 +308,32 @@ export const CONTENT = {
 
     about: {
       title: 'About',
-      desc: 'From a sales job in 1986 through 18 years at LG, two companies founded and 28 patents. And an AI transition that started at 65.',
+      desc: 'From a sales job in 1986 through 18 years at LG, two companies founded and close to 30 patents. And an AI transition that started at 65.',
       h1: 'A challenge at 65',
-      lead: 'I started as a salesman in 1986. Then 18 years at LG, two companies founded, 28 patents. Today I run alone, with AI, the work that once took ten to seventeen people.',
-      timelineH: 'Career',
-      timeline: [
-        { when: '2013 -', b: 'AKSys / SHAKS', s: 'CEO, solo founder. 28 patents, OEM across 5+ countries' },
-        { when: '2013 - 2017', b: 'Innoplay', s: 'EVP / Shenzhen. China EMS manufacturing, IoT, smart home' },
-        { when: '2008 - 2013', b: 'Avantis', s: 'CEO and COO, co-founder. Four-nation JV across Italy, Spain, Norway and Korea' },
-        { when: '2003 - 2008', b: 'LG-Nortel', s: 'Head of European Sales / Milan' },
-        { when: '1999 - 2003', b: 'LG Electronics', s: 'GM, European Sales / Milan. Mobile handset expansion in Europe' },
-        { when: '1990 - 1999', b: 'LG Information and Communications', s: 'Sales, planning, strategy' },
-        { when: '1986 - 1990', b: 'BYC', s: 'Sales, planning' },
+      lead: 'I started as a salesman in 1986. Then 18 years at LG, two companies founded, close to 30 patents. Today I am trying something new - learning as I go, studying as I go, to see if I can run alone, with AI, the work that once took about twenty people.',
+
+      originH: '40 years, only the tools changed',
+      originP: [
+        'In 1989 to 1990 I bought a dBASE III book and taught myself, using the IBM XT class PC that came into our office. I also built management records with the Lotus 1-2-3 spreadsheet.',
+        'Back then I went to the telex room every morning to check messages from overseas buyers. Telex was the text message of its day, and it charged by the character, so everyone used short forms. Today\'s messenger abbreviations come from the same habit.',
+        'Fax spread in 1992 to 1993 and let us send documents on the spot. Email spread in 1996 to 1998 and changed how we worked again.',
+        'Telex, then fax, then email, and now AI agents. The tools kept changing, but what I do has stayed the same: decide what to do, give the instruction, and check the result.',
       ],
-      factsH: 'Verifiable record',
-      factsRows: [
-        ['Global ICT experience', FACTS.ictYears + ' years, including 18 at LG'],
-        ['CEO / C-level', FACTS.ceoYears + ' years, two companies founded'],
-        ['Patents', FACTS.patents + ' (13 granted, 15 filed)'],
-        ['Government R&D', 'About ' + FACTS.govRnd + ' projects, KRW ' + FACTS.govRndAmount + 'B as project lead'],
-        ['EU R&D', FACTS.euRnd + ' projects (Eureka, Horizon)'],
-        ['Global partnerships', 'Qualcomm, Google, Deutsche Telekom, TIM'],
-        ['Overseas assignments', FACTS.overseasYears + ' years (Italy 9, China 4)'],
+
+      careerH: 'Career',
+      careerP: [
+        'I spent 18 years in global sales and planning at LG.',
+        'Then 17 years in overseas joint ventures and global C-level roles. I lived overseas for more than 10 years, working across Italy, Spain, Norway and China.',
+        'Now I run AKSys and SHAKS, founded and operated alone. Close to 30 patents, about 20 government R&D projects and a few EU projects led. I bring that experience into an AI agent organization.',
       ],
 
       nowH: 'What I do now',
       nowP: [
-        'I do the work myself. Most of my day is giving instructions and checking what comes back.',
-        'Research, documents, code and publishing are handled by AI agents. Think of them as staff with fixed job descriptions. What I keep doing is judgment and approval.',
-        'I direct machines the same way I directed people for 40 years. What changed is who receives the instruction, not how it is given.',
-      ],
-
-      linksH: 'Elsewhere',
-    },
-
-    notes: {
-      title: 'Notes',
-      desc: 'What I did, and what I learned, moving 40 years of hands on work into AI orchestration.',
-      h1: 'This is what I did, and what happened',
-      lead: 'I have planned and run my own work since 1986. Now I am moving a large part of it into AI orchestration. This is what I did in that process, and what I learned.',
-
-      didH: 'What I did',
-      didP: [
-        'I built a structure that splits instructions across six departments and puts the result through an audit. I moved it over the same way a human organization worked.',
-        'I put work like government R&D, hardware productization and international partnerships into the same structure. Not all of it worked.',
-        'What did not work, I wrote down as not working. Where judgment could only be done by a person, I left it with a person.',
-      ],
-
-      learnedH: 'What I learned',
-      learnedP: [
+        'Now I give instructions and check what comes back. Research, documents, code and publishing are handled by a number of agents.',
+        'I built a structure that splits instructions across six departments and puts the result through an audit team. I moved it over the same way a human organization worked.',
+        'I put work like government R&D, hardware productization and international partnerships into the same structure. Not all of it worked. What did not work, I wrote down as not working. Where judgment could only be done by a person, I left it with a person.',
         'Handing work to a machine and changing how I give instructions turned out to be two different things. It worked better when I gave the machine the same instructions I gave people for 40 years.',
-        'What slowed things down first was not speed. It was the pass criteria. Without writing down what counts as done, the work kept coming back.',
-        'This worked for me, under my conditions. It may be different at another scale, or in another setting.',
-      ],
-
-      areasH: 'Areas I worked in',
-      areas: [
-        ['AI orchestration', 'Ran a structure that splits instructions and checks results, in practice'],
-        ['Business development', 'Coordinated international partnerships and OEM manufacturing across borders'],
-        ['Government R&D', 'Went through the full cycle, from proposal to closing'],
-        ['Hardware productization', 'Did requirements definition through certification myself'],
+        'What slowed things down first was not speed. It was the pass criteria. Without writing down what counts as done, the work kept coming back. This worked for me, under my conditions. It may be different at another scale, or in another setting.',
       ],
 
       linksH: 'Elsewhere',
