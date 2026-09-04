@@ -46,7 +46,7 @@ const PAGES = {
     system:    { title: ['This site was built by', 'the system on this page'], sub: 'The Claude Code harness and automation pipelines in operation.', label: 'THE SYSTEM', file: 'og-system-en' },
     'then-now':{ title: ['The line with an empty', 'box'], sub: 'One person and a pipeline now do the work of about twenty.', label: 'THEN VS NOW', file: 'og-then-now-en' },
     about:     { title: ['A challenge at 65'], sub: 'And an AI transition that started at 65.', label: 'ABOUT', file: 'og-about-en' },
-    cases:     { title: ['This is what I did, and', 'what happened'], sub: 'Real problems from real work, redesigned as a pipeline.', label: 'CASES', file: 'og-cases-en' },
+    cases:     { title: ['This is what I did, and', 'what happened'], sub: 'How real problems from real work were rebuilt as pipelines.', label: 'CASES', file: 'og-cases-en' },
   },
 };
 
