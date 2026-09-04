@@ -48,6 +48,30 @@ const ASSET_SITE_CSS = hashedAsset('css/site.css');
 const ASSET_TOKENS_CSS = hashedAsset('css/tokens.css');
 const ASSET_FAVICON = hashedAsset('img/favicon.svg');
 
+// OG(소셜 공유 카드) 이미지. 규격 정본 OG_이미지_규격_v0.1.md §7.1 - 파일명 고정,
+// 해시를 넣지 않는다(SNS 크롤러 캐시가 자산 캐시와 별개라 재해싱 이점이 없고,
+// 플랫폼마다 URL 을 기억해 재수집하므로 안정적인 고정 경로가 낫다).
+// index 는 og-<lang>.webp, 나머지는 og-<page>-<lang>.webp (og-build.mjs 산출과 동일 규칙).
+const ogImagePath = (page, lang) =>
+  `/assets/img/og/${page === 'index' ? `og-${lang}` : `og-${page}-${lang}`}.webp`;
+
+const OG_ALT = {
+  ko: {
+    index: 'kjyoo.cloud 로고와 "20여 명이 하던 일을 혼자서 돌립니다" 제목이 있는 어두운 배경 카드',
+    system: 'kjyoo.cloud 로고와 "이 사이트도 이 시스템이 만들었습니다" 제목이 있는 어두운 배경 카드',
+    'then-now': 'kjyoo.cloud 로고와 "대책 칸이 비어 있던 한 줄" 제목이 있는 어두운 배경 카드',
+    about: 'kjyoo.cloud 로고와 "65세의 도전" 제목이 있는 어두운 배경 카드',
+    cases: 'kjyoo.cloud 로고와 "이렇게 해봤고 이렇게 됐습니다" 제목이 있는 어두운 배경 카드',
+  },
+  en: {
+    index: 'kjyoo.cloud logo with the title "Work of a 20-person team, now run by one, with AI" on a dark card',
+    system: 'kjyoo.cloud logo with the title "This site was built by the system on this page" on a dark card',
+    'then-now': 'kjyoo.cloud logo with the title "The line with an empty box" on a dark card',
+    about: 'kjyoo.cloud logo with the title "A challenge at 65" on a dark card',
+    cases: 'kjyoo.cloud logo with the title "This is what I did, and what happened" on a dark card',
+  },
+};
+
 // 다이어그램 - 인라인 SVG. 정본은 다이어그램_주입지침_v0.1.md.
 // data-t 속성은 다국어 치환 지점 표시. KR 페이지는 원본 그대로 넣고,
 // EN 페이지는 빌드 시점에 아래 EN_TEXT/EN_A11Y 승인본(도해_영문세트_v0.1.md)으로
@@ -183,11 +207,10 @@ function injectEnSvg(raw, a11yMap, textMap, overflowMap) {
   return out;
 }
 
-// D-7 (2026-09-03 2차 감사 지적, 치명). 원본 SVG 파일(assets/img/diagram-*.svg)의 XML 주석에는
-// 정본 파일명, 내부 경로, 조직 절차
-// 세부가 작업자용 지침으로 적혀 있다. 이 주석이 그대로 HTML 로 나가면 대외 페이지 소스에
-// 내부 자료가 노출된다. 원본 SVG 파일 자체는 고치지 않고(작업자용 지침이므로 유지),
-// HTML 에 인라인될 때만 주석을 제거한다.
+// 원본 SVG 자산(assets/img/*.svg) 안의 XML 주석은 내부 경로나 조직 절차를
+// 담지 않도록 별도로 정리되어 있다. 다만 그 정리가 앞으로도 매번 지켜진다는
+// 보장이 없으므로, HTML 에 인라인되는 시점에 XML 주석을 항상 제거해
+// 저장소가 공개(public)여도 내부 자료가 새지 않게 한다.
 const stripXmlComments = (svg) => svg.replace(/<!--[\s\S]*?-->/g, '');
 
 const svgForLang = (raw, lang) =>
@@ -207,6 +230,9 @@ function layout({ t, page, body, pageData: pageDataOverride, pathOverride, altPa
   const title = page === 'index'
     ? `${pageData.title} - ${t.foot.tagline}`
     : `${pageData.title} - ${SITE.domain}`;
+  const ogLocale = t.lang === 'ko' ? 'ko_KR' : 'en_US';
+  const ogImageUrl = `https://${SITE.domain}${ogImagePath(page, t.lang)}`;
+  const ogImageAlt = (OG_ALT[t.lang] && OG_ALT[t.lang][page]) || pageData.desc;
 
   return `<!doctype html>
 <html lang="${t.lang}">
@@ -218,9 +244,18 @@ function layout({ t, page, body, pageData: pageDataOverride, pathOverride, altPa
 ${robotsNoindex ? '<meta name="robots" content="noindex">\n' : ''}<link rel="alternate" hreflang="${t.lang}" href="https://${SITE.domain}${selfPath}">
 <link rel="alternate" hreflang="${t.other.code}" href="https://${SITE.domain}${altPath}">
 <meta property="og:type" content="website">
+<meta property="og:site_name" content="${esc(SITE.domain)}">
+<meta property="og:locale" content="${ogLocale}">
 <meta property="og:title" content="${esc(title)}">
 <meta property="og:description" content="${esc(pageData.desc)}">
 <meta property="og:url" content="https://${SITE.domain}${selfPath}">
+<meta property="og:image" content="${ogImageUrl}">
+<meta property="og:image:type" content="image/webp">
+<meta property="og:image:width" content="2400">
+<meta property="og:image:height" content="1260">
+<meta property="og:image:alt" content="${esc(ogImageAlt)}">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="${ogImageUrl}">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="icon" href="${ASSET_FAVICON.publicPath}" type="image/svg+xml">
@@ -233,12 +268,12 @@ ${robotsNoindex ? '<meta name="robots" content="noindex">\n' : ''}<link rel="alt
 <header class="site-head">
   <div class="shell">
     <a class="brand" href="${href(t.dir, 'index')}" aria-label="kjyoo.cloud">
-      <svg class="mark" viewBox="0 0 64 48" width="28" height="21" aria-hidden="true" focusable="false">
-        <g fill="none" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M4 8 H22 Q30 8 30 16 V24" stroke="var(--kj-text-3)" stroke-width="5"/>
-          <path d="M4 24 H30" stroke="var(--kj-text-3)" stroke-width="5"/>
-          <path d="M4 40 H22 Q30 40 30 32 V24" stroke="var(--kj-text-3)" stroke-width="5"/>
-          <path d="M30 24 H60" stroke="var(--kj-accent)" stroke-width="7"/>
+      <svg class="mark" viewBox="0 0 64 64" width="24" height="24" aria-hidden="true" focusable="false">
+        <g fill="none" stroke-linecap="square" stroke-linejoin="miter">
+          <path d="M17 13 V51" stroke="var(--kj-text)" stroke-width="10"/>
+          <path d="M17 32 L34 13" stroke="var(--kj-text)" stroke-width="10"/>
+          <path d="M17 32 L34 51" stroke="var(--kj-text)" stroke-width="10"/>
+          <path d="M47 13 V40 Q47 51 36 51" stroke="var(--kj-accent)" stroke-width="10"/>
         </g>
       </svg>
       <span class="brand-text">kjyoo.cloud</span>
@@ -469,7 +504,7 @@ ${nowP}
 `;
 }
 
-// pageNotes 는 2026-09-04 개편(총괄 기획실 결정)으로 삭제했다. notes(일지) 페이지는
+// pageNotes 는 2026-09-04 개편(운영 결정)으로 삭제했다. notes(일지) 페이지는
 // cases 로 통합됐고 PAGES 배열에서도 빠졌다. 구 URL /{lang}/notes.html 은
 // build() 안의 리다이렉트 스텁이 처리한다(sitemap 미등재).
 
@@ -517,7 +552,7 @@ Sitemap: https://${SITE.domain}/sitemap.xml
 `;
 
 // 13개 고정 경로 - PAGES(6) x 언어(2) = 12 + 루트 언어 리다이렉트 1.
-// 케이스 개별 페이지도 CASES 배열에 있는 그대로 추가한다(총괄 기획실 지시 2026-09-03 - 발행
+// 케이스 개별 페이지도 CASES 배열에 있는 그대로 추가한다(2026-09-03 결정 - 발행
 // 스킬이 넣을 주소가 sitemap 에서도 실재해야 한다). draft(구조 검증용 표본)는 뺀다
 // (3차 감사 W-5 지적, 2026-09-03) - 공개 접근 가능 + sitemap 등재 + noindex 가 동시에
 // 걸려 있던 것이 결함이었다. 표본은 라이브에서 완전히 내리고, 실제 발행물이 sitemap 에
@@ -621,7 +656,7 @@ function build() {
   writeFileSync(join(DIST, 'index.html'), ROOT_REDIRECT, 'utf8');
   written.push('index.html');
 
-  // 구 /{lang}/notes.html 리다이렉트 스텁 (총괄 기획실 결정 2026-09-04). notes(일지) 페이지가
+  // 구 /{lang}/notes.html 리다이렉트 스텁 (2026-09-04 결정). notes(일지) 페이지가
   // cases 로 통합되면서 PAGES 에서 빠졌다. 라이브 운영 중 사이트라 외부 링크가 있을 수 있어
   // 404 로 두지 않고 cases 로 넘긴다. ROOT_REDIRECT 와 같은 방식(meta refresh + canonical)을
   // 언어별로 재사용한다. sitemap.xml 에는 올리지 않는다(지시서 3절 4번).

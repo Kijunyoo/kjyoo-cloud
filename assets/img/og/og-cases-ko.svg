@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 420" width="800" height="420">
+  <rect width="800" height="420" fill="#121212"/>
+  <svg x="48" y="48" width="24" height="24" viewBox="0 0 64 64">
+    <g fill="none" stroke-linecap="square" stroke-linejoin="miter">
+      <path d="M17 13 V51" stroke="#A0A0A0" stroke-width="10"/>
+      <path d="M17 32 L34 13" stroke="#A0A0A0" stroke-width="10"/>
+      <path d="M17 32 L34 51" stroke="#A0A0A0" stroke-width="10"/>
+      <path d="M47 13 V40 Q47 51 36 51" stroke="#EE1D3A" stroke-width="10"/>
+    </g>
+  </svg>
+  <text x="80" y="68" font-family="'Nanum Gothic','Noto Sans KR',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" font-size="23" font-weight="700" letter-spacing="-0.35" fill="#FAFAFA">kjyoo.cloud</text>
+  <text x="48" y="180" font-family="'Nanum Gothic','Noto Sans KR',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" font-size="56" font-weight="700" letter-spacing="-1.12" fill="#FAFAFA">이렇게 해봤고</text>
+  <text x="48" y="247" font-family="'Nanum Gothic','Noto Sans KR',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" font-size="56" font-weight="700" letter-spacing="-1.12" fill="#FAFAFA">이렇게 됐습니다</text>
+  <text x="48" y="291" font-family="'Nanum Gothic','Noto Sans KR',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" font-size="23" font-weight="400" fill="#DAD9D9">실제 업무에서 나온 문제와, 그것을 AI</text>
+  <text x="48" y="364" font-family="'Nanum Gothic','Noto Sans KR',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" font-size="19" font-weight="700" letter-spacing="2.66" fill="#A0A0A0">CASES</text>
+</svg>

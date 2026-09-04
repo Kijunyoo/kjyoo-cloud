@@ -1,11 +1,11 @@
 // ============================================================
 // kjyoo.cloud - 사이트 콘텐츠 정본
-// v0.3 (2026-09-04) - 개편 지시서 반영(KJ_수정지시서_20260904.md, 개편_작업지시서_20260904.md)
+// v0.3 (2026-09-04) - 개편 작업지시 반영
 //
 // 5개 섹션(index/cases/system/then-now/about) x 2개 언어(ko/en)의 모든 카피가 이 파일 하나에 있다.
 // 페이지 HTML을 직접 고치지 말고 여기를 고친 뒤 build.mjs 를 돌린다.
 //
-// v0.2 -> v0.3 요지 (개편_신규카피_v0.1.md / v0.2.md 근거)
+// v0.2 -> v0.3 요지
 //   - 보고서형 표 4종(system.readRows/stackRows, then-now.evidenceRows 각주, about.factsRows) 및
 //     방어형/자기증명 문구 전량 삭제. 감사팀이 아니라 방문자에게 하는 말만 남긴다.
 //   - notes(일지) 페이지 폐기, cases로 통합(대문 문장 이관). PAGES 6 -> 5.
@@ -105,7 +105,7 @@ export const CONTENT = {
         { n: '20여 건', l: '정부 R&D 총괄' },
       ],
       sections: [
-        { key: 'then-now', h: '그때와 지금', p: '분야별로 20여 명이 상주하던 조직이 어떻게 1인과 파이프라인으로 바뀌었는지, 당시 자료와 나란히 놓고 봅니다.' },
+        { key: 'then-now', h: '그때와 지금', p: '분야별로 20여 명이 상주하던 조직이 어떻게 1인과 자동화 파이프라인(공장 컨베이어 벨트처럼 일이 자동으로 이어지는 절차)으로 바뀌었는지, 당시 자료와 나란히 놓고 봅니다.' },
         { key: 'system', h: '실제 돌리는 시스템', p: '말이 아니라 기계를 보여줍니다. 지금 운용 중인 에이전트 구성과 자동화 파이프라인 구성입니다.' },
         { key: 'cases', h: '케이스 스터디', p: '성공 자랑이 아니라 실패를 시스템으로 제압한 과정을 씁니다. 2일에 한 번 발행합니다.' },
       ],
@@ -151,7 +151,7 @@ export const CONTENT = {
       evidenceP: [
         '직원 20여 명이 여러 해에 걸쳐 있었습니다. 상품기획, 마케팅, 영업배송, 고객서비스, 생산, 품질, 개발까지 갈래마다 담당이 따로 있었습니다.',
         '과제가 몰렸던 넉 달은 몇 명이 나눠 맡았는데, 일한 시간을 적어 둔 칸은 전부 비어 있었습니다.',
-        '같은 결재 문서를 금액도 인원도 거의 같은 채로 매달 새로 만들었고, 상세페이지도 같은 것을 열 번 넘게 다시 만들었습니다.',
+        '같은 결재 문서를 금액도 인원도 거의 같은 채로 매달 새로 만들었고, 상세페이지도 같은 것을 몇 번이고 다시 만들었습니다.',
         '그렇게 쌓인 파일이 10만 건 넘습니다. 지금 다시 봐도 그대로입니다.',
       ],
 
@@ -241,7 +241,7 @@ export const CONTENT = {
         { n: 'about 20', l: 'Government R&D projects led' },
       ],
       sections: [
-        { key: 'then-now', h: 'Then vs Now', p: 'How an organization of about twenty specialists became one person and a pipeline, set against the records from that time.' },
+        { key: 'then-now', h: 'Then vs Now', p: 'How an organization of about twenty specialists became one person and an automated pipeline, work moving on its own like items on a factory conveyor belt, set against the records from that time.' },
         { key: 'system', h: 'The system, in the open', p: 'Not claims, but the machine. The agent structure and automation pipelines currently in operation.' },
         { key: 'cases', h: 'Case studies', p: 'Not victory laps. How a failure was beaten by building a system. Published every second day.' },
       ],
@@ -287,7 +287,7 @@ export const CONTENT = {
       evidenceP: [
         'About 20 people worked here across several years, each area with its own owner - product planning, marketing, sales and delivery, customer service, production, quality, development.',
         'During four months when tasks piled up, a few people split them, and the column for hours worked was left empty.',
-        'The same approval paper was rewritten from scratch every month, same amount, same headcount. The same product page was remade more than ten times.',
+        'The same approval paper was rewritten from scratch every month, same amount, same headcount. The same product page was remade again and again.',
         'Files piled up past 100,000. Still there today.',
       ],
 

@@ -49,8 +49,7 @@ html[lang="ko"] body { word-break: keep-all; overflow-wrap: break-word; }
 }
 .brand:hover { text-decoration: none; }
 .brand:hover .brand-text { color: var(--kj-accent); }
-/* 워드마크 - 여러 갈래가 하나로 모여 레드 출력선이 된다.
-   stroke 를 토큰으로 두어 라이트/다크에서 함께 바뀐다. */
+/* 로고 마크. stroke 를 토큰으로 두어 라이트/다크에서 함께 바뀐다. */
 .brand .mark { display: block; flex: none; }
 .brand-text { transition: color 120ms ease; }
 

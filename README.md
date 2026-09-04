@@ -25,7 +25,7 @@ node build.mjs --serve    # dist/ 생성 후 http://localhost:4173 미리보기
 ```
 assets/css/tokens.css   브랜드 토큰. 원천은 SHAKS Design System 파운데이션
 assets/css/site.css     사이트 레이아웃. 색/서체/간격을 새로 정의하지 않고 토큰만 참조
-content/site.mjs        6개 섹션 x 2개 언어(ko/en) 전체 카피의 단일 정본
+content/site.mjs        5개 섹션 x 2개 언어(ko/en) 전체 카피의 단일 정본
 build.mjs               무의존성 정적 빌더
 dist/                   빌드 산출물. 커밋하지 않는다
 ```
@@ -45,8 +45,10 @@ dist/                   빌드 산출물. 커밋하지 않는다
 | `/{lang}/cases.html` | Case Studies |
 | `/{lang}/system.html` | The System. 실제 운용 스택 공개 |
 | `/{lang}/then-now.html` | Then vs Now. 조직 대비 다이어그램 |
-| `/{lang}/about.html` | About. 경력과 검증 가능 실측 |
-| `/{lang}/notes.html` | 일지 / Notes. 해본 것과 알게 된 것 |
+| `/{lang}/about.html` | About. 40년 서사, 경력, 지금 하는 일 |
+
+구 `/{lang}/notes.html`(일지)은 2026-09-04 개편으로 `cases.html`에 통합됐다. 이 URL은 404가
+아니라 `cases.html`로 넘어가는 리다이렉트 스텁이다(`sitemap.xml`에는 없음, `build.mjs`가 생성).
 
 `{lang}` 은 `ko` 또는 `en`.
 
