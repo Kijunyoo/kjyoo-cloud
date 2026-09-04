@@ -105,7 +105,7 @@ export const CONTENT = {
         { n: '20여 건', l: '정부 R&D 총괄' },
       ],
       sections: [
-        { key: 'then-now', h: '그때와 지금', p: '20여 명이 하던 일이 파이프라인(컨베이어 벨트)이 됐습니다. 당시 자료와 나란히 놓았습니다.' },
+        { key: 'then-now', h: '그때와 지금', p: '20여 명이 하던 일을 지금은 한 사람과 파이프라인이 합니다. 공장 컨베이어 벨트 같은 것입니다.' },
         { key: 'system', h: '실제 돌리는 시스템', p: '말이 아니라 기계를 보여줍니다. 지금 운용 중인 에이전트 구성과 자동화 파이프라인 구성입니다.' },
         { key: 'cases', h: '케이스 스터디', p: '성공 자랑이 아니라 실패를 시스템으로 제압한 과정을 씁니다. 2일에 한 번 발행합니다.' },
       ],
@@ -241,7 +241,7 @@ export const CONTENT = {
         { n: 'about 20', l: 'Government R&D projects led' },
       ],
       sections: [
-        { key: 'then-now', h: 'Then vs Now', p: 'Twenty people became one pipeline, like a conveyor belt. Set against the records from that time.' },
+        { key: 'then-now', h: 'Then vs Now', p: 'About twenty people did this work. Now one person and a pipeline do it, like a factory conveyor belt.' },
         { key: 'system', h: 'The system, in the open', p: 'Not claims, but the machine. The agent structure and automation pipelines currently in operation.' },
         { key: 'cases', h: 'Case studies', p: 'Not victory laps. How a failure was beaten by building a system. Published every second day.' },
       ],

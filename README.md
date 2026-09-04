@@ -65,7 +65,7 @@ dist/                   빌드 산출물. 커밋하지 않는다
 
 ## 작업 위치 주의
 
-**이 저장소는 로컬(`C:\Users\kj530\dev\kjyoo-cloud`)에만 둔다.**
+**이 저장소는 로컬 작업 폴더에만 둔다(Google Drive Stream 밖).**
 
 Google Drive Stream(`H:`) 에서는 Node 의 `cpSync` 가 프로세스를 크래시시킨다(exit `-1073740791`, STATUS_STACK_BUFFER_OVERRUN). 2026-09-01 실측. 기획 문서만 Drive 에 두고 코드는 여기에 둔다.
 

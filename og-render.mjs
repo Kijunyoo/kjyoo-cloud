@@ -22,11 +22,20 @@ import { join, dirname, basename } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { execFileSync } from 'node:child_process';
 import { createRequire } from 'node:module';
+import { homedir } from 'node:os';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const OG_DIR = join(__dirname, 'assets', 'img', 'og');
 const MASTER_DIR = join(__dirname, 'OG_PNG_MASTER');
-const TO_WEBP = 'C:\\Users\\kj530\\.config\\image-output\\to_webp.py';
+
+// 헌법 §2.9 결정적 래퍼 경로 - 저장소에 사용자 절대경로를 박지 않는다.
+// 환경변수 TO_WEBP 로 지정하거나, 문서화된 기본 규약 ~/.config/image-output/to_webp.py 를 쓴다.
+const TO_WEBP = process.env.TO_WEBP || join(homedir(), '.config', 'image-output', 'to_webp.py');
+if (!existsSync(TO_WEBP)) {
+  console.error(`[og-render] to_webp.py 래퍼를 찾을 수 없습니다: ${TO_WEBP}`);
+  console.error('환경변수 TO_WEBP 로 경로를 지정하거나, 헌법 §2.9 결정적 래퍼를 ~/.config/image-output/to_webp.py 에 설치하세요.');
+  process.exit(1);
+}
 
 function loadPlaywright() {
   const require = createRequire(import.meta.url);

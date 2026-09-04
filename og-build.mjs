@@ -37,14 +37,14 @@ const PAGES = {
   ko: {
     index:     { title: ['20여 명이 하던 일을', '혼자서 돌립니다'], sub: '40년 실무 경력 경영자의 AI 전환 실증 기록.', label: 'KJYOO.CLOUD', file: 'og-ko' },
     system:    { title: ['이 사이트도 이', '시스템이 만들었습니다'], sub: '지금 운용 중인 자동화 파이프라인 구성입니다.', label: 'THE SYSTEM', file: 'og-system-ko' },
-    'then-now':{ title: ['대책 칸이 비어 있던', '한 줄'], sub: '20여 명이 하던 일이 한 사람으로 바뀌었습니다.', label: 'THEN VS NOW', file: 'og-then-now-ko' },
+    'then-now':{ title: ['대책 칸이 비어 있던', '한 줄'], sub: '한 사람과 파이프라인이 20여 명의 일을 합니다.', label: 'THEN VS NOW', file: 'og-then-now-ko' },
     about:     { title: ['65세의 도전'], sub: '그리고 65세에 시작한 AI 전환의 기록.', label: 'ABOUT', file: 'og-about-ko' },
     cases:     { title: ['이렇게 해봤고', '이렇게 됐습니다'], sub: '실제 업무에서 나온 문제를 재설계한 과정입니다.', label: 'CASES', file: 'og-cases-ko' },
   },
   en: {
     index:     { title: ['Work of a 20-person team,', 'now run by one, with AI'], sub: "A record of a 40 year operator's AI transition.", label: 'KJYOO.CLOUD', file: 'og-en' },
     system:    { title: ['This site was built by', 'the system on this page'], sub: 'The Claude Code harness and automation pipelines in operation.', label: 'THE SYSTEM', file: 'og-system-en' },
-    'then-now':{ title: ['The line with an empty', 'box'], sub: 'Twenty people became one person and a pipeline.', label: 'THEN VS NOW', file: 'og-then-now-en' },
+    'then-now':{ title: ['The line with an empty', 'box'], sub: 'One person and a pipeline now do the work of about twenty.', label: 'THEN VS NOW', file: 'og-then-now-en' },
     about:     { title: ['A challenge at 65'], sub: 'And an AI transition that started at 65.', label: 'ABOUT', file: 'og-about-en' },
     cases:     { title: ['This is what I did, and', 'what happened'], sub: 'Real problems from real work, redesigned as a pipeline.', label: 'CASES', file: 'og-cases-en' },
   },
