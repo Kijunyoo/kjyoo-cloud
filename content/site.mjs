@@ -7,7 +7,7 @@
 //
 // v0.2 -> v0.3 요지
 //   - 보고서형 표 4종(system.readRows/stackRows, then-now.evidenceRows 각주, about.factsRows) 및
-//     방어형/자기증명 문구 전량 삭제. 감사팀이 아니라 방문자에게 하는 말만 남긴다.
+//     방어형/자기증명 문구 전량 삭제. 검수자가 아니라 방문자에게 하는 말만 남긴다.
 //   - notes(일지) 페이지 폐기, cases로 통합(대문 문장 이관). PAGES 6 -> 5.
 //   - about에 40년 기술 연륜 서사(originH/originP), 경력 압축(careerH/careerP) 신설.
 //   - system에 실가동 인프라 요약(liveH/liveP/liveStats) 신설.
@@ -105,7 +105,7 @@ export const CONTENT = {
         { n: '20여 건', l: '정부 R&D 총괄' },
       ],
       sections: [
-        { key: 'then-now', h: '그때와 지금', p: '분야별로 20여 명이 상주하던 조직이 어떻게 1인과 자동화 파이프라인(공장 컨베이어 벨트처럼 일이 자동으로 이어지는 절차)으로 바뀌었는지, 당시 자료와 나란히 놓고 봅니다.' },
+        { key: 'then-now', h: '그때와 지금', p: '20여 명이 하던 일이 파이프라인(컨베이어 벨트)이 됐습니다. 당시 자료와 나란히 놓았습니다.' },
         { key: 'system', h: '실제 돌리는 시스템', p: '말이 아니라 기계를 보여줍니다. 지금 운용 중인 에이전트 구성과 자동화 파이프라인 구성입니다.' },
         { key: 'cases', h: '케이스 스터디', p: '성공 자랑이 아니라 실패를 시스템으로 제압한 과정을 씁니다. 2일에 한 번 발행합니다.' },
       ],
@@ -241,7 +241,7 @@ export const CONTENT = {
         { n: 'about 20', l: 'Government R&D projects led' },
       ],
       sections: [
-        { key: 'then-now', h: 'Then vs Now', p: 'How an organization of about twenty specialists became one person and an automated pipeline, work moving on its own like items on a factory conveyor belt, set against the records from that time.' },
+        { key: 'then-now', h: 'Then vs Now', p: 'Twenty people became one pipeline, like a conveyor belt. Set against the records from that time.' },
         { key: 'system', h: 'The system, in the open', p: 'Not claims, but the machine. The agent structure and automation pipelines currently in operation.' },
         { key: 'cases', h: 'Case studies', p: 'Not victory laps. How a failure was beaten by building a system. Published every second day.' },
       ],

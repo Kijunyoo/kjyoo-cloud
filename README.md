@@ -4,8 +4,8 @@ KJ Yoo 퍼스널 브랜딩 사이트. 40년 실무를 AI 오케스트레이션�
 
 이 저장소 자체가 산출물이자 증거물이다. 사이트는 클로드코드로 만들었고 소스를 공개한다.
 
-- 상위 기획: `internal planning doc (not public)`
-- 브랜드 기준: 같은 폴더 `kjyoo_cloud_Brand_Foundation_v0.1.md`
+- 상위 기획: 내부 기획 정본 `AI_Advisor_Branding_Plan_20260901.md`
+- 브랜드 기준: 같은 정본 `kjyoo_cloud_Brand_Foundation_v0.1.md`
 
 ---
 

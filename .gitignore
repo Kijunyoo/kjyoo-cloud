@@ -6,3 +6,4 @@ deploy.env
 notion.env
 notion-sync-backup/
 content/site.mjs.bak.*
+OG_PNG_MASTER/

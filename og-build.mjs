@@ -2,9 +2,9 @@
 // kjyoo.cloud - OG(소셜 공유 카드) 이미지 생성기
 // v0.1 (2026-09-04)
 //
-// 규격 정본: internal spec doc (not public)
+// 규격 정본: 내부 기획 정본 OG_이미지_규격_v0.1.md
 // 공정(7.2절) - ① 이 스크립트로 아트보드 SVG 800x420 을 만든다
-//              ② 헤드리스 크로미움으로 배율 3배 렌더 -> PNG 2400x1260 마스터 (별도 단계, og-render.mjs)
+//              ② `node og-render.mjs` 로 헤드리스 크로미움 배율 3배 렌더 -> PNG 2400x1260 마스터
 //              ③ to_webp.py 결정적 래퍼로 변환 (별도 단계)
 // 매번 다른 방식으로 만들지 않기 위해 문안과 좌표를 이 파일 하나에 고정한다.
 //
@@ -16,6 +16,7 @@
 import { writeFileSync, mkdirSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { execFileSync } from 'node:child_process';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const OUT_DIR = join(__dirname, 'assets', 'img', 'og');
@@ -34,18 +35,18 @@ const FONT = "'Nanum Gothic','Noto Sans KR',-apple-system,BlinkMacSystemFont,'Se
 
 const PAGES = {
   ko: {
-    index:     { title: ['20여 명이 하던 일을', '혼자서 돌립니다'], sub: '한국, 중국, 유럽 20여 명이 하던 개발, 제조,', label: 'KJYOO.CLOUD', file: 'og-ko' },
-    system:    { title: ['이 사이트도 이', '시스템이 만들었습니다'], sub: '지금 운용 중인 클로드코드 하네스, 에이전트 조직,', label: 'THE SYSTEM', file: 'og-system-ko' },
-    'then-now':{ title: ['대책 칸이 비어 있던', '한 줄'], sub: 'AI 이전에 20여 명이 하던 일이, 지금 어떻게 한', label: 'THEN VS NOW', file: 'og-then-now-ko' },
-    about:     { title: ['65세의 도전'], sub: 'BYC 영업사원(1986)에서 시작해 LG 18년,', label: 'ABOUT', file: 'og-about-ko' },
-    cases:     { title: ['이렇게 해봤고', '이렇게 됐습니다'], sub: '실제 업무에서 나온 문제와, 그것을 AI', label: 'CASES', file: 'og-cases-ko' },
+    index:     { title: ['20여 명이 하던 일을', '혼자서 돌립니다'], sub: '40년 실무 경력 경영자의 AI 전환 실증 기록.', label: 'KJYOO.CLOUD', file: 'og-ko' },
+    system:    { title: ['이 사이트도 이', '시스템이 만들었습니다'], sub: '지금 운용 중인 자동화 파이프라인 구성입니다.', label: 'THE SYSTEM', file: 'og-system-ko' },
+    'then-now':{ title: ['대책 칸이 비어 있던', '한 줄'], sub: '20여 명이 하던 일이 한 사람으로 바뀌었습니다.', label: 'THEN VS NOW', file: 'og-then-now-ko' },
+    about:     { title: ['65세의 도전'], sub: '그리고 65세에 시작한 AI 전환의 기록.', label: 'ABOUT', file: 'og-about-ko' },
+    cases:     { title: ['이렇게 해봤고', '이렇게 됐습니다'], sub: '실제 업무에서 나온 문제를 재설계한 과정입니다.', label: 'CASES', file: 'og-cases-ko' },
   },
   en: {
-    index:     { title: ['Work of a 20-person team,', 'now run by one, with AI'], sub: 'Work that once took about 20 people across Korea, China and', label: 'KJYOO.CLOUD', file: 'og-en' },
-    system:    { title: ['This site was built by', 'the system on this page'], sub: 'The Claude Code harness, agent structure and automation', label: 'THE SYSTEM', file: 'og-system-en' },
-    'then-now':{ title: ['The line with an empty', 'box'], sub: 'What about twenty people used to do, and how it became one', label: 'THEN VS NOW', file: 'og-then-now-en' },
-    about:     { title: ['A challenge at 65'], sub: 'From a sales job in 1986 through 18 years at LG, two companies', label: 'ABOUT', file: 'og-about-en' },
-    cases:     { title: ['This is what I did, and', 'what happened'], sub: 'Real problems from real work, and how each was redesigned as', label: 'CASES', file: 'og-cases-en' },
+    index:     { title: ['Work of a 20-person team,', 'now run by one, with AI'], sub: "A record of a 40 year operator's AI transition.", label: 'KJYOO.CLOUD', file: 'og-en' },
+    system:    { title: ['This site was built by', 'the system on this page'], sub: 'The Claude Code harness and automation pipelines in operation.', label: 'THE SYSTEM', file: 'og-system-en' },
+    'then-now':{ title: ['The line with an empty', 'box'], sub: 'Twenty people became one person and a pipeline.', label: 'THEN VS NOW', file: 'og-then-now-en' },
+    about:     { title: ['A challenge at 65'], sub: 'And an AI transition that started at 65.', label: 'ABOUT', file: 'og-about-en' },
+    cases:     { title: ['This is what I did, and', 'what happened'], sub: 'Real problems from real work, redesigned as a pipeline.', label: 'CASES', file: 'og-cases-en' },
   },
 };
 
@@ -53,7 +54,7 @@ function esc(s) {
   return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
-// 마크 - 로고 A 모노그램 좌표 정본 (internal asset doc (not public) §1)과 동일
+// 마크 - 로고 A 모노그램 좌표 정본 (내부 기획 정본 로고 A 자산 README §1)과 동일
 function markSvg() {
   return `<svg x="48" y="48" width="24" height="24" viewBox="0 0 64 64">
     <g fill="none" stroke-linecap="square" stroke-linejoin="miter">
@@ -95,3 +96,7 @@ for (const lang of Object.keys(PAGES)) {
 }
 console.log(`OG 아트보드 ${written.length}개 생성 -> ${OUT_DIR}`);
 written.forEach((p) => console.log('  ' + p));
+
+// ② ③ 단계(렌더 -> WebP 변환)를 이어서 실행한다. `node og-build.mjs` 한 줄로
+// SVG 부터 WebP 까지 재현되게 하기 위함이다 (F-4 정정, 재현 사슬 정본은 og-render.mjs).
+execFileSync(process.execPath, [join(__dirname, 'og-render.mjs')], { stdio: 'inherit' });
