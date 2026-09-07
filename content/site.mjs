@@ -40,29 +40,57 @@ export const FACTS = {
 export const PAGES = ['index', 'cases', 'system', 'then-now', 'about'];
 
 // 결함 5 (케이스 개별 URL 부재, 2026-09-02 감사 지적) 대응. 케이스 1건당 1페이지
-// (/{lang}/cases/<slug>.html)를 build.mjs 가 여기서 만든다. 본문은 Phase 3 소관이라
-// 여기 있는 표본 1건은 draft: true 로 둔다. build.mjs 는 draft 항목을 목록, 개별 페이지,
-// sitemap 세 곳 전부에서 뺀다(3차 감사 W-5 지적, 2026-09-03) - 라이브에는 아무 흔적도
-// 남기지 않고, 구조는 코드에 그대로 보존한다. Phase 3 는 draft 를 지우고 실제 항목을 채운다.
+// (/{lang}/cases/<slug>.html)를 build.mjs 가 여기서 만든다. draft: true 를 넣으면
+// build.mjs 가 목록, 개별 페이지, sitemap 세 곳 전부에서 뺀다(3차 감사 W-5 지적,
+// 2026-09-03) - 라이브에는 아무 흔적도 남기지 않는다. 2026-09-07 MAT-0001
+// (org-chart-to-agents) 주입으로 표본 항목은 실제 케이스로 교체됐다.
+// figure 키(선택)는 body 배열 몇 번째 문단 뒤에 도해를 넣을지 나타내는 인덱스다
+// (build.mjs pageCaseDetail 참조).
 export const CASES = {
   ko: [
     {
-      slug: 'ws5b-structure-check',
-      title: '[구조 검증용 표본] 케이스 개별 페이지',
-      tag: '구조 검증',
-      summary: '케이스 1건이 개별 URL 하나로 뜨는지 확인하기 위한 표본이다. 실제 발행물이 아니다.',
-      body: ['본문 없음. build.mjs 가 content/site.mjs 의 CASES 배열에서 케이스별 페이지를 만들어내는지 확인하는 용도다. 실제 케이스 본문은 Phase 3에서 채운다.'],
-      draft: true,
+      slug: 'org-chart-to-agents',
+      title: '사람은 다 있는데 아무도 안 하는 일이 왜 생깁니까',
+      tag: '조직과 오케스트레이션',
+      summary: '인원이 부족했던 것이 아닙니다. 그런데도 아무도 손대지 않는 일이 있었습니다. 담당을 그때그때 정하던 방식을 상시 조직으로 바꾼 이야기입니다.',
+      figure: 10,
+      body: [
+        '인원이 부족했던 것이 아닙니다. 그런데도 아무도 손대지 않는 일이 있었습니다. 작년까지는 사람에게 일을 나눴고 지금은 프로그램에 나눕니다. 방식을 바꿔도 처음엔 같은 문제가 나타났습니다.',
+        '저는 일이 생길 때마다 담당을 새로 정했습니다. 급한 일이 오면 그 자리에서 역할을 하나 만들어 붙였습니다. 그 결과가 두 가지로 나왔습니다. 같은 일을 두 곳에서 하고 있었습니다. 그리고 아무도 손대지 않는 일이 생겼습니다. 중복과 공백이 동시에 나타났습니다.',
+        '사람 조직에서 겪던 문제와 같았습니다. 도구를 바꿨는데 문제는 그대로였습니다. 원인은 도구가 아니라 담당을 그때그때 정하는 방식에 있었기 때문입니다.',
+        '두 번째 문제는 결재였습니다. 저는 일을 맡기고도 진행 도중에 계속 질문을 받았습니다. 이것을 해도 되는지 묻는 질문이 반복됐고 그때마다 일이 멈춰 섰습니다. 맡겼다고 말만 했지 실제로는 제가 매 단계를 붙잡고 있었습니다.',
+        '그때와 지금을 수치로 대면 이렇습니다. 전체 상시 인원은 그때 10명에서 17명이었고(2017, 2019, 2021 세 시점, 정부 기관 발급 명부), 지금은 저 1명과 담당자 11입니다(조직 구성 파일 11개 직접 확인). 마케팅과 영업은 그때 5명에서 6명이 나눠 맡았고 지금은 담당자 1입니다. 제 결재가 필요한 일은 그때 진행 도중에도 수시로 필요했지만 지금은 삭제, 비용, 대외 발송, 사업 판단 네 가지로 한정됩니다. 마지막 항목은 지어내지 않았습니다. 확인한 것만 적었습니다.',
+        '저는 담당을 그때그때 만드는 것을 그만두고 상시 조직을 만들었습니다. 지금 구성은 저 1명에 담당자 11입니다. 담당자는 사람이 아니라 일을 맡는 프로그램입니다. 회사로 치면 담당자 한 명입니다. 이것을 여럿 두고 일을 나눠 주는 방식을 에이전트 오케스트레이션이라고 부릅니다. 비서실장이 실무자들에게 업무를 분장하는 것과 같습니다.',
+        '담당자 11 가운데 5는 저를 보좌하는 참모이고 6은 분야별 담당입니다. 분야는 기술, 지식, 창작, 마케팅, 사업, 조사입니다. 사람 회사의 부서 구성과 크게 다르지 않습니다.',
+        '정의할 때 한 가지를 반드시 적었습니다. 각 분야가 하지 않는 일입니다. 맡을 일만 적으면 경계가 겹칩니다. 하지 않을 일을 적어야 빈칸이 눈에 보입니다.',
+        '같은 시기에 결재도 다시 그었습니다. 제 승인이 필요한 일을 네 가지로 줄였습니다. 삭제, 비용, 대외 발송, 사업 판단입니다. 네 가지에는 공통점이 있습니다. 되돌릴 수 없거나 저 아니면 판단할 수 없는 일입니다. 지우면 돌아오지 않습니다. 돈은 나가면 끝입니다. 대외 발송은 제 이름으로 나갑니다. 사업 판단은 상대와의 사정을 저만 알고 있습니다.',
+        '나머지는 묻지 말고 끝까지 하고 결과를 가져오게 했습니다. 결재 단계를 줄인 것이 통제를 푼 것은 아닙니다. 되돌릴 수 없는 일에만 통제를 모은 것입니다.',
+        '이 변화를 그림 한 장으로 정리했습니다. 왼쪽이 그때이고 오른쪽이 지금입니다.',
+        '저한테는 그랬습니다. 프로그램을 들인 것이 아니라 조직도를 다시 그린 것이었습니다.',
+      ],
     },
   ],
   en: [
     {
-      slug: 'ws5b-structure-check',
-      title: '[Structure check sample] Individual case page',
-      tag: 'Structure check',
-      summary: 'A sample used to confirm one case renders at one URL. Not a real publication.',
-      body: ['No content. This confirms build.mjs generates a per-case page from the CASES array in content/site.mjs. Real case content is written in Phase 3.'],
-      draft: true,
+      slug: 'org-chart-to-agents',
+      title: 'Why does work go undone when everyone is already there?',
+      tag: 'Organization and orchestration',
+      summary: 'Headcount was not the problem. Still, some work went untouched. This is how I moved from assigning owners case by case to a standing structure.',
+      figure: 10,
+      body: [
+        'Headcount was not the problem. Still, some work went untouched. Until last year I split work among people. Now I split it among programs. The method changed. At first, the same problem showed up again.',
+        'I used to assign an owner each time a new task came up. When something urgent landed, I created a role for it on the spot. Two things followed. The same work got done twice, in two places. And some work nobody touched at all. Duplication and gaps showed up at the same time.',
+        'This was the same problem I had with a team of people. I changed the tool. The problem stayed. The cause was not the tool. It was how I assigned ownership, case by case, every time.',
+        'The second problem was approval. I handed off work, but kept getting asked mid task whether it was okay to proceed. Each question stopped the work. I said I had delegated it. In practice I was still holding every step.',
+        'Here is the same story in numbers. Full time headcount was 10 to 17 people back then (three points: 2017, 2019, 2021, from official registration records), and it is me plus 11 agents now (checked directly against 11 org definition files). Marketing and sales took 5 to 6 people back then, and 1 agent now. Work needing my approval used to come up any time, mid task. Now it is limited to four cases: deletion, spend, outbound communication, business decisions. That last line is not invented. I only wrote what I could confirm.',
+        'I stopped creating a role each time and built a standing structure instead. Now it is me plus 11 agents. An agent is not a person, it is a program that owns a piece of work. One agent is like one staff member, in company terms. Running several of them and splitting work among them is called agent orchestration. It works the way a chief of staff assigns work to staff.',
+        'Of the 11 agents, 5 support me directly and 6 own one function each. The functions are tech, knowledge, creative, marketing, business, and research. It is close to a normal company org chart.',
+        'When I defined each one, I made sure to write down what it does not do. If you only write what it owns, the boundaries overlap. Writing what it does not do is what makes the gaps visible.',
+        'At the same time I redrew approval. I cut what needs my sign off to four things: deletion, spend, outbound communication, business decisions. These four share something. They are either irreversible or only I can judge them. A deletion does not come back. Money, once spent, is spent. Outbound communication goes out under my name. Business decisions depend on context only I have.',
+        'Everything else, I told them to finish without asking and bring me the result. Cutting approval steps did not loosen control. It moved control onto the things that cannot be undone.',
+        'I put this change into one picture. Left is then, right is now.',
+        'For me, that is what happened. I did not bring in a tool. I redrew the org chart.',
+      ],
     },
   ],
 };

@@ -374,10 +374,19 @@ ${list.map((c) => `      <article class="card">
 `;
 }
 
-// 결함 5 - 케이스 1건당 1페이지. 본문은 Phase 3 소관이므로 여기서는 CASES 배열이 있는 그대로
-// 렌더링만 한다. 문구를 새로 짓지 않는다.
+// 결함 5 - 케이스 1건당 1페이지. 본문은 CASES 배열이 있는 그대로 렌더링만 한다.
+// 문구를 새로 짓지 않는다.
+// figure 키(선택, 2026-09-07 MAT-0001 주입) - c.figure 가 숫자면 그 인덱스 문단
+// 바로 뒤에 then-vs-now 도해를 넣는다. 렌더 방식은 pageThenNow 와 동일하게
+// kjd-wrap + svgForLang 을 그대로 재사용한다(언어별 처리 이원화 금지).
 function pageCaseDetail(t, c) {
-  const bodyP = c.body.map((p) => `      <p>${esc(p)}</p>`).join('\n');
+  const figureBlock = `    <div class="kjd-wrap" role="group" tabindex="0" aria-label="${esc(t.a11y.diagramScroll)}">
+${svgForLang(SVG_THEN_NOW, t.lang)}
+    </div>`;
+  const bodyP = c.body.map((p, i) => {
+    const para = `      <p>${esc(p)}</p>`;
+    return c.figure === i ? `${para}\n${figureBlock}` : para;
+  }).join('\n');
   const backLabel = t.lang === 'ko' ? '목록으로' : 'Back to list';
   return `<section class="band">
   <div class="shell">
