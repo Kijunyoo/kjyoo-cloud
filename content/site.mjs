@@ -56,6 +56,7 @@ export const CASES = {
       title: '사람은 다 있는데 아무도 안 하는 일이 왜 생깁니까',
       tag: '조직과 오케스트레이션',
       summary: '인원이 부족했던 것이 아닙니다. 그런데도 아무도 손대지 않는 일이 있었습니다. 담당을 그때그때 정하던 방식을 상시 조직으로 바꾼 이야기입니다.',
+      figure: 10,
       body: [
         '인원이 부족했던 것이 아닙니다. 그런데도 아무도 손대지 않는 일이 있었습니다. 작년까지는 사람에게 일을 나눴고 지금은 프로그램에 나눕니다. 방식을 바꿔도 처음엔 같은 문제가 나타났습니다.',
         '저는 일이 생길 때마다 담당을 새로 정했습니다. 급한 일이 오면 그 자리에서 역할을 하나 만들어 붙였습니다. 그 결과가 두 가지였습니다. 같은 일을 두 곳에서 하고 있었습니다. 그리고 아무도 손대지 않는 일이 생겼습니다. 중복과 공백이 같이 나타났습니다.',
@@ -87,6 +88,7 @@ export const CASES = {
       title: 'Why does work go undone when everyone is already there?',
       tag: 'Organization and orchestration',
       summary: 'Headcount was not the problem. Still, some work went untouched. This is how I moved from assigning owners case by case to a standing structure.',
+      figure: 10,
       body: [
         'Headcount was not the problem. Still, some work went untouched. Until last year I split work among people. Now I split it among programs. The method changed. At first, the same problem showed up again.',
         'I used to assign an owner each time a new task came up. When something urgent landed, I created a role for it on the spot. Two things followed. The same work got done twice, in two places. And some work nobody touched at all. Duplication and gaps showed up together.',

@@ -78,6 +78,9 @@ const OG_ALT = {
 // data-t 텍스트 노드와 title/desc 4곳을 치환한다. data-t 속성 자체는 지우지 않는다.
 const SVG_THE_SYSTEM = readFileSync(join(ROOT, 'assets/img/diagram-the-system.svg'), 'utf8');
 const SVG_THEN_NOW = readFileSync(join(ROOT, 'assets/img/diagram-then-vs-now.svg'), 'utf8');
+// 2026-09-08 MAT-0001 v2 동반 도해 - 케이스 org-chart-to-agents 전용. then-now
+// 페이지의 SVG_THEN_NOW 와는 별개 자산이다(둘 다 유지, 서로 대체하지 않는다).
+const SVG_TVN2 = readFileSync(join(ROOT, 'assets/img/diagram_org_boundary_v0.1.svg'), 'utf8');
 
 // title/desc (data-t 없음, id로 매칭)
 const EN_A11Y = {
@@ -85,6 +88,8 @@ const EN_A11Y = {
   kjdSysDesc: 'One instruction goes to the Planning HQ, who splits it across six departments. Results pass the audit team and come out as one deliverable.',
   kjdTvnTitle: 'Then vs Now - same work, different headcount',
   kjdTvnDesc: 'The left panel is the past organization: six roles, nineteen people. Each dot is one person - six in R&D, four in sales and marketing, four overseas, three in business planning, and one each in CEO and design. The right panel is six department agents doing the same work today, with one person. The converging shape in the middle marks the shift from many to one.',
+  kjdTvn2Title: 'Then vs Now - from overlap and gaps to a drawn boundary',
+  kjdTvn2Desc: 'The left panel is then: two dashed owner boxes both point to the same task, stacking it, while a third task sits untouched with no arrow reaching it. The right panel is now: six functions sit inside one continuous boundary, divided into six cells with no overlap and no gap. The band below is approval - on the left, arrows return to me at many points; on the right, only four: deletion, spend, outbound communication, and business decisions.',
 };
 
 // data-t 키 -> EN 승인본. 문자열이면 한 줄 치환.
@@ -155,6 +160,27 @@ const EN_TEXT = {
   'tvn.m2.now': 'Agent 1',
   'tvn.m3.label.now': 'Areas',
   'tvn.m3.now': '6 areas',
+
+  // tvn2.* - diagram_org_boundary_v0.1.svg (2026-09-08 MAT-0001 v2 동반 도해).
+  // KJ 확정 치환표를 그대로 옮긴다. 문안 재작성 금지.
+  'tvn2.then.h1': 'Every time work came up',
+  'tvn2.then.h2': 'I assigned it on the spot',
+  'tvn2.then.sub': 'Two on one task, none on another',
+  'tvn2.now.h1': 'I drew the boundary',
+  'tvn2.now.h2': 'before I started',
+  'tvn2.now.sub': 'No overlap, no gap',
+  'tvn2.dept.tech': 'Tech',
+  'tvn2.dept.knowledge': 'Knowledge',
+  'tvn2.dept.creative': 'Creative',
+  'tvn2.dept.marketing': 'Marketing',
+  'tvn2.dept.business': 'Business',
+  'tvn2.dept.intelligence': 'Research',
+  'tvn2.appr.then': 'It came back to me, any time',
+  'tvn2.appr.now': 'Only four things come back',
+  'tvn2.appr.tag1': 'Delete',
+  'tvn2.appr.tag2': 'Spend',
+  'tvn2.appr.tag3': 'Outbound',
+  'tvn2.appr.tag4': 'Decision',
 };
 
 const xmlesc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -376,15 +402,17 @@ ${list.map((c) => `      <article class="card">
 
 // 결함 5 - 케이스 1건당 1페이지. 본문은 CASES 배열이 있는 그대로 렌더링만 한다.
 // 문구를 새로 짓지 않는다.
-// figure 키(선택) - c.figure 가 숫자면 그 인덱스 문단 바로 뒤에 then-vs-now 도해를
-// 넣는다. 렌더 방식은 pageThenNow 와 동일하게 kjd-wrap + svgForLang 을 그대로
-// 재사용한다(언어별 처리 이원화 금지). 2026-09-08 MAT-0001 v2 - 현재 붙는 도해가
-// 본문과 맞지 않아 데이터에서 figure 키를 뺐다. 새 도해가 나오면 다시 쓴다(코드는 유지).
+// figure 키(선택) - c.figure 가 숫자면 그 인덱스 문단 바로 뒤에 케이스 전용 도해
+// (SVG_TVN2, diagram_org_boundary_v0.1.svg)를 넣는다. then-now 페이지의
+// SVG_THEN_NOW 와는 별개 자산이다 - 케이스 도해를 바꿔도 then-now 페이지는
+// 그대로다. 렌더 방식은 pageThenNow 와 동일하게 kjd-wrap + svgForLang 을 재사용한다
+// (언어별 처리 이원화 금지). 2026-09-08 MAT-0001 v2 - diagram_org_boundary_v0.1.svg
+// 로 교체(좌표 겹침 결함 수정, 좌표 겹침 0 재실측 완료).
 // thenNow 키(선택, 2026-09-08 MAT-0001 v2 주입) - c.thenNow.after 문단 뒤에
 // Then vs Now 대비표를 실제 <table> 로 그린다. 표를 산문으로 풀지 않는다.
 function pageCaseDetail(t, c) {
   const figureBlock = `    <div class="kjd-wrap" role="group" tabindex="0" aria-label="${esc(t.a11y.diagramScroll)}">
-${svgForLang(SVG_THEN_NOW, t.lang)}
+${svgForLang(SVG_TVN2, t.lang)}
     </div>`;
   const tn = c.thenNow;
   const tableBlock = tn
@@ -641,6 +669,9 @@ function build() {
   // 그대로 둔다 - 작업자용 주석이 필요한 것은 원본이지 배포본이 아니다.
   rmSync(join(DIST, 'assets/img/diagram-the-system.svg'), { force: true });
   rmSync(join(DIST, 'assets/img/diagram-then-vs-now.svg'), { force: true });
+  // diagram_org_boundary_v0.1.svg (2026-09-08 MAT-0001 v2) - 같은 이유로 인라인 전용,
+  // URL 참조 없음. D-7과 동일 조치.
+  rmSync(join(DIST, 'assets/img/diagram_org_boundary_v0.1.svg'), { force: true });
 
   const written = [];
   for (const langKey of Object.keys(CONTENT)) {

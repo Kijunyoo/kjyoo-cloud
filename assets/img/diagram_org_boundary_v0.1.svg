@@ -1,0 +1,142 @@
+<svg xmlns="http://www.w3.org/2000/svg" class="kjd kjd-tvn2" viewBox="-4 -4 1040 564" width="1040" height="564" role="img" aria-labelledby="kjdTvn2Title kjdTvn2Desc">
+<title id="kjdTvn2Title">그때와 지금 - 겹침과 빈칸에서 경계로</title>
+<desc id="kjdTvn2Desc">왼쪽은 일이 생길 때마다 담당을 점선 상자로 새로 만들던 그때다. 담당 둘이 같은 일감 하나를 함께 가리켜 그 일감이 겹쳐 쌓여 있고, 다른 일감 하나는 어떤 담당도 가리키지 않아 비어 있다. 오른쪽은 여섯 분야가 하나로 이어진 경계 안에서 겹침도 빈칸도 없이 일을 나눠 맡는 지금이다. 아래 띠는 결재다. 왼쪽은 여러 지점에서 화살표가 나에게 되돌아오고, 오른쪽은 삭제, 비용, 대외 발송, 사업 판단 네 지점에서만 되돌아온다.</desc>
+
+<style>
+.kjd-tvn2 text { font-family: var(--kj-font, "Nanum Gothic", "Noto Sans KR", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif); }
+.kjd-tvn2 .t-era-then { font-size: 16px; font-weight: 700; letter-spacing: 1.6px; fill: var(--kj-text-2, #737373); }
+.kjd-tvn2 .t-era-now  { font-size: 16px; font-weight: 700; letter-spacing: 1.6px; fill: var(--kj-text, #383838); }
+.kjd-tvn2 .t-h        { font-size: 23px; font-weight: 700; fill: var(--kj-text, #383838); }
+.kjd-tvn2 .t-sub      { font-size: 16px; font-weight: 400; fill: var(--kj-text-2, #737373); }
+.kjd-tvn2 .t-lane     { font-size: 16px; font-weight: 700; fill: var(--kj-text, #383838); }
+.kjd-tvn2 .t-cap      { font-size: 16px; font-weight: 400; fill: var(--kj-text-2, #737373); }
+.kjd-tvn2 .t-tag      { font-size: 16px; font-weight: 700; fill: var(--kj-accent, #E5002B); }
+.kjd-tvn2 .panel      { fill: var(--kj-surface, #FFFFFF); stroke: var(--kj-border, rgba(0,0,0,0.08)); stroke-width: 1; }
+.kjd-tvn2 .box        { fill: var(--kj-surface, #FFFFFF); stroke: var(--kj-text-3, #787878); stroke-width: 1.5; }
+.kjd-tvn2 .box-back   { fill: var(--kj-bg, #FAFAFA); stroke: var(--kj-text-3, #787878); stroke-width: 1.5; }
+.kjd-tvn2 .box-dashed { fill: none; stroke: var(--kj-text-3, #787878); stroke-width: 1.5; stroke-dasharray: 5 4; }
+.kjd-tvn2 .box-fade   { fill: none; stroke: var(--kj-divider, rgba(0,0,0,0.2)); stroke-width: 1.5; stroke-dasharray: 3 4; }
+.kjd-tvn2 .grid       { fill: none; stroke: var(--kj-text, #383838); stroke-width: 1.5; }
+.kjd-tvn2 .grid-line  { stroke: var(--kj-border, rgba(0,0,0,0.08)); stroke-width: 1.5; }
+.kjd-tvn2 .rule       { stroke: var(--kj-divider, rgba(0,0,0,0.06)); stroke-width: 1; }
+.kjd-tvn2 .tick-out   { stroke: var(--kj-accent, #E5002B); stroke-width: 3; stroke-linecap: round; }
+.kjd-tvn2 .tick-gray  { stroke: var(--kj-text-3, #787878); stroke-width: 2; stroke-linecap: round; }
+.kjd-tvn2 .flow-then  { fill: none; stroke: var(--kj-text-3, #787878); stroke-width: 1.75; marker-end: url(#kjArrThen); }
+.kjd-tvn2 .flow-now   { fill: none; stroke: var(--kj-accent, #E5002B); stroke-width: 1.75; }
+.kjd-tvn2 .dot-event  { fill: var(--kj-text-3, #787878); }
+.kjd-tvn2 .dot-event-now { fill: var(--kj-accent, #E5002B); }
+.kjd-tvn2 .dot-anchor { fill: var(--kj-text, #383838); }
+.kjd-tvn2 .dot-anchor-now { fill: var(--kj-accent, #E5002B); }
+.kjd-tvn2 .mk-line    { fill: none; stroke: var(--kj-text-3, #787878); stroke-width: 5; stroke-linecap: round; stroke-linejoin: round; }
+.kjd-tvn2 .mk-out     { fill: none; stroke: var(--kj-accent, #E5002B); stroke-width: 7; stroke-linecap: round; stroke-linejoin: round; }
+</style>
+
+<defs>
+  <marker id="kjArrThen" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+    <path d="M0 0 L10 5 L0 10 z" fill="var(--kj-text-3, #787878)"/>
+  </marker>
+</defs>
+
+<!-- ================= 왼쪽. THEN - 겹침과 빈칸 ================= -->
+<rect class="panel" x="0" y="0" width="484" height="336" rx="17"/>
+
+<text class="t-era-then" x="32" y="48">THEN</text>
+<text class="t-h"   x="32" y="88"  data-t="tvn2.then.h1">일이 생길 때마다</text>
+<text class="t-h"   x="32" y="118" data-t="tvn2.then.h2">담당을 새로 정했다</text>
+<text class="t-sub" x="32" y="146" data-t="tvn2.then.sub">같은 일에 둘, 어떤 일엔 아무도</text>
+<line class="rule" x1="32" y1="168" x2="452" y2="168"/>
+
+<!-- 담당 상자 2개. 그때그때 만든 것이므로 점선 -->
+<rect class="box-dashed" x="48" y="190" width="150" height="52" rx="8"/>
+<rect class="box-dashed" x="286" y="190" width="150" height="52" rx="8"/>
+
+<!-- 일감. 가운데는 담당 둘이 겹쳐 가리키는 일감(쌓인 상자로 표시), 오른쪽은 어떤 담당도 가리키지 않는 일감(흐린 점선, 화살표 없음). 둘 사이는 뚜렷하게 떨어뜨려 혼자 남은 일감으로 읽히게 한다 -->
+<rect class="box-back" x="148" y="280" width="130" height="56" rx="8"/>
+<rect class="box" x="140" y="272" width="130" height="56" rx="8"/>
+<rect class="box-fade" x="310" y="272" width="130" height="56" rx="8"/>
+
+<!-- 담당 둘의 화살표가 같은 일감 하나로 모인다 -->
+<path class="flow-then" d="M123 242 Q123 258 172 272"/>
+<path class="flow-then" d="M361 242 Q361 258 238 272"/>
+
+<!-- ================= 가운데. 수렴 표식 ================= -->
+<g transform="translate(482 149)">
+  <path class="mk-line" d="M17 13 V51"/>
+  <path class="mk-line" d="M17 32 L34 13"/>
+  <path class="mk-line" d="M17 32 L34 51"/>
+  <path class="mk-out"  d="M47 13 V40 Q47 51 36 51"/>
+</g>
+
+<!-- ================= 오른쪽. NOW - 경계 ================= -->
+<rect class="panel" x="548" y="0" width="484" height="336" rx="17"/>
+
+<text class="t-era-now" x="580" y="48">NOW</text>
+<text class="t-h"   x="580" y="88"  data-t="tvn2.now.h1">경계를 먼저</text>
+<text class="t-h"   x="580" y="118" data-t="tvn2.now.h2">긋고 시작했다</text>
+<text class="t-sub" x="580" y="146" data-t="tvn2.now.sub">겹침도 빈칸도 없다</text>
+<line class="rule" x1="580" y1="168" x2="1000" y2="168"/>
+
+<!-- 하나로 이어진 경계 안을 여섯 칸으로 나눈다. 칸끼리 겹치지도, 사이가 비지도 않는다 -->
+<rect class="grid" x="580" y="192" width="420" height="144" rx="8"/>
+<line class="grid-line" x1="720" y1="192" x2="720" y2="336"/>
+<line class="grid-line" x1="860" y1="192" x2="860" y2="336"/>
+<line class="grid-line" x1="580" y1="264" x2="1000" y2="264"/>
+
+<line class="tick-out" x1="640" y1="206" x2="660" y2="206"/>
+<text class="t-lane" x="650" y="232" text-anchor="middle" data-t="tvn2.dept.tech">기술</text>
+<line class="tick-gray" x1="640" y1="250" x2="660" y2="250"/>
+
+<line class="tick-out" x1="780" y1="206" x2="800" y2="206"/>
+<text class="t-lane" x="790" y="232" text-anchor="middle" data-t="tvn2.dept.knowledge">지식</text>
+<line class="tick-gray" x1="780" y1="250" x2="800" y2="250"/>
+
+<line class="tick-out" x1="920" y1="206" x2="940" y2="206"/>
+<text class="t-lane" x="930" y="232" text-anchor="middle" data-t="tvn2.dept.creative">창작</text>
+<line class="tick-gray" x1="920" y1="250" x2="940" y2="250"/>
+
+<line class="tick-out" x1="640" y1="278" x2="660" y2="278"/>
+<text class="t-lane" x="650" y="304" text-anchor="middle" data-t="tvn2.dept.marketing">마케팅</text>
+<line class="tick-gray" x1="640" y1="322" x2="660" y2="322"/>
+
+<line class="tick-out" x1="780" y1="278" x2="800" y2="278"/>
+<text class="t-lane" x="790" y="304" text-anchor="middle" data-t="tvn2.dept.business">사업</text>
+<line class="tick-gray" x1="780" y1="322" x2="800" y2="322"/>
+
+<line class="tick-out" x1="920" y1="278" x2="940" y2="278"/>
+<text class="t-lane" x="930" y="304" text-anchor="middle" data-t="tvn2.dept.intelligence">조사</text>
+<line class="tick-gray" x1="920" y1="322" x2="940" y2="322"/>
+
+<!-- ================= 아래 띠. 결재 ================= -->
+<rect class="panel" x="0" y="352" width="484" height="200" rx="17"/>
+<text class="t-cap" x="32" y="384" data-t="tvn2.appr.then">언제든 나에게 되돌아왔다</text>
+<line class="rule" x1="32" y1="442" x2="452" y2="442"/>
+<circle class="dot-event" cx="110" cy="442" r="5"/>
+<circle class="dot-event" cx="180" cy="442" r="5"/>
+<circle class="dot-event" cx="250" cy="442" r="5"/>
+<circle class="dot-event" cx="320" cy="442" r="5"/>
+<circle class="dot-event" cx="390" cy="442" r="5"/>
+<path class="flow-then" d="M110 447 Q170 494 253 517"/>
+<path class="flow-then" d="M180 447 Q210 494 253 517"/>
+<path class="flow-then" d="M250 447 Q252 484 258 517"/>
+<path class="flow-then" d="M320 447 Q296 494 263 517"/>
+<path class="flow-then" d="M390 447 Q336 494 263 517"/>
+<circle class="dot-anchor" cx="258" cy="522" r="7"/>
+
+<rect class="panel" x="548" y="352" width="484" height="200" rx="17"/>
+<text class="t-cap" x="580" y="384" data-t="tvn2.appr.now">네 가지만 나에게</text>
+<line class="rule" x1="580" y1="442" x2="968" y2="442"/>
+<circle class="dot-event-now" cx="650" cy="442" r="5"/>
+<circle class="dot-event-now" cx="750" cy="442" r="5"/>
+<circle class="dot-event-now" cx="850" cy="442" r="5"/>
+<circle class="dot-event-now" cx="950" cy="442" r="5"/>
+<text class="t-tag" x="650" y="424" text-anchor="middle" data-t="tvn2.appr.tag1">삭제</text>
+<text class="t-tag" x="750" y="424" text-anchor="middle" data-t="tvn2.appr.tag2">비용</text>
+<text class="t-tag" x="850" y="424" text-anchor="middle" data-t="tvn2.appr.tag3">대외 발송</text>
+<text class="t-tag" x="950" y="424" text-anchor="middle" data-t="tvn2.appr.tag4">사업 판단</text>
+<path class="flow-now" d="M650 447 Q690 494 793 517"/>
+<path class="flow-now" d="M750 447 Q760 494 796 517"/>
+<path class="flow-now" d="M850 447 Q840 494 804 517"/>
+<path class="flow-now" d="M950 447 Q900 494 807 517"/>
+<circle class="dot-anchor-now" cx="800" cy="522" r="7"/>
+
+</svg>
