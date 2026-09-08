@@ -376,16 +376,31 @@ ${list.map((c) => `      <article class="card">
 
 // 결함 5 - 케이스 1건당 1페이지. 본문은 CASES 배열이 있는 그대로 렌더링만 한다.
 // 문구를 새로 짓지 않는다.
-// figure 키(선택, 2026-09-07 MAT-0001 주입) - c.figure 가 숫자면 그 인덱스 문단
-// 바로 뒤에 then-vs-now 도해를 넣는다. 렌더 방식은 pageThenNow 와 동일하게
-// kjd-wrap + svgForLang 을 그대로 재사용한다(언어별 처리 이원화 금지).
+// figure 키(선택) - c.figure 가 숫자면 그 인덱스 문단 바로 뒤에 then-vs-now 도해를
+// 넣는다. 렌더 방식은 pageThenNow 와 동일하게 kjd-wrap + svgForLang 을 그대로
+// 재사용한다(언어별 처리 이원화 금지). 2026-09-08 MAT-0001 v2 - 현재 붙는 도해가
+// 본문과 맞지 않아 데이터에서 figure 키를 뺐다. 새 도해가 나오면 다시 쓴다(코드는 유지).
+// thenNow 키(선택, 2026-09-08 MAT-0001 v2 주입) - c.thenNow.after 문단 뒤에
+// Then vs Now 대비표를 실제 <table> 로 그린다. 표를 산문으로 풀지 않는다.
 function pageCaseDetail(t, c) {
   const figureBlock = `    <div class="kjd-wrap" role="group" tabindex="0" aria-label="${esc(t.a11y.diagramScroll)}">
 ${svgForLang(SVG_THEN_NOW, t.lang)}
     </div>`;
+  const tn = c.thenNow;
+  const tableBlock = tn
+    ? `    <div class="tablewrap">
+      <table>
+        <thead><tr>${tn.head.map((h) => `<th>${esc(h)}</th>`).join('')}</tr></thead>
+        <tbody>
+${tn.rows.map((r) => `          <tr>${r.map((v) => `<td>${esc(v)}</td>`).join('')}</tr>`).join('\n')}
+        </tbody>
+      </table>
+    </div>`
+    : '';
   const bodyP = c.body.map((p, i) => {
     const para = `      <p>${esc(p)}</p>`;
-    return c.figure === i ? `${para}\n${figureBlock}` : para;
+    const withFigure = c.figure === i ? `${para}\n${figureBlock}` : para;
+    return tn && tn.after === i ? `${withFigure}\n${tableBlock}` : withFigure;
   }).join('\n');
   const backLabel = t.lang === 'ko' ? '목록으로' : 'Back to list';
   return `<section class="band">
