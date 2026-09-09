@@ -856,6 +856,17 @@ function build() {
     written.push(`${key}.txt (IndexNow 키)`);
   }
 
+  // 네이버 서치어드바이저 소유확인 파일 (KJ 승인 2026-09-09). indexnow.key 와 같은 방식 -
+  // 저장소 루트의 원본 파일을 정본으로 두고 매 빌드마다 dist/ 루트에 그대로 복사한다.
+  // 시험 빌드(--preview)에서는 안 낸다 - 시험 주소는 robots.txt 로 크롤러를 막고 있어
+  // 소유확인이 의미가 없다(llms.txt 와 같은 판단, 719행 주석 참조).
+  const NAVER_VERIFY_FILE = 'naverb501af1ff7501a174765f27e20a6a274.html';
+  if (!IS_PREVIEW_BUILD && existsSync(join(ROOT, NAVER_VERIFY_FILE))) {
+    const naverContent = readFileSync(join(ROOT, NAVER_VERIFY_FILE), 'utf8');
+    writeFileSync(join(DIST, NAVER_VERIFY_FILE), naverContent, 'utf8');
+    written.push(`${NAVER_VERIFY_FILE} (네이버 소유확인)`);
+  }
+
   if (!IS_PREVIEW_BUILD) {
     writeFileSync(join(DIST, 'llms.txt'), buildLlmsTxt(), 'utf8');
     written.push('llms.txt');
