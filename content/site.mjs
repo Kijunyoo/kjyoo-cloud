@@ -66,7 +66,7 @@ export const CASES = {
       // 발행일 - JSON-LD datePublished 에 그대로 쓴다. 지어내지 않는다(KJ 지시).
       // 첫 케이스 확정값: 2026-09-09.
       date: '2026-09-09',
-      summary: '인원이 부족했던 것이 아닙니다. 그런데도 아무도 손대지 않는 일이 있었습니다. 담당을 그때그때 정하던 방식을 상시 조직으로 바꾼 이야기입니다.',
+      summary: '인원이 부족했던 것이 아닙니다. 그런데도 아무도 손대지 않는 일이 있었습니다. 담당을 그때그때 정하던 방식을 상시 조직으로 바꾼 이야기입니다. [ko-en 동시발행시험]',
       figure: 10,
       body: [
         '인원이 부족했던 것이 아닙니다. 그런데도 아무도 손대지 않는 일이 있었습니다. 작년까지는 사람에게 일을 나눴고 지금은 프로그램에 나눕니다. 방식을 바꿔도 처음엔 같은 문제가 나타났습니다.',
@@ -125,6 +125,17 @@ export const CASES = {
           ['Work needing my approval', 'Any time, mid task', 'Four things'],
         ],
       },
+    },
+    {
+      slug: 'autopublish-selftest-en-0909',
+      title: 'Auto-publish self-test case (to be deleted)',
+      tag: 'test',
+      date: '2026-09-09',
+      summary: 'Self-test excerpt for the auto-publish pipeline. Deleted after verification.',
+      body: [
+        'First test paragraph for the auto-publish pipeline en new-case path.',
+        'Second test paragraph, confirming multi-paragraph rendering.',
+      ],
     },
   ],
 };
