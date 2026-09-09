@@ -126,17 +126,6 @@ export const CASES = {
         ],
       },
     },
-    {
-      slug: 'autopublish-selftest-en-0909',
-      title: 'Auto-publish self-test case (to be deleted)',
-      tag: 'test',
-      date: '2026-09-09',
-      summary: 'Self-test excerpt for the auto-publish pipeline. Deleted after verification.',
-      body: [
-        'First test paragraph for the auto-publish pipeline en new-case path.',
-        'Second test paragraph, confirming multi-paragraph rendering.',
-      ],
-    },
   ],
 };
 
