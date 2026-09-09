@@ -692,7 +692,10 @@ async function main() {
   const { newSrc, changedSlugs, notionPatches, rows, skipReasons } = await syncPublishedCases(notionEnv);
   // E-3(3차 감리, 비서실장 결정) - 스킵 경보는 같은 사유·같은 행에 하루 1회만.
   // 회차마다 무조건 알리지 않는다 - filterSkipAlerts 가 파일 기반 억제를 적용한다.
-  const skipAlerts = skipReasons.length ? filterSkipAlerts(skipReasons) : [];
+  // skipReasons 가 비어도 항상 호출한다 - filterSkipAlerts 안의 정리(prune) 로직이
+  // 이번 회차에 더는 보이지 않는 과거 키(행이 고쳐졌거나 지워짐)를 지운다. 길이로
+  // 조건을 걸면 "스킵이 전부 사라진 회차"에는 정리가 영영 안 돈다(자체 발견, 3차 감리 중).
+  const skipAlerts = filterSkipAlerts(skipReasons);
   if (skipReasons.length) say(`\n   노션 행 스킵 ${skipReasons.length}건 (오늘 처음 알리는 것 ${skipAlerts.length}건, 나머지는 24시간 억제 중)`);
 
   if (!changedSlugs.length) {
