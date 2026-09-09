@@ -1,14 +1,16 @@
 // ============================================================
 // kjyoo.cloud - 발행 자동화 (VPS 상주 실행 전용)
-// v1.0 (2026-09-09, KJ 결정 2026-09-08/09 "모든 것을 자동화")
+// v1.1 (2026-09-09, KJ 결정 2026-09-08/09 "모든 것을 자동화" - 신규 케이스 자동생성 추가)
 //
 // 이 파일은 Hostinger VPS(72.61.151.50) 의 /root/kjyoo-cloud-src 에서만 돈다.
 // n8n(같은 서버) 이 10분마다 SSH 로 run.sh 를 호출하고, run.sh 가 이 스크립트를 부른다.
 // KJ PC 가 꺼져 있어도 동작한다 - 그것이 이 파일의 존재 이유다.
 //
 // 흐름: git pull(원격 코드 최신화) -> 노션 케이스 DB 에서 Status=게시 행 조회
-//   -> 그 행들의 문안(제목/태그/발췌/본문)을 content/site.mjs 에 반영, PublishDate
-//      비어 있으면 채움(노션+site.mjs 양쪽) -> 변경 없으면 여기서 종료(빌드 생략)
+//   -> 코드(CASES)에 이미 있는 케이스는 문안(제목/태그/발췌/본문)을 site.mjs 에 반영,
+//      코드에 없는 케이스는 새 객체를 만들어 CASES.<lang> 끝에 추가(신규 발행 자동화 -
+//      Slug 없으면 만들지 않고 건너뛰고 알린다. figure/thenNow 는 코드 전용 값이라 비워둠).
+//      PublishDate 비어 있으면 채움(노션+site.mjs 양쪽) -> 변경 없으면 여기서 종료(빌드 생략)
 //   -> node build.mjs -> 로컬 릴리스 배포(같은 서버라 scp 불필요, cp + 심볼릭 링크 전환)
 //   -> 라이브 검증(전체 파일 200+바이트 일치) -> 실패 시 심볼릭 링크와 site.mjs 를
 //      되돌리고 종료코드 1 -> 성공 시 site.mjs 를 git commit+push, IndexNow 제출,
@@ -166,6 +168,44 @@ function propMap(caseObj) {
   return m;
 }
 
+// ---------- 신규 케이스 삽입 (코드에 없는 slug - 2026-09-09 신설) ----------
+// figure·thenNow 는 문안이 아니라 코드 전용 값(도해 삽입 위치·대비표)이므로 여기서
+// 채우지 않고 비운 채로 만든다(과업 지시). build.mjs 는 두 키 모두 선택값으로 다뤄
+// undefined 여도 정상 렌더링한다(pageCaseDetail c.figure/c.thenNow 미정 분기).
+function buildCaseObjectText(fields) {
+  const q = "'";
+  const lit = (v) => q + escapeForLiteral(v || '', q) + q;
+  const bodyLines = fields.body.map((p) => `        ${lit(p)},`).join('\n');
+  return [
+    '    {',
+    `      slug: ${lit(fields.slug)},`,
+    `      title: ${lit(fields.title)},`,
+    `      tag: ${lit(fields.tag)},`,
+    `      date: ${lit(fields.date)},`,
+    `      summary: ${lit(fields.summary)},`,
+    '      body: [',
+    bodyLines,
+    '      ],',
+    '    }',
+  ].join('\n');
+}
+
+// arrayNode(langProp.value, CASES.ko 또는 CASES.en 배열 노드)의 끝에 새 케이스 객체를
+// 삽입하는 { start, end, text } 편집을 만든다. start===end 로 두면 순수 삽입이 된다
+// (호출부의 공통 edits 적용 루프 - src.slice(0,start)+text+src.slice(end) - 를 그대로 재사용).
+function buildCaseInsertion(arrayNode, fields) {
+  const objectText = buildCaseObjectText(fields);
+  if (arrayNode.items.length) {
+    const last = arrayNode.items[arrayNode.items.length - 1];
+    // 마지막 항목의 닫는 '}' 바로 뒤(원본의 트레일링 콤마 앞)에 삽입한다.
+    // 삽입문 앞의 ',\n' 이 마지막 항목과 새 항목을 구분하고, 원본에 이미 있던
+    // 트레일링 콤마는 그대로 새 항목의 트레일링 콤마가 된다.
+    return { start: last.end, end: last.end, text: ',\n' + objectText };
+  }
+  // 빈 배열('[]' 또는 '[\n  ]') - '[' 바로 뒤에 삽입한다.
+  return { start: arrayNode.start + 1, end: arrayNode.start + 1, text: '\n' + objectText + ',\n  ' };
+}
+
 // ---------- Notion API ----------
 
 function sleep(ms) { return new Promise((r) => setTimeout(r, ms)); }
@@ -237,84 +277,103 @@ async function syncPublishedCases(notionEnv) {
     let publishDate = row.properties.PublishDate?.date?.start || null;
     say(`   - [${lang}] ${slug} (page ${row.id})`);
 
-    if (!lang || !slug) { say(`     스킵 - Lang 또는 Slug 비어있음`); continue; }
+    if (!lang || !slug) { say(`     스킵 - Lang 또는 Slug 비어있음(주소를 기계가 짓지 않는다 - 수동 확인 필요)`); continue; }
 
     // 현재 site.mjs 를 매 행마다 새로 파싱한다(직전 행의 수정을 이번 행이 반영해서 봐야 한다 -
     // start/end 오프셋이 텍스트 치환마다 바뀌므로 캐시하면 어긋난다).
     const casesNode = findExportValue(src, 'CASES');
     const langProp = casesNode.props.find((p) => p.key === lang);
-    if (!langProp || langProp.value.kind !== 'array') { say(`     스킵 - CASES.${lang} 없음(코드에 아직 없는 케이스 - 신규 케이스는 자동생성 대상 아님)`); continue; }
+    if (!langProp || langProp.value.kind !== 'array') { say(`     스킵 - CASES.${lang} 배열이 코드에 없음(구조 이상 - 수동 확인 필요)`); continue; }
     const caseObj = langProp.value.items.find((item) => {
       if (item.kind !== 'object') return false;
       const sp = item.props.find((p) => p.key === 'slug');
       return sp && sp.value.kind === 'string' && sp.value.value === slug;
     });
-    if (!caseObj) { say(`     스킵 - CASES.${lang} 안에 slug="${slug}" 없음(코드에 아직 없는 케이스)`); continue; }
 
-    const props = propMap(caseObj);
     const edits = []; // { start, end, text } - 뒤에서부터 적용
     let rowChanged = false;
 
-    // title / tag / summary(=Excerpt) - 문자열 리프 치환
-    const stringFieldMap = [['title', title], ['tag', tag], ['summary', excerpt]];
-    for (const [key, notionValue] of stringFieldMap) {
-      const p = props.get(key);
-      if (!p || p.value.kind !== 'string') { say(`     경고 - CASES.${lang}[${slug}].${key} 없음(스킵, 수동 확인 필요)`); continue; }
-      if (p.value.value !== notionValue) {
-        edits.push({ start: p.value.start, end: p.value.end, text: literalOf(p.value, p.value.quote, notionValue) });
-        rowChanged = true;
+    if (!caseObj) {
+      // ---- 신규 케이스 (코드에 아직 없음) - 새 객체를 만들어 CASES.<lang> 끝에 붙인다.
+      // slug 는 이미 확인됨(위 스킵 조건). title 이 비어 있으면 화면에 낼 것이 없어 만들지 않는다.
+      if (!title) { say(`     스킵 - Title 비어있음(신규 케이스 생성 불가 - 수동 확인 필요)`); continue; }
+      const children = await listAllChildren(notionEnv, row.id);
+      const paragraphs = children.filter((b) => b.type === 'paragraph').map(blockPlainText).filter((p) => p.trim());
+      if (!paragraphs.length) { say(`     스킵 - 본문 문단 없음(신규 케이스 생성 불가 - 수동 확인 필요)`); continue; }
+      if (!tag) say(`     경고 - Tag 비어있음(빈 값으로 생성)`);
+      if (!excerpt) say(`     경고 - Excerpt 비어있음(빈 값으로 생성)`);
+      if (!publishDate) {
+        publishDate = kstDateToday();
+        notionPatches.push({ pageId: row.id, publishDate });
+        say(`     PublishDate 비어있음 -> ${publishDate} 로 채움(노션에 되쓴다)`);
       }
-    }
+      edits.push(buildCaseInsertion(langProp.value, { slug, title, tag, date: publishDate, summary: excerpt, body: paragraphs }));
+      rowChanged = true;
+      say(`     신규 케이스 생성 - 본문 문단 ${paragraphs.length}개 (figure/thenNow 는 비움 - 필요시 사람이 나중에 채움)`);
+    } else {
+      const props = propMap(caseObj);
 
-    // body - 페이지 자식 문단을 순서대로 읽어 배열과 대조
-    const children = await listAllChildren(notionEnv, row.id);
-    const paragraphs = children.filter((b) => b.type === 'paragraph').map(blockPlainText);
-    const bodyProp = props.get('body');
-    if (bodyProp && bodyProp.value.kind === 'array') {
-      const oldItems = bodyProp.value.items;
-      const sameLength = oldItems.length === paragraphs.length;
-      const allString = oldItems.every((it) => it.kind === 'string');
-      if (sameLength && allString) {
-        for (let i = 0; i < oldItems.length; i++) {
-          if (oldItems[i].value !== paragraphs[i]) {
-            edits.push({ start: oldItems[i].start, end: oldItems[i].end, text: literalOf(oldItems[i], oldItems[i].quote, paragraphs[i]) });
-            rowChanged = true;
+      // title / tag / summary(=Excerpt) - 문자열 리프 치환
+      const stringFieldMap = [['title', title], ['tag', tag], ['summary', excerpt]];
+      for (const [key, notionValue] of stringFieldMap) {
+        const p = props.get(key);
+        if (!p || p.value.kind !== 'string') { say(`     경고 - CASES.${lang}[${slug}].${key} 없음(스킵, 수동 확인 필요)`); continue; }
+        if (p.value.value !== notionValue) {
+          edits.push({ start: p.value.start, end: p.value.end, text: literalOf(p.value, p.value.quote, notionValue) });
+          rowChanged = true;
+        }
+      }
+
+      // body - 페이지 자식 문단을 순서대로 읽어 배열과 대조
+      const children = await listAllChildren(notionEnv, row.id);
+      const paragraphs = children.filter((b) => b.type === 'paragraph').map(blockPlainText);
+      const bodyProp = props.get('body');
+      if (bodyProp && bodyProp.value.kind === 'array') {
+        const oldItems = bodyProp.value.items;
+        const sameLength = oldItems.length === paragraphs.length;
+        const allString = oldItems.every((it) => it.kind === 'string');
+        if (sameLength && allString) {
+          for (let i = 0; i < oldItems.length; i++) {
+            if (oldItems[i].value !== paragraphs[i]) {
+              edits.push({ start: oldItems[i].start, end: oldItems[i].end, text: literalOf(oldItems[i], oldItems[i].quote, paragraphs[i]) });
+              rowChanged = true;
+            }
           }
+        } else {
+          // 문단 개수가 바뀌었다 - 배열 리터럴 전체를 다시 짠다(들여쓰기 표준 8칸으로 재작성).
+          const rebuilt = '[\n' + paragraphs.map((p) => `        ${literalOf(null, "'", p)},`).join('\n') + '\n      ]';
+          edits.push({ start: bodyProp.value.start, end: bodyProp.value.end, text: rebuilt });
+          rowChanged = true;
+          say(`     본문 문단 수 변경 ${oldItems.length} -> ${paragraphs.length} - 배열 전체 재작성`);
         }
       } else {
-        // 문단 개수가 바뀌었다 - 배열 리터럴 전체를 다시 짠다(들여쓰기 표준 8칸으로 재작성).
-        const rebuilt = '[\n' + paragraphs.map((p) => `        ${literalOf(null, "'", p)},`).join('\n') + '\n      ]';
-        edits.push({ start: bodyProp.value.start, end: bodyProp.value.end, text: rebuilt });
-        rowChanged = true;
-        say(`     본문 문단 수 변경 ${oldItems.length} -> ${paragraphs.length} - 배열 전체 재작성`);
+        say(`     경고 - CASES.${lang}[${slug}].body 없음(스킵)`);
       }
-    } else {
-      say(`     경고 - CASES.${lang}[${slug}].body 없음(스킵)`);
-    }
 
-    // draft 제거 (게시 행이므로 더는 초안이 아니다)
-    const draftProp = props.get('draft');
-    if (draftProp) {
-      edits.push({ start: draftProp.propStart, end: draftProp.propEnd, text: '' });
-      rowChanged = true;
-      say(`     draft 플래그 제거`);
-    }
-
-    // date(PublishDate) - site.mjs 에 없으면 채운다. 노션 PublishDate 도 비어 있으면
-    // 오늘(KST) 로 채우고 두 곳(노션+site.mjs) 에 같은 값을 쓴다.
-    const dateProp = props.get('date');
-    if (!publishDate) {
-      publishDate = kstDateToday();
-      notionPatches.push({ pageId: row.id, publishDate });
-      say(`     PublishDate 비어있음 -> ${publishDate} 로 채움(노션에 되쓴다)`);
-    }
-    if (dateProp && dateProp.value.kind === 'string') {
-      if (dateProp.value.value !== publishDate) {
-        edits.push({ start: dateProp.value.start, end: dateProp.value.end, text: literalOf(dateProp.value, dateProp.value.quote, publishDate) });
+      // draft 제거 (게시 행이므로 더는 초안이 아니다)
+      const draftProp = props.get('draft');
+      if (draftProp) {
+        edits.push({ start: draftProp.propStart, end: draftProp.propEnd, text: '' });
         rowChanged = true;
+        say(`     draft 플래그 제거`);
       }
-    } else {
-      say(`     경고 - CASES.${lang}[${slug}].date 없음(신규 필드 삽입은 자동화 범위 밖 - 수동 확인 필요)`);
+
+      // date(PublishDate) - site.mjs 에 없으면 채운다. 노션 PublishDate 도 비어 있으면
+      // 오늘(KST) 로 채우고 두 곳(노션+site.mjs) 에 같은 값을 쓴다.
+      const dateProp = props.get('date');
+      if (!publishDate) {
+        publishDate = kstDateToday();
+        notionPatches.push({ pageId: row.id, publishDate });
+        say(`     PublishDate 비어있음 -> ${publishDate} 로 채움(노션에 되쓴다)`);
+      }
+      if (dateProp && dateProp.value.kind === 'string') {
+        if (dateProp.value.value !== publishDate) {
+          edits.push({ start: dateProp.value.start, end: dateProp.value.end, text: literalOf(dateProp.value, dateProp.value.quote, publishDate) });
+          rowChanged = true;
+        }
+      } else {
+        say(`     경고 - CASES.${lang}[${slug}].date 없음(신규 필드 삽입은 자동화 범위 밖 - 수동 확인 필요)`);
+      }
     }
 
     if (edits.length) {

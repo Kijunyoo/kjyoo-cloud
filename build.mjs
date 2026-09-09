@@ -701,7 +701,7 @@ function buildSitemap() {
     for (const c of (CASES[langKey] || []).filter((c) => !c.draft)) {
       const loc = `https://${SITE.domain}${hrefCase(t.dir, c.slug)}`;
       const alt = langKeys
-        .filter((lk) => (CASES[lk] || []).some((oc) => oc.slug === c.slug))
+        .filter((lk) => (CASES[lk] || []).some((oc) => oc.slug === c.slug && !oc.draft))
         .map((lk) => {
           const tt = CONTENT[lk];
           return `    <xhtml:link rel="alternate" hreflang="${tt.lang}" href="https://${SITE.domain}${hrefCase(tt.dir, c.slug)}"/>`;
@@ -799,11 +799,15 @@ function build() {
     if (cases.length) mkdirSync(join(DIST, t.dir, 'cases'), { recursive: true });
     for (const c of cases) {
       const body = pageCaseDetail(t, c);
+      // 언어 전환 링크 방어 (2026-09-09, 자동생성 케이스 도입) - 상대 언어에 같은
+      // slug 케이스가 없으면(한쪽 언어만 게시된 상태) 존재하지 않는 케이스 URL로
+      // 링크·hreflang 을 걸지 않는다. 상대 언어의 케이스 목록 페이지로 대신 건다.
+      const otherHasCase = (CASES[t.other.dir] || []).some((oc) => oc.slug === c.slug && !oc.draft);
       const html = layout({
         t, page: 'cases', body,
         pageData: { title: c.title, desc: c.summary },
         pathOverride: hrefCase(t.dir, c.slug),
-        altPathOverride: hrefCase(t.other.dir, c.slug),
+        altPathOverride: otherHasCase ? hrefCase(t.other.dir, c.slug) : href(t.other.dir, 'cases'),
         robotsNoindex: !!c.draft,
         jsonLd: caseJsonLd(t, c),
       });
