@@ -640,7 +640,7 @@ async function main() {
     if (notionPatches.length) await patchNotionPublishDate(notionEnv, notionPatches);
     // 스킵된 노션 행이 있으면 무변경이라도 조용히 끝내지 않는다(감사관 관찰 3번).
     if (skipReasons.length) {
-      finish(2, { changed: false, publishedRows: rows.length, softFailures: skipReasons.map((s) => `노션 행 스킵: ${s}`) });
+      finish(2, { changed: false, publishedRows: rows.length, softFailures: skipReasons.map((s) => `노션 행 스킵: ${s}`), rolledBack: false });
       return;
     }
     finish(0, { changed: false, publishedRows: rows.length });
