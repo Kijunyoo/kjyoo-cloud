@@ -7,3 +7,8 @@ notion.env
 notion-sync-backup/
 content/site.mjs.bak.*
 OG_PNG_MASTER/
+
+# VPS 발행 자동화 - 서버 로컬 전용 파일. 비밀값(SA 키) 포함, 저장소에 절대 커밋 금지.
+gcp-sa-searchconsole.json
+run.sh
+publish-logs/
