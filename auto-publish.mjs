@@ -36,6 +36,8 @@ const ROOT = dirname(fileURLToPath(import.meta.url));
 const SITE_MJS = join(ROOT, 'content', 'site.mjs');
 const DIST = join(ROOT, 'dist');
 const HEARTBEAT_FILE = join(ROOT, 'publish-logs', 'last-run.json');
+const SKIP_DEDUP_FILE = join(ROOT, 'publish-logs', 'skip-dedup.json'); // E-3(3차 감리) - 파일에 남겨 재시작에도 살아남게 한다
+const SKIP_ALERT_INTERVAL_MS = 24 * 3600 * 1000; // 같은 사유·같은 행은 하루 1회만
 const LOCK_FILE = join(ROOT, 'publish-logs', 'auto-publish.lock');
 const LOCK_STALE_MS = 15 * 60 * 1000; // 10분 주기의 1.5배 - 이보다 오래 걸리면 이전 실행 크래시로 본다
 const WATCHDOG_MS = 4 * 60 * 1000;    // 전체 실행 상한 (D-4). 정상 실행은 초 단위.
@@ -86,6 +88,38 @@ function acquireLock() {
 }
 function releaseLock() {
   try { unlinkSync(LOCK_FILE); } catch { /* 이미 없으면 무시 */ }
+}
+
+// ---------- 스킵 경보 하루 1회 억제 (E-3, 3차 감리 - 비서실장 결정 4가지 반영) ----------
+// 파일에 저장한다(메모리에만 두지 않는다 - 결정 4번, 재시작에도 살아남아야 한다).
+// 키는 "[pageId] 사유" 문자열 그대로(같은 행의 같은 사유만 같은 키가 된다 - KJ 가 그
+// 행을 고쳐 사유 문구 자체가 달라지면 새 키가 되어 다시 1회 알린다. 의도된 동작이다 -
+// 사유가 바뀌었다는 것은 새로운 정보다).
+function loadSkipDedup() {
+  if (!existsSync(SKIP_DEDUP_FILE)) return {};
+  try { return JSON.parse(readFileSync(SKIP_DEDUP_FILE, 'utf8')); } catch { return {}; }
+}
+function saveSkipDedup(store) {
+  mkdirSync(dirname(SKIP_DEDUP_FILE), { recursive: true });
+  writeFileSync(SKIP_DEDUP_FILE, JSON.stringify(store, null, 2), 'utf8');
+}
+// skipReasons(현재 회차에 실제로 스킵된 행 전부) 를 받아, 하루 안에 이미 알린 것은 걸러낸
+// alertableSkips 만 반환한다. 이번에 안 보이는 과거 키(행이 고쳐졌거나 지워짐)는 지운다 -
+// 파일이 무한정 자라지 않게 한다. 알린 것은 즉시 타임스탬프를 갱신해 저장한다.
+function filterSkipAlerts(skipReasons) {
+  const store = loadSkipDedup();
+  const now = Date.now();
+  const alertable = [];
+  for (const s of skipReasons) {
+    const last = store[s];
+    if (!last || (now - Date.parse(last)) >= SKIP_ALERT_INTERVAL_MS) {
+      alertable.push(s);
+      store[s] = new Date(now).toISOString();
+    }
+  }
+  for (const k of Object.keys(store)) if (!skipReasons.includes(k)) delete store[k];
+  saveSkipDedup(store);
+  return alertable;
 }
 
 function loadEnvFile(file, need) {
@@ -606,14 +640,36 @@ function writeHeartbeat(result) {
   writeFileSync(HEARTBEAT_FILE, JSON.stringify({ ranAt: new Date().toISOString(), ...result }, null, 2), 'utf8');
 }
 
+// site.mjs 작업 트리 상태 추적 (E-1, 3차 감리) - 모듈 전역이다. main() 안의 지역 변수로는
+// 워치독(setTimeout 콜백, main() 스코프 밖)이 백업 내용에 접근할 수 없어서다.
+// siteMjsDirty=true 인 동안은 디스크의 content/site.mjs 가 아직 커밋되지 않은 새 내용이다 -
+// 어떤 경로로 끝나든(soft-fail exitCode 2, 워치독 강제종료 포함) 종료 직전 반드시 되돌린다.
+let siteMjsBackup = null;
+let siteMjsDirty = false;
+
+// git 작업 트리를 마지막으로 읽은 site.mjs 백업 상태로 되돌린다(add 스테이징 해제 포함).
+// 검증 실패/빌드 실패 경로가 이미 쓰던 것과 같은 처리를 재사용한다(감사관 지적 - 새로
+// 만들지 말고 있는 것을 쓴다). 이미 깨끗하면(siteMjsDirty=false) 아무 것도 하지 않는다.
+function revertSiteMjsIfDirty() {
+  if (!siteMjsDirty) return false;
+  say('\n[정리] content/site.mjs 를 마지막 커밋 상태로 되돌린다(다음 회차 차단 방지)');
+  run('git', ['reset'], { cwd: ROOT }); // 스테이징 해제. 스테이징된 것이 없어도 무해하다.
+  if (siteMjsBackup !== null) writeFileSync(SITE_MJS, siteMjsBackup, 'utf8');
+  siteMjsDirty = false;
+  return true;
+}
+
 // 유일한 종료 경로(D-3 잠금 해제를 모든 exit 지점에서 빠짐없이 하기 위해). exitCode 0 은
 // 항상 rolledBack:false 다. 그 외에는 호출부가 rolledBack 값을 명시적으로 넣어야 한다 -
 // 기본값을 두지 않는다(D-2: 추정으로 채우지 않는다. 명시 안 하면 아래에서 즉시 던진다).
+// E-1(3차 감리) - exitCode 0 이 아닌 모든 종료 직전에 site.mjs 작업 트리 정리를 강제한다.
+// 호출부가 개별적으로 기억해서 부르게 하지 않는다 - 잊어버리는 경로가 계속 나왔기 때문이다.
 function finish(exitCode, fields) {
   if (exitCode !== 0 && typeof fields.rolledBack !== 'boolean') {
     throw new Error(`내부 오류 - finish(${exitCode}) 호출에 rolledBack 이 명시되지 않았다: ${JSON.stringify(fields)}`);
   }
-  const result = { exitCode, rolledBack: exitCode === 0 ? false : fields.rolledBack, ...fields, log };
+  const siteMjsReverted = exitCode !== 0 ? revertSiteMjsIfDirty() : false;
+  const result = { exitCode, rolledBack: exitCode === 0 ? false : fields.rolledBack, siteMjsReverted, ...fields, log };
   writeHeartbeat(result);
   console.log('RESULT_JSON ' + JSON.stringify(result));
   releaseLock();
@@ -634,30 +690,39 @@ async function main() {
 
   const notionEnv = loadEnvFile(join(ROOT, 'notion.env'), ['NOTION_TOKEN', 'NOTION_CASES_DB_ID']);
   const { newSrc, changedSlugs, notionPatches, rows, skipReasons } = await syncPublishedCases(notionEnv);
+  // E-3(3차 감리, 비서실장 결정) - 스킵 경보는 같은 사유·같은 행에 하루 1회만.
+  // 회차마다 무조건 알리지 않는다 - filterSkipAlerts 가 파일 기반 억제를 적용한다.
+  const skipAlerts = skipReasons.length ? filterSkipAlerts(skipReasons) : [];
+  if (skipReasons.length) say(`\n   노션 행 스킵 ${skipReasons.length}건 (오늘 처음 알리는 것 ${skipAlerts.length}건, 나머지는 24시간 억제 중)`);
 
   if (!changedSlugs.length) {
     say('\n변경 없음 - 빌드/배포 생략');
     if (notionPatches.length) await patchNotionPublishDate(notionEnv, notionPatches);
-    // 스킵된 노션 행이 있으면 무변경이라도 조용히 끝내지 않는다(감사관 관찰 3번).
-    if (skipReasons.length) {
-      finish(2, { changed: false, publishedRows: rows.length, softFailures: skipReasons.map((s) => `노션 행 스킵: ${s}`), rolledBack: false });
+    // E-3 결정 3번 - 스킵만 있고 다른 실패가 없으면 exitCode 2(배포 실패군)로 묶지 않고
+    // 별도 등급 3(정보성 - 확인 요망, 발행 자체는 정상)으로 낸다. 억제로 알릴 게 없으면 0.
+    if (skipAlerts.length) {
+      finish(3, { changed: false, publishedRows: rows.length, skipAlerts, rolledBack: false });
       return;
     }
-    finish(0, { changed: false, publishedRows: rows.length });
+    finish(0, { changed: false, publishedRows: rows.length, skippedTotal: skipReasons.length });
     return;
   }
 
   say(`\n변경된 케이스: ${changedSlugs.join(', ')}`);
   const backup = readFileSync(SITE_MJS, 'utf8');
   writeFileSync(SITE_MJS, newSrc, 'utf8');
+  // E-1(3차 감리) - 여기서부터 디스크의 site.mjs 가 아직 커밋되지 않은 새 내용이다.
+  // finish() 가 exitCode!==0 이면 자동으로 되돌린다(어떤 실패 경로로 끝나든 예외 없이).
+  siteMjsBackup = backup;
+  siteMjsDirty = true;
 
   let deployInfo;
   try {
     deployInfo = deployAndVerify();
   } catch (e) {
     // 빌드 또는 배포 단계에서 실패 - 아직 심볼릭 링크를 바꾸지 않았거나(빌드 실패) 바꿨어도
-    // 검증 전이라 "롤백"이라 부를 상태가 아직 없다. site.mjs 만 원복하고 rolledBack:false 로 명시한다.
-    writeFileSync(SITE_MJS, backup, 'utf8');
+    // 검증 전이라 "롤백"이라 부를 상태가 아직 없다. rolledBack:false 로 명시한다.
+    // site.mjs 원복은 finish() 가 siteMjsDirty 를 보고 자동으로 한다.
     finish(1, { changed: true, stage: 'build_or_deploy', error: String(e.message || e), rolledBack: false });
     return;
   }
@@ -665,7 +730,6 @@ async function main() {
   const failCount = await verify(listDist());
   if (failCount > 0) {
     const rolledBack = rollback(deployInfo.previousTarget);
-    writeFileSync(SITE_MJS, backup, 'utf8');
     finish(1, { changed: true, stage: 'verify', failCount, rolledBackTo: deployInfo.previousTarget, rolledBack });
     return;
   }
@@ -676,6 +740,8 @@ async function main() {
   // exitCode 2 로 보고한다. 각 단계를 개별 try/catch 로 감싸 한 단계의 실패가 다음 단계를
   // 막지 않게 한다(D-1: git commit 실패를 삼키던 문제의 근본 원인 - 실패해도 계속 진행해야
   // 하는데 예외가 나면 통째로 unhandled 로 떨어져 exitCode 오분류가 났었다).
+  // E-1(3차 감리) - "커밋 실패했으니 스테이징만 해제하면 된다"는 착각이 1차 시정의 결함이었다.
+  // 여기서는 커밋 성공 시에만 siteMjsDirty=false 로 내린다 - 나머지는 finish() 가 되돌린다.
   let softFail = false;
   const softFailures = [];
   const fail = (label, detail) => { softFail = true; softFailures.push(`${label}: ${detail}`); say(`   [경고] ${label}: ${detail}`); };
@@ -692,12 +758,10 @@ async function main() {
     const commit = run('git', ['commit', '-m', `auto-publish: ${changedSlugs.join(', ')} (${new Date().toISOString()})`], { cwd: ROOT });
     say(commit.stdout || commit.stderr);
     if (commit.status !== 0) {
-      // D-1 - 이전에는 여기 else 가 없어 실패가 조용히 exitCode 0 으로 빠졌다.
-      // 커밋 실패 시 add 로 스테이징된 변경을 되돌려(reset) 다음 회차의 "커밋 안 된
-      // 변경이 있다" 선행 점검이 걸리지 않게 한다 - 실패를 다음 회차까지 전파하지 않는다.
-      run('git', ['reset'], { cwd: ROOT });
       fail('git commit 실패', (commit.stderr || '(메시지 없음)').slice(0, 300));
+      // siteMjsDirty 는 그대로 true 로 둔다 - finish() 가 종료 직전에 되돌린다(E-1).
     } else {
+      siteMjsDirty = false; // 커밋 성공 - 작업 트리가 이제 HEAD 와 같다. 되돌릴 것이 없다.
       const push = run('git', ['push'], { cwd: ROOT });
       say(push.stdout || push.stderr);
       if (push.status !== 0) fail('git push 실패', push.stderr.slice(0, 300));
@@ -719,9 +783,11 @@ async function main() {
     if (!gscResult.skipped && gscResult.status >= 300) fail('Search Console 실패', `status=${gscResult.status}: ${gscResult.body}`);
   } catch (e) { fail('Search Console 예외', e.message); }
 
-  if (skipReasons.length) for (const s of skipReasons) fail('노션 행 스킵', s);
-
-  finish(softFail ? 2 : 0, { changed: true, changedSlugs, softFailures, rolledBack: false });
+  // E-3 결정 3번 - 스킵 알림은 softFailures(배포/후속단계 실패)와 별도 필드로 낸다.
+  // softFail 이 이미 true(다른 진짜 실패가 있다)면 exitCode 는 2 그대로 간다 - 스킵은
+  // 부가정보로만 얹는다. softFail 이 false 인데 스킵 알림만 있으면 exitCode 3.
+  const exitCode = softFail ? 2 : (skipAlerts.length ? 3 : 0);
+  finish(exitCode, { changed: true, changedSlugs, softFailures, skipAlerts, rolledBack: false });
 }
 
 const watchdog = setTimeout(() => {
