@@ -242,9 +242,64 @@ const stripXmlComments = (svg) => svg.replace(/<!--[\s\S]*?-->/g, '');
 const svgForLang = (raw, lang) =>
   stripXmlComments(lang === 'en' ? injectEnSvg(raw, EN_A11Y, EN_TEXT, EN_OVERFLOW) : raw);
 
+// ---------- structured data (JSON-LD) ----------
+// 검색과 AI 검색 노출 과업(KJ 승인 2026-09-09) - 3항. 지어낸 값 금지, 데이터에 없는 칸은
+// 아예 넣지 않는다(발행일 등). 글쓴이 표기는 SITE.authorName 하나만 - 직함 없음(헌법 §2.4,
+// KJ 결정 2026-09-03 "직함을 넣지 않는다").
+
+function personJsonLd() {
+  return {
+    '@type': 'Person',
+    name: SITE.authorName,
+    url: `https://${SITE.domain}/en/about.html`,
+    sameAs: [SITE.linkedin, SITE.github],
+  };
+}
+
+// 홈/소개 페이지 전용 - 사람 + 사이트 정보. 매 페이지에 반복하지 않는다(과업 지시 1항).
+function websiteJsonLd(t) {
+  const idx = t.index;
+  return {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'WebSite',
+        name: SITE.domain,
+        url: `https://${SITE.domain}${href(t.dir, 'index')}`,
+        description: idx.desc,
+        inLanguage: t.lang,
+        publisher: personJsonLd(),
+      },
+      personJsonLd(),
+    ],
+  };
+}
+
+// 케이스 개별 페이지 - 글로 인식되게 한다(과업 지시 1항). 발행일은 CASES 데이터의 c.date 를
+// 그대로 쓴다 - 데이터에 없으면 datePublished 자체를 안 낸다(지어내지 않는다).
+function caseJsonLd(t, c) {
+  const url = `https://${SITE.domain}${hrefCase(t.dir, c.slug)}`;
+  const out = {
+    '@context': 'https://schema.org',
+    '@type': 'BlogPosting',
+    headline: c.title,
+    description: c.summary,
+    inLanguage: t.lang,
+    url,
+    image: `https://${SITE.domain}${ogImagePath('cases', t.lang)}`,
+    author: personJsonLd(),
+    mainEntityOfPage: { '@type': 'WebPage', '@id': url },
+  };
+  if (c.date) {
+    out.datePublished = c.date;
+    out.dateModified = c.date;
+  }
+  return out;
+}
+
 // ---------- shell ----------
 
-function layout({ t, page, body, pageData: pageDataOverride, pathOverride, altPathOverride, robotsNoindex }) {
+function layout({ t, page, body, pageData: pageDataOverride, pathOverride, altPathOverride, robotsNoindex, jsonLd }) {
   const navItems = PAGES.map((p) => {
     const cur = p === page ? ' aria-current="page"' : '';
     return `<a href="${href(t.dir, p)}"${cur}>${esc(t.nav[p])}</a>`;
@@ -267,8 +322,10 @@ function layout({ t, page, body, pageData: pageDataOverride, pathOverride, altPa
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${esc(title)}</title>
 <meta name="description" content="${esc(pageData.desc)}">
-${robotsNoindex ? '<meta name="robots" content="noindex">\n' : ''}<link rel="alternate" hreflang="${t.lang}" href="https://${SITE.domain}${selfPath}">
+${robotsNoindex ? '<meta name="robots" content="noindex">\n' : ''}<link rel="canonical" href="https://${SITE.domain}${selfPath}">
+<link rel="alternate" hreflang="${t.lang}" href="https://${SITE.domain}${selfPath}">
 <link rel="alternate" hreflang="${t.other.code}" href="https://${SITE.domain}${altPath}">
+${SITE.googleSiteVerification ? `<meta name="google-site-verification" content="${esc(SITE.googleSiteVerification)}">\n` : ''}${SITE.naverSiteVerification ? `<meta name="naver-site-verification" content="${esc(SITE.naverSiteVerification)}">\n` : ''}
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="${esc(SITE.domain)}">
 <meta property="og:locale" content="${ogLocale}">
@@ -287,7 +344,7 @@ ${robotsNoindex ? '<meta name="robots" content="noindex">\n' : ''}<link rel="alt
 <link rel="icon" href="${ASSET_FAVICON.publicPath}" type="image/svg+xml">
 <link rel="stylesheet" href="${ASSET_TOKENS_CSS.publicPath}">
 <link rel="stylesheet" href="${ASSET_SITE_CSS.publicPath}">
-</head>
+${jsonLd ? `<script type="application/ld+json">${JSON.stringify(jsonLd)}</script>\n` : ''}</head>
 <body>
 <a class="skip" href="#main">${esc(t.skip)}</a>
 
@@ -593,6 +650,18 @@ const ROOT_REDIRECT = `<!doctype html>
 // (플래그 없음)는 Allow: / 그대로 두고, `node build.mjs --preview` 로 부를 때만
 // Disallow: / 를 낸다. deploy.mjs --preview 가 이 플래그를 넘긴다.
 const IS_PREVIEW_BUILD = process.argv.includes('--preview');
+// AI 크롤러 명시 허용 (KJ 승인 2026-09-09 과업 4항 - "노출을 원한다, 차단하지 마라").
+// 기본 `User-agent: * / Allow: /` 만으로도 아래 봇들은 이미 막혀 있지 않지만,
+// 노출 의도를 명시적으로 밝히기 위해 개별 User-agent 로도 Allow: / 를 낸다.
+// Google-Extended/Applebot-Extended 는 별도 크롤러가 아니라 각 사가 이미 수집한 콘텐츠를
+// AI 학습에 쓰도록 허용하는 옵트인 토큰이다(실제 요청 로그에 안 잡힘, 2026-09 실측 보고 기준).
+const AI_CRAWLERS = [
+  'GPTBot', 'ChatGPT-User', 'OAI-SearchBot',
+  'ClaudeBot', 'Claude-User', 'Claude-SearchBot', 'anthropic-ai',
+  'PerplexityBot', 'Perplexity-User',
+  'Google-Extended', 'Applebot-Extended',
+  'CCBot', 'Amazonbot', 'Meta-ExternalAgent', 'cohere-ai',
+];
 const ROBOTS_TXT = IS_PREVIEW_BUILD
   ? `User-agent: *
 Disallow: /
@@ -600,6 +669,7 @@ Disallow: /
   : `User-agent: *
 Allow: /
 
+${AI_CRAWLERS.map((ua) => `User-agent: ${ua}\nAllow: /\n`).join('\n')}
 Sitemap: https://${SITE.domain}/sitemap.xml
 `;
 
@@ -643,6 +713,40 @@ function buildSitemap() {
   return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n${urls.join('\n')}\n</urlset>\n`;
 }
 
+// ---------- llms.txt (과업 지시 3항, KJ 승인 2026-09-09) ----------
+// AI 크롤러가 사이트 구조를 읽는 안내 파일. 손으로 관리하면 sitemap 과 어긋나므로
+// buildSitemap 과 같은 소스(PAGES/CASES/CONTENT)에서 매 빌드마다 자동 생성한다.
+// 시험 빌드(--preview)에서는 검색 노출 자체를 막으므로(ROBOTS_TXT Disallow: /) 내지 않는다.
+function buildLlmsTxt() {
+  const en = CONTENT.en;
+  const lines = [];
+  lines.push(`# ${SITE.domain}`);
+  lines.push('');
+  lines.push(`> ${en.index.desc}`);
+  lines.push('');
+  lines.push(`Author: ${SITE.authorName}`);
+  lines.push(`Languages: ${Object.values(CONTENT).map((t) => t.lang).join(', ')}`);
+  lines.push('');
+  lines.push('## Pages');
+  for (const page of PAGES) {
+    for (const langKey of Object.keys(CONTENT)) {
+      const t = CONTENT[langKey];
+      lines.push(`- [${t[page].title} (${t.lang})](https://${SITE.domain}${href(t.dir, page)}): ${t[page].desc}`);
+    }
+  }
+  lines.push('');
+  lines.push('## Case studies');
+  for (const langKey of Object.keys(CONTENT)) {
+    const t = CONTENT[langKey];
+    for (const c of (CASES[langKey] || []).filter((c) => !c.draft)) {
+      lines.push(`- [${c.title} (${t.lang})](https://${SITE.domain}${hrefCase(t.dir, c.slug)}): ${c.summary}`);
+    }
+  }
+  lines.push('');
+  lines.push(`Sitemap: https://${SITE.domain}/sitemap.xml`);
+  return lines.join('\n') + '\n';
+}
+
 // ---------- build ----------
 
 function build() {
@@ -679,7 +783,7 @@ function build() {
     mkdirSync(join(DIST, t.dir), { recursive: true });
     for (const page of PAGES) {
       const body = RENDER[page](t, langKey);
-      const html = layout({ t, page, body });
+      const html = layout({ t, page, body, jsonLd: page === 'index' ? websiteJsonLd(t) : undefined });
       const file = page === 'index' ? 'index.html' : `${page}.html`;
       const out = join(DIST, t.dir, file);
       writeFileSync(out, html, 'utf8');
@@ -701,6 +805,7 @@ function build() {
         pathOverride: hrefCase(t.dir, c.slug),
         altPathOverride: hrefCase(t.other.dir, c.slug),
         robotsNoindex: !!c.draft,
+        jsonLd: caseJsonLd(t, c),
       });
       const out = join(DIST, t.dir, 'cases', `${c.slug}.html`);
       writeFileSync(out, html, 'utf8');
@@ -740,6 +845,21 @@ function build() {
   written.push('robots.txt');
   writeFileSync(join(DIST, 'sitemap.xml'), buildSitemap(), 'utf8');
   written.push('sitemap.xml');
+
+  // IndexNow 키 파일 (자동발행 파이프라인 과업, KJ 승인 2026-09-08/09). 사이트 루트에
+  // <key>.txt 로 키 값 그대로를 낸다 - IndexNow 프로토콜의 소유권 증명 방식이다.
+  // 키 값은 저장소 루트 indexnow.key 하나가 정본이고, auto-publish.mjs 가 제출 때
+  // 같은 파일을 읽어 body 의 key 값과 맞춘다(두 곳이 어긋나면 검증에서 거부된다).
+  if (existsSync(join(ROOT, 'indexnow.key'))) {
+    const key = readFileSync(join(ROOT, 'indexnow.key'), 'utf8').trim();
+    writeFileSync(join(DIST, `${key}.txt`), key, 'utf8');
+    written.push(`${key}.txt (IndexNow 키)`);
+  }
+
+  if (!IS_PREVIEW_BUILD) {
+    writeFileSync(join(DIST, 'llms.txt'), buildLlmsTxt(), 'utf8');
+    written.push('llms.txt');
+  }
 
   console.log(`built ${written.length} pages -> dist/`);
   for (const w of written) console.log('  ' + w);

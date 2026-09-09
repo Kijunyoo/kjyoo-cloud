@@ -21,6 +21,14 @@ export const SITE = {
   linkedin: 'https://www.linkedin.com/in/kjyoo-global/',
   github: 'https://github.com/Kijunyoo',
   email: 'kj@kjyoo.cloud',
+  // 글쓴이 표기 - 헌법 §2.4 정본 결정(2026-09-03) 직함 없이 이름만.
+  // JSON-LD author.name, footer 표기와 동일 값을 여기 한 곳에서 관리한다.
+  authorName: 'KJ Yoo',
+  // 검색엔진 소유 확인 메타 태그 값. KJ 가 각 콘솔에서 발급받아 채운다.
+  // 빈 문자열이면 build.mjs 가 해당 meta 태그를 아예 내지 않는다(값 없이 태그만 내면
+  // 검증 실패 상태로 남아 혼동을 준다). 값 기입 절차는 작업 보고서 5절 참조.
+  googleSiteVerification: '',
+  naverSiteVerification: '',
 };
 
 // 개인 이력 실측 - 출처 KJ_Yoo_Profile.pdf (2026-03).
@@ -55,6 +63,9 @@ export const CASES = {
       slug: 'org-chart-to-agents',
       title: '사람은 다 있는데 아무도 안 하는 일이 왜 생깁니까',
       tag: '조직과 오케스트레이션',
+      // 발행일 - JSON-LD datePublished 에 그대로 쓴다. 지어내지 않는다(KJ 지시).
+      // 첫 케이스 확정값: 2026-09-09.
+      date: '2026-09-09',
       summary: '인원이 부족했던 것이 아닙니다. 그런데도 아무도 손대지 않는 일이 있었습니다. 담당을 그때그때 정하던 방식을 상시 조직으로 바꾼 이야기입니다.',
       figure: 10,
       body: [
@@ -87,6 +98,8 @@ export const CASES = {
       slug: 'org-chart-to-agents',
       title: 'Why does work go undone when everyone is already there?',
       tag: 'Organization and orchestration',
+      // Publish date - fed straight into JSON-LD datePublished. Not invented (KJ instruction).
+      date: '2026-09-09',
       summary: 'Headcount was not the problem. Still, some work went untouched. This is how I moved from assigning owners case by case to a standing structure.',
       figure: 10,
       body: [
