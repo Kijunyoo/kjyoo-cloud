@@ -1,47 +1,92 @@
 // ============================================================
 // kjyoo.cloud - 발행 자동화 (VPS 상주 실행 전용)
-// v1.1 (2026-09-09, KJ 결정 2026-09-08/09 "모든 것을 자동화" - 신규 케이스 자동생성 추가)
+// v1.2 (2026-09-09, 2차 감리 지적 8건 시정 - D-1~D-6)
 //
 // 이 파일은 Hostinger VPS(72.61.151.50) 의 /root/kjyoo-cloud-src 에서만 돈다.
 // n8n(같은 서버) 이 10분마다 SSH 로 run.sh 를 호출하고, run.sh 가 이 스크립트를 부른다.
 // KJ PC 가 꺼져 있어도 동작한다 - 그것이 이 파일의 존재 이유다.
 //
-// 흐름: git pull(원격 코드 최신화) -> 노션 케이스 DB 에서 Status=게시 행 조회
-//   -> 코드(CASES)에 이미 있는 케이스는 문안(제목/태그/발췌/본문)을 site.mjs 에 반영,
-//      코드에 없는 케이스는 새 객체를 만들어 CASES.<lang> 끝에 추가(신규 발행 자동화 -
-//      Slug 없으면 만들지 않고 건너뛰고 알린다. figure/thenNow 는 코드 전용 값이라 비워둠).
-//      PublishDate 비어 있으면 채움(노션+site.mjs 양쪽) -> 변경 없으면 여기서 종료(빌드 생략)
-//   -> node build.mjs -> 로컬 릴리스 배포(같은 서버라 scp 불필요, cp + 심볼릭 링크 전환)
-//   -> 라이브 검증(전체 파일 200+바이트 일치) -> 실패 시 심볼릭 링크와 site.mjs 를
-//      되돌리고 종료코드 1 -> 성공 시 site.mjs 를 git commit+push, IndexNow 제출,
-//      Search Console 사이트맵 재제출.
+// 흐름: 잠금 획득(D-3) -> git pull(원격 코드 최신화) -> 노션 케이스 DB 에서 Status=게시
+//   행 조회 -> 코드(CASES)에 이미 있는 케이스는 문안(제목/태그/발췌/본문)을 site.mjs 에
+//   반영, 코드에 없는 케이스는 새 객체를 만들어 CASES.<lang> 끝에 추가(신규 발행 자동화 -
+//   Slug 없으면 만들지 않고 건너뛰고 알린다. figure/thenNow 는 코드 전용 값이라 비워둠).
+//   PublishDate 비어 있으면 채움(노션+site.mjs 양쪽) -> 변경 없으면 여기서 종료(빌드 생략)
+//   -> node build.mjs -> 로컬 릴리스 배포(같은 서버라 scp 불필요, cp + 심볼릭 링크 전환,
+//      릴리스 이름에 초+PID 포함 - D-3) -> 라이브 검증(SHA-256 대조 - 감사관 관찰 반영,
+//      전체 파일 200+해시 일치) -> 실패 시 심볼릭 링크와 site.mjs 를 되돌리고(rolledBack:true)
+//      종료코드 1 -> 성공 시 그 이후(노션 되쓰기/git commit·push/IndexNow/Search Console)는
+//      **개별적으로** 실패를 잡는다 - 이미 라이브는 정상이므로 종료코드 1(배포실패)로
+//      오분류하지 않고 2(부분실패)로만 기록한다(D-1, D-2).
 //
-// 종료코드. 0=변경 없음 또는 전체 성공. 1=배포 실패(롤백 완료). 2=배포는 성공,
-//   git push 또는 색인 통보 중 하나가 실패(사이트는 정상, 후속 조치만 실패).
+// 종료코드. 0=변경 없음 또는 전체 성공. 1=배포 실패(rolledBack 필드로 실제 롤백 여부 명시,
+//   n8n 판정은 이 필드만 보고 문구를 짠다 - 추정 금지, D-2). 2=배포는 성공, 그 이후 단계
+//   (노션 되쓰기/git 커밋·푸시/색인 통보/노션 행 스킵) 중 하나 이상 실패(사이트는 정상).
 // 마지막 줄에 항상 JSON 한 줄을 찍는다 - 호출부(run.sh/n8n)가 파싱해 알림 본문을 짠다.
+// 동시 실행 방지 - publish-logs/auto-publish.lock (PID 기록, 15분 초과 시 이전 실행 크래시로
+//   보고 회수). 전체 실행 상한 4분 워치독(D-4) - 이 시간을 넘기면 강제 종료+알림.
 // ============================================================
 
-import { readFileSync, writeFileSync, existsSync, mkdirSync, rmSync, cpSync, readdirSync, statSync } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync, mkdirSync, rmSync, cpSync, unlinkSync, readdirSync, statSync } from 'node:fs';
 import { join, dirname, relative, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
-import { createSign } from 'node:crypto';
+import { createSign, createHash, randomBytes } from 'node:crypto';
 
 const ROOT = dirname(fileURLToPath(import.meta.url));
 const SITE_MJS = join(ROOT, 'content', 'site.mjs');
 const DIST = join(ROOT, 'dist');
 const HEARTBEAT_FILE = join(ROOT, 'publish-logs', 'last-run.json');
+const LOCK_FILE = join(ROOT, 'publish-logs', 'auto-publish.lock');
+const LOCK_STALE_MS = 15 * 60 * 1000; // 10분 주기의 1.5배 - 이보다 오래 걸리면 이전 실행 크래시로 본다
+const WATCHDOG_MS = 4 * 60 * 1000;    // 전체 실행 상한 (D-4). 정상 실행은 초 단위.
+const FETCH_TIMEOUT_MS = 20000;       // 개별 fetch 상한 (D-4)
 
 const DEPLOY_ROOT = '/root/n8n/static';
 const DEPLOY_NAME = 'kjyoo-cloud';
 const VERIFY_BASE = 'https://kjyoo.cloud';
-// Search Console 제출용 SA 키. KJ 가 Search Console 에서 이 SA 이메일을 속성 사용자로
-// 등록해야(1회) 실제 제출이 통과한다 - README 및 보고서의 "미결" 절 참조.
+// Search Console 제출용 SA 키. KJ 가 2026-09-09 Search Console 에서 이 SA 이메일을
+// 속성(https://kjyoo.cloud/) 에 전체 사용자로 등록 완료 - 실측 제출 204로 확인됨(더는 미결 아님).
 const GCP_SA_KEY = '/root/kjyoo-cloud-src/gcp-sa-searchconsole.json';
 const SEARCHCONSOLE_SITE_URL = 'https://kjyoo.cloud/';
 
 const log = [];
 function say(line) { log.push(line); console.log(line); }
+
+// ---------- 타임아웃 있는 fetch (D-4) ----------
+async function fetchTO(url, options = {}, timeoutMs = FETCH_TIMEOUT_MS) {
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(new Error(`fetch 타임아웃 ${timeoutMs}ms: ${url}`)), timeoutMs);
+  try {
+    return await fetch(url, { ...options, signal: ctrl.signal });
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+// ---------- 동시 실행 잠금 (D-3) ----------
+function acquireLock() {
+  mkdirSync(dirname(LOCK_FILE), { recursive: true });
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      writeFileSync(LOCK_FILE, JSON.stringify({ pid: process.pid, startedAt: new Date().toISOString() }), { flag: 'wx' });
+      return true;
+    } catch (e) {
+      if (e.code !== 'EEXIST') throw e;
+      let age = Infinity;
+      try { age = Date.now() - statSync(LOCK_FILE).mtimeMs; } catch { /* 잠금이 방금 사라졌을 수 있다 */ }
+      if (age > LOCK_STALE_MS && attempt === 0) {
+        say(`   잠금파일이 ${Math.round(age / 60000)}분째 방치됨(이전 실행 크래시로 판단) - 회수하고 재시도`);
+        try { unlinkSync(LOCK_FILE); } catch { /* 이미 없으면 무시 */ }
+        continue;
+      }
+      return false; // 다른 실행이 진행 중 - 정상적인 겹침, 조용히 건너뛴다
+    }
+  }
+  return false;
+}
+function releaseLock() {
+  try { unlinkSync(LOCK_FILE); } catch { /* 이미 없으면 무시 */ }
+}
 
 function loadEnvFile(file, need) {
   if (!existsSync(file)) throw new Error(`${file} 가 없다`);
@@ -57,13 +102,20 @@ function loadEnvFile(file, need) {
   return raw;
 }
 
+// timeout 기본값 60초(D-4) - 개별 호출부에서 opts.timeout 으로 덮어쓸 수 있다.
+// spawnSync 는 timeout 초과 시 status 를 null 로 주고 signal 에 'SIGTERM' 을 채운다 -
+// 아래 status!==0 검사가 null 도 실패로 잡으므로 별도 분기 없이도 안전하게 걸린다.
 function run(cmd, args, opts = {}) {
-  const r = spawnSync(cmd, args, { encoding: 'utf8', ...opts });
-  return { status: r.status, stdout: r.stdout || '', stderr: r.stderr || '' };
+  const r = spawnSync(cmd, args, { encoding: 'utf8', timeout: 60000, ...opts });
+  const timedOut = r.signal === 'SIGTERM' && r.status === null;
+  return { status: r.status, stdout: r.stdout || '', stderr: r.stderr || '', timedOut };
 }
 function runOrThrow(cmd, args, opts = {}) {
   const r = run(cmd, args, opts);
-  if (r.status !== 0) throw new Error(`실패: ${cmd} ${args.join(' ')} (exit ${r.status})\n${r.stderr}`);
+  if (r.status !== 0) {
+    const suffix = r.timedOut ? ' (타임아웃)' : '';
+    throw new Error(`실패: ${cmd} ${args.join(' ')} (exit ${r.status}${suffix})\n${r.stderr}`);
+  }
   return r;
 }
 
@@ -211,7 +263,7 @@ function buildCaseInsertion(arrayNode, fields) {
 function sleep(ms) { return new Promise((r) => setTimeout(r, ms)); }
 async function notionFetch(env, pathname, options = {}) {
   for (let attempt = 0; attempt < 6; attempt++) {
-    const res = await fetch(`https://api.notion.com/v1${pathname}`, {
+    const res = await fetchTO(`https://api.notion.com/v1${pathname}`, {
       ...options,
       headers: {
         Authorization: `Bearer ${env.NOTION_TOKEN}`,
@@ -267,6 +319,10 @@ async function syncPublishedCases(notionEnv) {
   let src = readFileSync(SITE_MJS, 'utf8');
   const changedSlugs = [];
   const notionPatches = []; // { pageId, publishDate }
+  // 스킵/경고 사유 - 감사관 지적(같이 볼 것 3번): 노션 행 스킵에 알림이 없었다.
+  // 이제 하나라도 쌓이면 main() 이 softFail 로 승격해 알림에 담는다.
+  const skipReasons = [];
+  const skip = (row, reason) => { const line = `[${row.id}] ${reason}`; say(`     스킵 - ${reason}`); skipReasons.push(line); };
 
   for (const row of rows) {
     const lang = row.properties.Lang?.select?.name;
@@ -277,13 +333,13 @@ async function syncPublishedCases(notionEnv) {
     let publishDate = row.properties.PublishDate?.date?.start || null;
     say(`   - [${lang}] ${slug} (page ${row.id})`);
 
-    if (!lang || !slug) { say(`     스킵 - Lang 또는 Slug 비어있음(주소를 기계가 짓지 않는다 - 수동 확인 필요)`); continue; }
+    if (!lang || !slug) { skip(row, 'Lang 또는 Slug 비어있음(주소를 기계가 짓지 않는다 - 수동 확인 필요)'); continue; }
 
     // 현재 site.mjs 를 매 행마다 새로 파싱한다(직전 행의 수정을 이번 행이 반영해서 봐야 한다 -
     // start/end 오프셋이 텍스트 치환마다 바뀌므로 캐시하면 어긋난다).
     const casesNode = findExportValue(src, 'CASES');
     const langProp = casesNode.props.find((p) => p.key === lang);
-    if (!langProp || langProp.value.kind !== 'array') { say(`     스킵 - CASES.${lang} 배열이 코드에 없음(구조 이상 - 수동 확인 필요)`); continue; }
+    if (!langProp || langProp.value.kind !== 'array') { skip(row, `CASES.${lang} 배열이 코드에 없음(구조 이상 - 수동 확인 필요)`); continue; }
     const caseObj = langProp.value.items.find((item) => {
       if (item.kind !== 'object') return false;
       const sp = item.props.find((p) => p.key === 'slug');
@@ -296,10 +352,10 @@ async function syncPublishedCases(notionEnv) {
     if (!caseObj) {
       // ---- 신규 케이스 (코드에 아직 없음) - 새 객체를 만들어 CASES.<lang> 끝에 붙인다.
       // slug 는 이미 확인됨(위 스킵 조건). title 이 비어 있으면 화면에 낼 것이 없어 만들지 않는다.
-      if (!title) { say(`     스킵 - Title 비어있음(신규 케이스 생성 불가 - 수동 확인 필요)`); continue; }
+      if (!title) { skip(row, 'Title 비어있음(신규 케이스 생성 불가 - 수동 확인 필요)'); continue; }
       const children = await listAllChildren(notionEnv, row.id);
       const paragraphs = children.filter((b) => b.type === 'paragraph').map(blockPlainText).filter((p) => p.trim());
-      if (!paragraphs.length) { say(`     스킵 - 본문 문단 없음(신규 케이스 생성 불가 - 수동 확인 필요)`); continue; }
+      if (!paragraphs.length) { skip(row, '본문 문단 없음(신규 케이스 생성 불가 - 수동 확인 필요)'); continue; }
       if (!tag) say(`     경고 - Tag 비어있음(빈 값으로 생성)`);
       if (!excerpt) say(`     경고 - Excerpt 비어있음(빈 값으로 생성)`);
       if (!publishDate) {
@@ -324,9 +380,12 @@ async function syncPublishedCases(notionEnv) {
         }
       }
 
-      // body - 페이지 자식 문단을 순서대로 읽어 배열과 대조
+      // body - 페이지 자식 문단을 순서대로 읽어 배열과 대조.
+      // 빈 문단은 버린다(D-6) - 신규 생성 경로(위 300행 부근)와 동일 규칙으로 맞췄다.
+      // 노션에서 빈 줄을 남기는 편집은 흔하고, 다르게 처리하면 다음 회차가 "문단 수 변경"으로
+      // 오판해 불필요한 재배포·재커밋을 반복한다(실측 재현 - 2차 감리 D-6).
       const children = await listAllChildren(notionEnv, row.id);
-      const paragraphs = children.filter((b) => b.type === 'paragraph').map(blockPlainText);
+      const paragraphs = children.filter((b) => b.type === 'paragraph').map(blockPlainText).filter((p) => p.trim());
       const bodyProp = props.get('body');
       if (bodyProp && bodyProp.value.kind === 'array') {
         const oldItems = bodyProp.value.items;
@@ -383,7 +442,7 @@ async function syncPublishedCases(notionEnv) {
     if (rowChanged) changedSlugs.push(`${lang}/${slug}`);
   }
 
-  return { newSrc: src, changedSlugs, notionPatches, rows };
+  return { newSrc: src, changedSlugs, notionPatches, rows, skipReasons };
 }
 
 async function patchNotionPublishDate(notionEnv, patches) {
@@ -397,6 +456,8 @@ async function patchNotionPublishDate(notionEnv, patches) {
 
 // ---------- 2) 빌드 + 배포(로컬, 같은 서버라 scp 불필요) + 검증 ----------
 
+function sha256(buf) { return createHash('sha256').update(buf).digest('hex'); }
+
 function listDist() {
   const out = [];
   (function walk(dir) {
@@ -408,21 +469,25 @@ function listDist() {
   return out.map((p) => {
     const rel = relative(DIST, p).split(sep).join('/');
     const url = rel.endsWith('index.html') ? '/' + rel.slice(0, -'index.html'.length) : '/' + rel;
-    return { rel, url, size: statSync(p).size };
+    const buf = readFileSync(p);
+    return { rel, url, size: buf.length, hash: sha256(buf) };
   }).sort((a, b) => a.url.localeCompare(b.url));
 }
 
+// 감사관 관찰 반영 - 바이트 길이만 비교하면 길이가 같고 내용이 다른 손상을 통과시킨다.
+// SHA-256 전체 대조로 바꿨다(길이 비교보다 느리지 않다 - 어차피 body 전체를 받는다).
 async function verify(files) {
   say(`\n[검증] ${VERIFY_BASE}`);
   let fail = 0;
   for (const f of files) {
     let line;
     try {
-      const res = await fetch(VERIFY_BASE + f.url, { redirect: 'manual' });
+      const res = await fetchTO(VERIFY_BASE + f.url, { redirect: 'manual' });
       const body = Buffer.from(await res.arrayBuffer());
-      const ok = res.status === 200 && body.length === f.size;
+      const remoteHash = sha256(body);
+      const ok = res.status === 200 && remoteHash === f.hash;
       if (!ok) fail++;
-      line = `${ok ? 'OK  ' : 'FAIL'} ${f.url.padEnd(30)} ${res.status}  ${body.length}B (로컬 ${f.size}B)`;
+      line = `${ok ? 'OK  ' : 'FAIL'} ${f.url.padEnd(30)} ${res.status}  ${body.length}B sha256:${remoteHash.slice(0, 8)} (로컬 ${f.size}B sha256:${f.hash.slice(0, 8)})`;
     } catch (e) { fail++; line = `FAIL ${f.url.padEnd(30)} ${e.message}`; }
     say('  ' + line);
   }
@@ -438,10 +503,13 @@ function currentReleaseTarget() {
 
 function deployAndVerify() {
   say('\n[2] 빌드');
-  runOrThrow(process.execPath, [join(ROOT, 'build.mjs')], { cwd: ROOT });
+  runOrThrow(process.execPath, [join(ROOT, 'build.mjs')], { cwd: ROOT, timeout: 120000 });
 
-  const stamp = new Date().toISOString().replace(/[-:T]/g, '').slice(0, 12);
-  const releaseName = `${DEPLOY_NAME}-releases/${stamp}`;
+  // 릴리스 이름 충돌 방지(D-3) - 잠금으로 동시 실행 자체는 막지만, 이름 자체도 분 단위
+  // 충돌 가능성이 없도록 초 단위 + PID + 4자리 난수를 덧붙인다(이중 방어).
+  const stamp = new Date().toISOString().replace(/[-:T]/g, '').slice(0, 14);
+  const uniq = `${stamp}-${process.pid}-${randomBytes(2).toString('hex')}`;
+  const releaseName = `${DEPLOY_NAME}-releases/${uniq}`;
   const releaseDir = join(DEPLOY_ROOT, releaseName);
   const previousTarget = currentReleaseTarget();
 
@@ -455,10 +523,14 @@ function deployAndVerify() {
   return { previousTarget, releaseName };
 }
 
+// 반환값 - 실제로 롤백을 시도했는지(rolledBack). previousTarget 이 없으면 되돌릴 곳이
+// 없다는 뜻이라 false 를 반환한다 - 이 값을 결과 JSON 에 그대로 실어 n8n 판정이 추정 없이
+// 쓰게 한다(D-2, 감사관 지적 - "추정으로 제목을 달지 마라").
 function rollback(previousTarget) {
-  if (!previousTarget) { say('   롤백 대상 없음 - 이전 릴리스를 찾지 못함(수동 확인 필요)'); return; }
+  if (!previousTarget) { say('   롤백 대상 없음 - 이전 릴리스를 찾지 못함(수동 확인 필요)'); return false; }
   say(`\n[롤백] ${previousTarget} 로 되돌린다`);
-  run('ln', ['-sfn', previousTarget, join(DEPLOY_ROOT, DEPLOY_NAME)]);
+  const r = run('ln', ['-sfn', previousTarget, join(DEPLOY_ROOT, DEPLOY_NAME)]);
+  return r.status === 0;
 }
 
 // ---------- 3) IndexNow ----------
@@ -467,19 +539,34 @@ async function submitIndexNow(changedSlugs) {
   const keyFile = join(ROOT, 'indexnow.key');
   if (!existsSync(keyFile)) return { skipped: true, reason: 'indexnow.key 없음' };
   const key = readFileSync(keyFile, 'utf8').trim();
+  const keyLocation = `https://kjyoo.cloud/${key}.txt`;
+
+  // 감사관 관찰 - IndexNow 는 키가 틀려도 200/202 를 돌려주는 경우가 있어 응답 코드만으로
+  // "성공"을 믿을 수 없다. 제출 전에 라이브에 걸린 키 파일 내용이 실제로 이 키와
+  // 일치하는지 자체 대조한다(자기 자신에 대한 신뢰성 검사 - 제출 응답과 무관하게 수행).
+  let keySelfCheck = 'unchecked';
+  try {
+    const kc = await fetchTO(keyLocation, {}, 10000);
+    const kt = (await kc.text()).trim();
+    keySelfCheck = (kc.status === 200 && kt === key) ? 'ok' : `mismatch(status=${kc.status}, body=${kt.slice(0, 40)})`;
+  } catch (e) { keySelfCheck = `check_failed(${e.message})`; }
+  if (keySelfCheck !== 'ok') {
+    return { skipped: true, reason: `키 파일 자체검증 실패 - ${keySelfCheck} (제출 생략, 응답코드만으로는 오탐 가능)` };
+  }
+
   const host = 'kjyoo.cloud';
   const urlList = ['https://kjyoo.cloud/sitemap.xml'];
   for (const s of changedSlugs) {
     const [lang, slug] = s.split('/');
     urlList.push(`https://kjyoo.cloud/${lang}/cases/${slug}.html`);
   }
-  const res = await fetch('https://api.indexnow.org/indexnow', {
+  const res = await fetchTO('https://api.indexnow.org/indexnow', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json; charset=utf-8' },
-    body: JSON.stringify({ host, key, keyLocation: `https://kjyoo.cloud/${key}.txt`, urlList }),
+    body: JSON.stringify({ host, key, keyLocation, urlList }),
   });
   const text = await res.text().catch(() => '');
-  return { skipped: false, status: res.status, body: text.slice(0, 300), urlCount: urlList.length };
+  return { skipped: false, status: res.status, body: text.slice(0, 300), urlCount: urlList.length, keySelfCheck };
 }
 
 // ---------- 4) Search Console 사이트맵 재제출 ----------
@@ -493,7 +580,7 @@ async function gcpSaToken(sa, scope) {
   const signer = createSign('RSA-SHA256'); signer.update(unsigned);
   const sig = signer.sign(sa.private_key).toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
   const jwt = unsigned + '.' + sig;
-  const res = await fetch(sa.token_uri, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: new URLSearchParams({ grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer', assertion: jwt }) });
+  const res = await fetchTO(sa.token_uri, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: new URLSearchParams({ grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer', assertion: jwt }) });
   const json = await res.json();
   if (!res.ok) throw new Error(`GCP 토큰 발급 실패: ${JSON.stringify(json)}`);
   return json.access_token;
@@ -504,7 +591,7 @@ async function submitSearchConsoleSitemap() {
   const token = await gcpSaToken(sa, 'https://www.googleapis.com/auth/webmasters');
   const feedpath = encodeURIComponent('https://kjyoo.cloud/sitemap.xml');
   const siteUrl = encodeURIComponent(SEARCHCONSOLE_SITE_URL);
-  const res = await fetch(`https://www.googleapis.com/webmasters/v3/sites/${siteUrl}/sitemaps/${feedpath}`, {
+  const res = await fetchTO(`https://www.googleapis.com/webmasters/v3/sites/${siteUrl}/sitemaps/${feedpath}`, {
     method: 'PUT',
     headers: { Authorization: `Bearer ${token}` },
   });
@@ -519,8 +606,22 @@ function writeHeartbeat(result) {
   writeFileSync(HEARTBEAT_FILE, JSON.stringify({ ranAt: new Date().toISOString(), ...result }, null, 2), 'utf8');
 }
 
+// 유일한 종료 경로(D-3 잠금 해제를 모든 exit 지점에서 빠짐없이 하기 위해). exitCode 0 은
+// 항상 rolledBack:false 다. 그 외에는 호출부가 rolledBack 값을 명시적으로 넣어야 한다 -
+// 기본값을 두지 않는다(D-2: 추정으로 채우지 않는다. 명시 안 하면 아래에서 즉시 던진다).
+function finish(exitCode, fields) {
+  if (exitCode !== 0 && typeof fields.rolledBack !== 'boolean') {
+    throw new Error(`내부 오류 - finish(${exitCode}) 호출에 rolledBack 이 명시되지 않았다: ${JSON.stringify(fields)}`);
+  }
+  const result = { exitCode, rolledBack: exitCode === 0 ? false : fields.rolledBack, ...fields, log };
+  writeHeartbeat(result);
+  console.log('RESULT_JSON ' + JSON.stringify(result));
+  releaseLock();
+  process.exit(exitCode);
+}
+
 async function main() {
-  say(`=== auto-publish 시작 ${new Date().toISOString()} ===`);
+  say(`=== auto-publish 시작 ${new Date().toISOString()} (pid ${process.pid}) ===`);
 
   say('\n[0] git pull');
   const localDiff = run('git', ['status', '--porcelain'], { cwd: ROOT });
@@ -532,15 +633,18 @@ async function main() {
   if (pull.status !== 0) throw new Error(`git pull 실패:\n${pull.stderr}`);
 
   const notionEnv = loadEnvFile(join(ROOT, 'notion.env'), ['NOTION_TOKEN', 'NOTION_CASES_DB_ID']);
-  const { newSrc, changedSlugs, notionPatches, rows } = await syncPublishedCases(notionEnv);
+  const { newSrc, changedSlugs, notionPatches, rows, skipReasons } = await syncPublishedCases(notionEnv);
 
   if (!changedSlugs.length) {
     say('\n변경 없음 - 빌드/배포 생략');
     if (notionPatches.length) await patchNotionPublishDate(notionEnv, notionPatches);
-    const result = { exitCode: 0, changed: false, publishedRows: rows.length, log };
-    writeHeartbeat(result);
-    console.log('RESULT_JSON ' + JSON.stringify(result));
-    process.exit(0);
+    // 스킵된 노션 행이 있으면 무변경이라도 조용히 끝내지 않는다(감사관 관찰 3번).
+    if (skipReasons.length) {
+      finish(2, { changed: false, publishedRows: rows.length, softFailures: skipReasons.map((s) => `노션 행 스킵: ${s}`) });
+      return;
+    }
+    finish(0, { changed: false, publishedRows: rows.length });
+    return;
   }
 
   say(`\n변경된 케이스: ${changedSlugs.join(', ')}`);
@@ -551,66 +655,95 @@ async function main() {
   try {
     deployInfo = deployAndVerify();
   } catch (e) {
+    // 빌드 또는 배포 단계에서 실패 - 아직 심볼릭 링크를 바꾸지 않았거나(빌드 실패) 바꿨어도
+    // 검증 전이라 "롤백"이라 부를 상태가 아직 없다. site.mjs 만 원복하고 rolledBack:false 로 명시한다.
     writeFileSync(SITE_MJS, backup, 'utf8');
-    const result = { exitCode: 1, changed: true, stage: 'build_or_deploy', error: String(e.message || e), log };
-    writeHeartbeat(result);
-    console.log('RESULT_JSON ' + JSON.stringify(result));
-    process.exit(1);
+    finish(1, { changed: true, stage: 'build_or_deploy', error: String(e.message || e), rolledBack: false });
+    return;
   }
 
   const failCount = await verify(listDist());
   if (failCount > 0) {
-    rollback(deployInfo.previousTarget);
+    const rolledBack = rollback(deployInfo.previousTarget);
     writeFileSync(SITE_MJS, backup, 'utf8');
-    const result = { exitCode: 1, changed: true, stage: 'verify', failCount, rolledBackTo: deployInfo.previousTarget, log };
-    writeHeartbeat(result);
-    console.log('RESULT_JSON ' + JSON.stringify(result));
-    process.exit(1);
+    finish(1, { changed: true, stage: 'verify', failCount, rolledBackTo: deployInfo.previousTarget, rolledBack });
+    return;
   }
 
   say('\n검증 통과 - 라이브 반영 완료');
-  if (notionPatches.length) {
-    say('\n[5] 노션 PublishDate 되쓰기');
-    await patchNotionPublishDate(notionEnv, notionPatches);
-  }
-
+  // ---- 여기부터는 라이브가 이미 정상이다(D-2). 이 아래 어떤 단계가 실패해도 배포
+  // 실패가 아니고, exitCode 1(롤백)로 격상하지 않는다 - 전부 softFailures 로만 기록해
+  // exitCode 2 로 보고한다. 각 단계를 개별 try/catch 로 감싸 한 단계의 실패가 다음 단계를
+  // 막지 않게 한다(D-1: git commit 실패를 삼키던 문제의 근본 원인 - 실패해도 계속 진행해야
+  // 하는데 예외가 나면 통째로 unhandled 로 떨어져 exitCode 오분류가 났었다).
   let softFail = false;
   const softFailures = [];
+  const fail = (label, detail) => { softFail = true; softFailures.push(`${label}: ${detail}`); say(`   [경고] ${label}: ${detail}`); };
+
+  if (notionPatches.length) {
+    say('\n[5] 노션 PublishDate 되쓰기');
+    try { await patchNotionPublishDate(notionEnv, notionPatches); }
+    catch (e) { fail('노션 PublishDate 되쓰기 실패', e.message); }
+  }
 
   say('\n[6] git commit + push (site.mjs)');
-  runOrThrow('git', ['add', 'content/site.mjs'], { cwd: ROOT });
-  const commit = run('git', ['commit', '-m', `auto-publish: ${changedSlugs.join(', ')} (${new Date().toISOString()})`], { cwd: ROOT });
-  say(commit.stdout || commit.stderr);
-  if (commit.status === 0) {
-    const push = run('git', ['push'], { cwd: ROOT });
-    say(push.stdout || push.stderr);
-    if (push.status !== 0) { softFail = true; softFailures.push(`git push 실패: ${push.stderr.slice(0, 300)}`); }
-  }
+  try {
+    runOrThrow('git', ['add', 'content/site.mjs'], { cwd: ROOT });
+    const commit = run('git', ['commit', '-m', `auto-publish: ${changedSlugs.join(', ')} (${new Date().toISOString()})`], { cwd: ROOT });
+    say(commit.stdout || commit.stderr);
+    if (commit.status !== 0) {
+      // D-1 - 이전에는 여기 else 가 없어 실패가 조용히 exitCode 0 으로 빠졌다.
+      // 커밋 실패 시 add 로 스테이징된 변경을 되돌려(reset) 다음 회차의 "커밋 안 된
+      // 변경이 있다" 선행 점검이 걸리지 않게 한다 - 실패를 다음 회차까지 전파하지 않는다.
+      run('git', ['reset'], { cwd: ROOT });
+      fail('git commit 실패', (commit.stderr || '(메시지 없음)').slice(0, 300));
+    } else {
+      const push = run('git', ['push'], { cwd: ROOT });
+      say(push.stdout || push.stderr);
+      if (push.status !== 0) fail('git push 실패', push.stderr.slice(0, 300));
+    }
+  } catch (e) { fail('git add 실패', e.message); }
 
   say('\n[7] IndexNow 제출');
   try {
     const inResult = await submitIndexNow(changedSlugs);
     say(JSON.stringify(inResult));
-    if (!inResult.skipped && inResult.status >= 300) { softFail = true; softFailures.push(`IndexNow 실패 status=${inResult.status}: ${inResult.body}`); }
-  } catch (e) { softFail = true; softFailures.push(`IndexNow 예외: ${e.message}`); }
+    if (!inResult.skipped && inResult.status >= 300) fail('IndexNow 실패', `status=${inResult.status}: ${inResult.body}`);
+    if (inResult.skipped && inResult.reason && inResult.reason.startsWith('키 파일 자체검증 실패')) fail('IndexNow', inResult.reason);
+  } catch (e) { fail('IndexNow 예외', e.message); }
 
   say('\n[8] Search Console 사이트맵 재제출');
   try {
     const gscResult = await submitSearchConsoleSitemap();
     say(JSON.stringify(gscResult));
-    if (!gscResult.skipped && gscResult.status >= 300) { softFail = true; softFailures.push(`Search Console 실패 status=${gscResult.status}: ${gscResult.body}`); }
-  } catch (e) { softFail = true; softFailures.push(`Search Console 예외: ${e.message}`); }
+    if (!gscResult.skipped && gscResult.status >= 300) fail('Search Console 실패', `status=${gscResult.status}: ${gscResult.body}`);
+  } catch (e) { fail('Search Console 예외', e.message); }
 
-  const result = { exitCode: softFail ? 2 : 0, changed: true, changedSlugs, softFailures, log };
-  writeHeartbeat(result);
-  console.log('RESULT_JSON ' + JSON.stringify(result));
-  process.exit(softFail ? 2 : 0);
+  if (skipReasons.length) for (const s of skipReasons) fail('노션 행 스킵', s);
+
+  finish(softFail ? 2 : 0, { changed: true, changedSlugs, softFailures, rolledBack: false });
 }
 
-main().catch((e) => {
-  const result = { exitCode: 1, stage: 'unhandled', error: String(e && e.stack || e), log };
-  try { writeHeartbeat(result); } catch {}
-  console.log('RESULT_JSON ' + JSON.stringify(result));
-  console.error(e);
-  process.exit(1);
-});
+const watchdog = setTimeout(() => {
+  // D-4 - 전체 실행 상한. 개별 fetch/child_process 타임아웃을 다 걸어도 예상 못한 지점에서
+  // 붙들릴 가능성은 남는다 - 여기서 무조건 끝낸다. rolledBack:false 로 명시(이 시점까지 온다는
+  // 것은 아직 정상 흐름 어딘가에 있다는 뜻이라 임의로 롤백을 시도하지 않는다 - 상태를
+  // 모른 채 링크를 건드리는 것이 더 위험하다. 수동 확인을 알림 본문에 요청한다).
+  say(`\nTIMEOUT - 전체 실행 상한 ${WATCHDOG_MS / 1000}초 초과, 강제 종료`);
+  finish(1, { stage: 'timeout', error: `전체 실행이 ${WATCHDOG_MS / 1000}초를 넘었다 - 수동으로 서버 상태 확인 필요`, rolledBack: false });
+}, WATCHDOG_MS);
+watchdog.unref?.();
+
+if (!acquireLock()) {
+  say('다른 실행이 진행 중(잠금 보유) - 이번 주기는 건너뛴다');
+  clearTimeout(watchdog);
+  console.log('RESULT_JSON ' + JSON.stringify({ exitCode: 0, skipped: 'locked', rolledBack: false, log }));
+  process.exit(0);
+} else {
+  main()
+    .then(() => clearTimeout(watchdog))
+    .catch((e) => {
+      clearTimeout(watchdog);
+      finish(1, { stage: 'unhandled', error: String(e && e.stack || e), rolledBack: false });
+    });
+}
